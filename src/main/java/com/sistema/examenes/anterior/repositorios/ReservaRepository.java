@@ -31,4 +31,12 @@ public interface ReservaRepository extends JpaRepository<Reserva,Long>{
 	@Query("SELECT r FROM Reserva r WHERE r.fecha = :fecha AND r.hora = :hora AND r.asignacionTipoTurno.recurso.id = :recursoId")
     List<Reserva> buscarPorFechaHoraRecurso(@Param("fecha") LocalDate fecha, @Param("hora") LocalTime hora, @Param("recursoId") Long recursoId);
 	
+	@Query("SELECT r FROM Reserva r WHERE r.fecha = :fecha AND r.hora >= :horaInicio AND r.hora <= :horaFin AND r.asignacionTipoTurno.recurso.id = :recursoId")
+	List<Reserva> buscarPorFechaRangoHorarioRecurso(
+	        @Param("fecha") LocalDate fecha,
+	        @Param("horaInicio") LocalTime horaInicio,
+	        @Param("horaFin") LocalTime horaFin,
+	        @Param("recursoId") Long recursoId
+	);
+
 }

@@ -1,5 +1,6 @@
 package com.sistema.examenes.nuevo.servicios;
 
+import java.time.LocalTime;
 import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +13,7 @@ import com.sistema.examenes.anterior.modelo.AsignacionRecursoTipoTurno;
 import com.sistema.examenes.anterior.modelo.Dias;
 import com.sistema.examenes.anterior.modelo.Horario;
 import com.sistema.examenes.anterior.modelo.HorarioEspecial;
+import com.sistema.examenes.anterior.modelo.Recurso;
 import com.sistema.examenes.anterior.modelo.Reserva;
 import com.sistema.examenes.anterior.modelo.Reservante;
 import com.sistema.examenes.anterior.repositorios.ReservaRepository;
@@ -70,13 +72,22 @@ public class ReservaServiceImpl implements ReservaService{
 		//setear todos los datos que no se pueden cambiar
 		r.setAsignacionTipoTurno(reservaAEditar.getAsignacionTipoTurno());
 		r.setId(reservaAEditar.getId());
-		r.setCambioEstado(reservaAEditar.getCambioEstado());
-		//cambiar los datos que si se cambian
+		r.setCambioEstado(reservaAEditar.getCambioEstado());//le ponemos los cambios de estado
+		if(reservaAEditar.getFecha()!=r.getFecha() || reservaAEditar.getHora()!=r.getHora()) {
+			ApiResponse<Reserva> horarioResponse = setHorariosReserva(r);
+			if(!horarioResponse.isSuccess()) {
+				return new ApiResponse<>(false,horarioResponse.getMessage(),null);	
+			}
+			r.setFecha(horarioResponse.getData().getFecha());
+			r.setHora(horarioResponse.getData().getHora());
+		}
 		if(r.getEstado()!=reservaAEditar.getEstado()) {
 			ApiResponse<Reserva> cambiarEstadoResponse = cambiarEstado(r);
 			if(cambiarEstadoResponse.isSuccess()) {
 				r.setCambioEstado(cambiarEstadoResponse.getData().getCambioEstado());
-				r.setEstado(cambiarEstadoResponse.getData().getEstado());	
+				r.setEstado(cambiarEstadoResponse.getData().getEstado());
+				Reserva guardado = reservaRepo.save(r);
+    			return new ApiResponse<>(true,"",guardado);	
 			}else {
 				return new ApiResponse<>(false,cambiarEstadoResponse.getMessage(),null);	
 			}	
@@ -101,6 +112,7 @@ public class ReservaServiceImpl implements ReservaService{
 	
 	private ApiResponse<Reserva> setDatosObligatorios(Reserva r) {
     	ApiResponse<Reservante> resReservante = reservanteService.guardarReservante(r.getReservante());
+    	System.out.println("EL ID DE LA ASGNACION ES "+r.getAsignacionTipoTurno().getId());
     	ApiResponse<AsignacionRecursoTipoTurno> resAsig = asignacionService.obtenerPorId(r.getAsignacionTipoTurno().getId());
     	ApiResponse<Reserva> setEstadoResponse = estadoService.estadoReservaNueva(r);
     	if(resReservante.isSuccess()) {
@@ -130,16 +142,21 @@ public class ReservaServiceImpl implements ReservaService{
 	}
 	
 	private ApiResponse<Reserva> setHorariosReserva(Reserva r) {
-		ApiResponse<Reserva> respuestaHorarioEsp = comprobarHoraPorHorarioEspecial(r);
-		if(respuestaHorarioEsp.isSuccess()) {
-			if(respuestaHorarioEsp.getData()==null) {
-				//comprobar horario comun
-				return comprobarHoraPorHorarioComun(r);
+		ApiResponse<Reserva> ocupadoResponse = estaOcupado(r);
+		if(ocupadoResponse.isSuccess()) {
+			ApiResponse<Reserva> respuestaHorarioEsp = comprobarHoraPorHorarioEspecial(r);
+			if(respuestaHorarioEsp.isSuccess()) {
+				if(respuestaHorarioEsp.getData()==null) {
+					//comprobar horario comun
+					return comprobarHoraPorHorarioComun(r);
+				}else {
+					return respuestaHorarioEsp;
+				}
 			}else {
 				return respuestaHorarioEsp;
-			}
+			}	
 		}else {
-			return respuestaHorarioEsp;
+			return ocupadoResponse;
 		}
 	}
 	
@@ -170,4 +187,21 @@ public class ReservaServiceImpl implements ReservaService{
 		return new ApiResponse<>(false,"Horario Invalido",null);
 	}
 
+	private ApiResponse<Reserva> estaOcupado(Reserva r) {
+		try {
+			LocalTime desde = r.getHora();
+			LocalTime hasta = desde.plusMinutes((long)r.getAsignacionTipoTurno().getDuracionEnMinutos());
+			if(reservaRepo.buscarPorFechaRangoHorarioRecurso(
+					r.getFecha(),
+					desde,
+					hasta,
+					r.getAsignacionTipoTurno().getRecurso().getId()).size()>0) {
+				return new ApiResponse<>(false,"El Recurso "+r.getAsignacionTipoTurno().getRecurso().getNombre()+
+						" esta entre las "+desde+" y "+hasta,null);
+			}
+			return new ApiResponse<>(true,"",null);
+		}catch(Exception e) {
+			return new ApiResponse<>(false,"Error: "+e.getMessage(),null);
+		}
+	}
 }

@@ -4,6 +4,7 @@ import java.time.LocalTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.sistema.examenes.anterior.modelo.AsignacionRecursoTipoTurno;
 import com.sistema.examenes.anterior.modelo.Dias;
@@ -12,6 +13,7 @@ import com.sistema.examenes.anterior.modelo.Recurso;
 import com.sistema.examenes.anterior.repositorios.HorarioRepository;
 import com.sistema.examenes.nuevo.servicios_interfaces.HorarioService;
 
+@Service
 public class HorarioServiceImpl implements HorarioService{
 
 	@Autowired

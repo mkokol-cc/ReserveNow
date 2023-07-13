@@ -1,13 +1,9 @@
 package com.sistema.examenes.nuevo.controladores;
 
-import java.sql.Time;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.TextStyle;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -47,6 +43,9 @@ import com.sistema.examenes.anterior.repositorios.RecursoRepository;
 import com.sistema.examenes.anterior.repositorios.ReservaRepository;
 import com.sistema.examenes.anterior.repositorios.ReservanteRepository;
 import com.sistema.examenes.anterior.repositorios.TipoTurnoRepository;
+import com.sistema.examenes.modelo.usuario.Usuario;
+import com.sistema.examenes.nuevo.servicios.ApiResponse;
+import com.sistema.examenes.nuevo.servicios_interfaces.ReservaService;
 import com.sistema.examenes.repositorios.UsuarioRepository;
 
 @RestController
@@ -78,7 +77,11 @@ public class AdmController {
 	private UsuarioRepository usuarioRepo;
 	
 	@Autowired
-	private ReservanteRepository reservanteRepo;	
+	private ReservanteRepository reservanteRepo;
+	
+	
+	@Autowired
+	private ReservaService reservaService;
 	
 	
 	//CRUD RECURSO
@@ -248,6 +251,24 @@ public class AdmController {
 	//CRUD RESERVAS
 	@PostMapping("/reservas/{idAsignacion}/add")
 	public ResponseEntity<?> registrarReserva(@PathVariable Long idAsignacion,@RequestBody Reserva reservaStr) throws JsonProcessingException {
+		try {
+			//System.out.println("LLEGUE");
+			Reservante r = reservaStr.getReservante();
+			//System.out.println("LLEGUE");
+			Usuario u = usuarioRepo.getById(getUserId());
+			//System.out.println("LLEGUE");
+			r.setUsuario(u);
+			//System.out.println("LLEGUE");
+			//reservaStr.setReservante(r);)
+			ApiResponse<Reserva> resp = reservaService.guardarReserva(reservaStr);
+			if(resp.isSuccess()) {
+				return ResponseEntity.ok(resp.getData());
+			}
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp.getMessage());
+		}catch(Exception e){
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: "+e.getMessage());
+		}
+		/*
 		Reservante existente = reservanteRepo.findByTelefono(reservaStr.getReservante().getTelefono()); 
 		if(existente==null) {
 			existente = reservanteRepo.save(reservaStr.getReservante());
@@ -266,6 +287,7 @@ public class AdmController {
 		//}else {
 			//return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Horario o Fecha Incorrecto o Ocupado");
 		//}
+			*/
 	}
 	
 	@PutMapping("/reservas/{idReserva}/edit")
@@ -474,14 +496,14 @@ public class AdmController {
 			System.out.println("La hora es anterior a la actual");
 		}
 		//if !HorarioEspecial
-		List<HorarioEspecial> he2 = horarioEspRepo.findByAsignacionAndFecha(reservaStr.getAsignacionTipoTurno(), reservaStr.getFecha());
+		/*List<HorarioEspecial> he2 = horarioEspRepo.findByAsignacionAndFecha(reservaStr.getAsignacionTipoTurno(), reservaStr.getFecha());
 		if(he2.size()==1) {
 			for(HorarioEspecial he : he2) {
 				if(he.isCerrado()) {
 					System.out.println("El dia "+he.getFecha()+" el negocio esta cerrado. Motivo: "+he.getMotivo());
 				}
 			}
-		}
+		}*/
 		//if Horario especial
 		List<HorarioEspecial> he = horarioEspRepo.obtenerPorFechaHoraYAsignacion(reservaStr.getFecha(), reservaStr.getHora(), reservaStr.getAsignacionTipoTurno());
 		if(he.size()==1) {

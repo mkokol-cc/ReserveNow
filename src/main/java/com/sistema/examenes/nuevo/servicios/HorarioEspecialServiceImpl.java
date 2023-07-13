@@ -5,6 +5,7 @@ import java.time.LocalTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.sistema.examenes.anterior.modelo.AsignacionRecursoTipoTurno;
 import com.sistema.examenes.anterior.modelo.HorarioEspecial;
@@ -12,6 +13,7 @@ import com.sistema.examenes.anterior.modelo.Recurso;
 import com.sistema.examenes.anterior.repositorios.HorarioEspecialRepository;
 import com.sistema.examenes.nuevo.servicios_interfaces.HorarioEspecialService;
 
+@Service
 public class HorarioEspecialServiceImpl implements HorarioEspecialService{
 
 	@Autowired
@@ -30,15 +32,13 @@ public class HorarioEspecialServiceImpl implements HorarioEspecialService{
 	@Override
 	public ApiResponse<HorarioEspecial> comprobarHorarioEspecialAsignacion(LocalTime hora, LocalDate fecha,
 			AsignacionRecursoTipoTurno asignacion) {
-		List<HorarioEspecial> horariosEspeciales = horarioEspRepo.findByAsignacionAndFecha(asignacion, fecha);
+		List<HorarioEspecial> horariosEspeciales = horarioEspRepo.findByFechaAndAsignacion(fecha,asignacion);
 		//si hay horarios especiales de la asignacion para ese dia:
 		if(horariosEspeciales.size()>0) {
-			HorarioEspecial horarioEspCerrado = null;
 			HorarioEspecial horarioEspCompatible = null;
 			for(HorarioEspecial he : horariosEspeciales) {
 				if(he.isCerrado()) {
-					horarioEspCerrado = he;
-					//return new ApiResponse<>(false,"Fecha Cerrada: "+he.getMotivo(),he);
+					return new ApiResponse<>(false,"Fecha Cerrada: "+he.getMotivo(),he);
 				}else{
 					LocalTime horaMasDuracion = hora.plusMinutes((long)asignacion.getDuracionEnMinutos());
 					if(!he.getDesde().isAfter(hora) && !he.getDesde().isBefore(horaMasDuracion)) {
@@ -46,9 +46,7 @@ public class HorarioEspecialServiceImpl implements HorarioEspecialService{
 					}
 				}
 			}
-			if(horarioEspCerrado!=null) {
-				return new ApiResponse<>(false,"Fecha Cerrada: "+horarioEspCerrado.getMotivo(),horarioEspCerrado);
-			}else if(horarioEspCompatible!=null) {
+			if(horarioEspCompatible!=null) {
 				return new ApiResponse<>(true,"Horario Valido, Motivo horario Especial: "+horarioEspCompatible.getMotivo(),horarioEspCompatible);
 			}
 			return new ApiResponse<>(false,"Hay Horario Especial Para el dia "+fecha+" y la hora no es valida para ese dia",null);

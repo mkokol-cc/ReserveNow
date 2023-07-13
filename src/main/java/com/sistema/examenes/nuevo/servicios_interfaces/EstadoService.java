@@ -5,6 +5,7 @@ import com.sistema.examenes.anterior.modelo.Reserva;
 import com.sistema.examenes.nuevo.servicios.ApiResponse;
 
 public interface EstadoService {
-	public ApiResponse<Reserva> nuevoCambioEstadoReserva(Reserva reserva,Estado anterior, Estado nuevo);
-	public ApiResponse<Reserva> estadoReservaNueva(Reserva reserva);
+	ApiResponse<Reserva> nuevoCambioEstadoReserva(Reserva reserva);
+	ApiResponse<Reserva> estadoReservaNueva(Reserva reserva);
+	ApiResponse<Estado> getEstadoByNombre(String nombre);
 }

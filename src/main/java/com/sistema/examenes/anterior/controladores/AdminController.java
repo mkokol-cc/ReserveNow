@@ -437,7 +437,7 @@ public class AdminController {
 	        asignacionRepo.save(a);
 		}
 	}
-	
+	/*
 	@PostMapping("/horarios-especiales-asignacion/{id}")
 	@Transactional
 	public void setHorariosEspecialesAsignacion(@PathVariable long id,@RequestBody JsonNode[] listaHorarios) throws ParseException {
@@ -521,7 +521,7 @@ public class AdminController {
         }
 	}
 	
-	
+	*/
 	
 	@PostMapping("/datos-asignacion")
 	public AsignacionRecursoTipoTurno datosAsignacion(@RequestBody JsonNode a) {

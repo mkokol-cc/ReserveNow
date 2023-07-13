@@ -12,5 +12,7 @@ public interface ReservanteRepository extends JpaRepository<Reservante,Long>{
 	Reservante findByTelefono(String telefono);
 
 	List<Reservante> findByUsuario(Usuario usuario);
+	
+	Reservante findByTelefonoAndUsuario(String telefono,Usuario usuario);
 }
 

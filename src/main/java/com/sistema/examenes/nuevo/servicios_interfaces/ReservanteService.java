@@ -9,5 +9,5 @@ public interface ReservanteService {
 	
 	public ApiResponse<Reservante> guardarReservante(Reservante reservante);
 	public ApiResponse<Reservante> editarReservante(Reservante reservante);
-	public ApiResponse<Reservante> obtenerPorTelefono(String telefono);
+	public ApiResponse<Reservante> obtenerPorTelefonoYUsuario(Reservante reservante);
 }

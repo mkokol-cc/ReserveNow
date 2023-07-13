@@ -113,8 +113,8 @@ public class PublicController {
 
 		//armamos una reserva
 		Reserva r = new Reserva();
-		r.setFecha(fecha);
-		r.setHora(time);
+		//r.setFecha(fecha);
+		//r.setHora(time);
 		r.setNota(reservaStr.get("nota").asText());
 		
 		Reservante reservante = reservanteRepo.findByTelefono(reservaStr.get("reservante").get("telefono").asText());

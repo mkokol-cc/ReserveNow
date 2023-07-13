@@ -1,6 +1,8 @@
 package com.sistema.examenes.anterior.modelo;
 
 import java.sql.Time;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -25,10 +27,10 @@ public class CambioEstado {
 	
 	@Column(name = "fecha",nullable = false)
 	@JsonFormat(pattern="yyyy-MM-dd")
-	private Date fecha;
+	private LocalDate fecha;
 	
 	@Column(name = "hora",nullable = false)
-	private Time hora;
+	private LocalTime hora;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "estadoAnterior", referencedColumnName = "id", nullable = false)
@@ -53,19 +55,21 @@ public class CambioEstado {
 		this.id = id;
 	}
 
-	public Date getFecha() {
+	
+
+	public LocalDate getFecha() {
 		return fecha;
 	}
 
-	public void setFecha(Date fecha) {
+	public void setFecha(LocalDate fecha) {
 		this.fecha = fecha;
 	}
 
-	public Time getHora() {
+	public LocalTime getHora() {
 		return hora;
 	}
 
-	public void setHora(Time hora) {
+	public void setHora(LocalTime hora) {
 		this.hora = hora;
 	}
 

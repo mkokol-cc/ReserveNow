@@ -7,5 +7,5 @@ import com.sistema.examenes.anterior.modelo.Estado;
 
 @Repository
 public interface EstadoRepository extends JpaRepository<Estado,Long>{
-
+	Estado findByNombre(String nombre);
 }
