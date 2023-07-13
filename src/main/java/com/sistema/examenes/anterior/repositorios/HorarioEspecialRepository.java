@@ -1,6 +1,7 @@
 package com.sistema.examenes.anterior.repositorios;
 
-import java.sql.Time;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Date;
 import java.util.List;
 
@@ -11,15 +12,20 @@ import org.springframework.stereotype.Repository;
 
 import com.sistema.examenes.anterior.modelo.AsignacionRecursoTipoTurno;
 import com.sistema.examenes.anterior.modelo.HorarioEspecial;
+import com.sistema.examenes.anterior.modelo.Recurso;
 
 @Repository
 public interface HorarioEspecialRepository extends JpaRepository<HorarioEspecial,Long>{
 
+	void deleteByAsignacion(AsignacionRecursoTipoTurno asignacion);
+
+	void deleteByRecurso(Recurso recurso);
+	
 	List<HorarioEspecial> findByAsignacion(AsignacionRecursoTipoTurno asignacion);
 	
-	List<HorarioEspecial> findByAsignacionAndFecha(AsignacionRecursoTipoTurno asignacion, Date fecha);
+	List<HorarioEspecial> findByAsignacionAndFecha(AsignacionRecursoTipoTurno asignacion, LocalDate fecha);
 	
     @Query("SELECT he FROM HorarioEspecial he WHERE he.fecha = :fecha AND :hora BETWEEN he.desde AND he.hasta AND he.asignacion = :asignacion")
-    List<HorarioEspecial> obtenerPorFechaHoraYAsignacion(@Param("fecha") Date fecha, @Param("hora") Time hora, @Param("asignacion") AsignacionRecursoTipoTurno asignacion);
+    List<HorarioEspecial> obtenerPorFechaHoraYAsignacion(@Param("fecha") LocalDate fecha, @Param("hora") LocalTime hora, @Param("asignacion") AsignacionRecursoTipoTurno asignacion);
     
 }

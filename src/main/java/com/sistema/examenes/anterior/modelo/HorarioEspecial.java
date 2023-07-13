@@ -4,12 +4,10 @@ package com.sistema.examenes.anterior.modelo;
 
 
 import java.sql.Time;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -17,8 +15,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
@@ -41,17 +37,17 @@ public class HorarioEspecial {
 	private Long id;
 	
 	@Column(name = "desde", nullable=true)
-	private Time desde;
+	private LocalTime desde;
 	
 	@Column(name = "hasta", nullable=true)
-	private Time hasta;
+	private LocalTime hasta;
 	
 	@Column(name = "cerrado")
 	private boolean cerrado;
 	
 	@Column(name = "fecha",nullable = false)
 	@JsonFormat(pattern="yyyy-MM-dd")
-	private Date fecha;
+	private LocalDate fecha;
 	
 	@Column(name = "motivo", nullable=true)
 	private String motivo;
@@ -81,35 +77,37 @@ public class HorarioEspecial {
 	}
 
 
-	public Time getDesde() {
+
+
+
+	public LocalTime getDesde() {
 		return desde;
 	}
 
 
-	public void setDesde(Time desde) {
+	public void setDesde(LocalTime desde) {
 		this.desde = desde;
 	}
 
 
-	public Time getHasta() {
+	public LocalTime getHasta() {
 		return hasta;
 	}
 
 
-	public void setHasta(Time hasta) {
+	public void setHasta(LocalTime hasta) {
 		this.hasta = hasta;
 	}
 
 
-	public Date getFecha() {
+	public LocalDate getFecha() {
 		return fecha;
 	}
 
 
-	public void setFecha(Date fecha) {
+	public void setFecha(LocalDate fecha) {
 		this.fecha = fecha;
 	}
-
 
 
 	public String getMotivo() {

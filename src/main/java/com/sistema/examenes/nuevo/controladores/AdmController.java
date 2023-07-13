@@ -1,13 +1,16 @@
 package com.sistema.examenes.nuevo.controladores;
 
 import java.sql.Time;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,6 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sistema.examenes.anterior.modelo.AsignacionRecursoTipoTurno;
+import com.sistema.examenes.anterior.modelo.Dias;
 import com.sistema.examenes.anterior.modelo.Horario;
 import com.sistema.examenes.anterior.modelo.HorarioEspecial;
 import com.sistema.examenes.anterior.modelo.Recurso;
@@ -94,6 +99,7 @@ public class AdmController {
 	}
 
 	@PutMapping("/recurso/{idRecurso}/edit")
+	@Transactional
 	public ResponseEntity<?> editarRecurso(@PathVariable Long idRecurso,@RequestBody Recurso recursoStr) throws JsonProcessingException {
 		Recurso r = recursoRepo.getById(idRecurso);
 		if(r.getUsuario()==usuarioRepo.getById(getUserId())) {
@@ -101,6 +107,7 @@ public class AdmController {
 			
 			
 			if(!recursoStr.getHorarios().isEmpty()) {
+				horarioRepo.deleteByRecurso(r);
 				Set<Horario> horarios = new HashSet<>();
 				for(Horario h : recursoStr.getHorarios()) {
 					horarios.add(horarioRepo.save(h));
@@ -108,6 +115,7 @@ public class AdmController {
 				recursoStr.setHorarios(horarios);
 			}
 			if(!recursoStr.getHorariosEspeciales().isEmpty()) {
+				horarioEspRepo.deleteByRecurso(r);
 				Set<HorarioEspecial> horariosespeciales = new HashSet<>();
 				for(HorarioEspecial h : recursoStr.getHorariosEspeciales()) {
 					horariosespeciales.add(horarioEspRepo.save(h));
@@ -163,7 +171,7 @@ public class AdmController {
 	
 	//CRUD ASIGNACION
 	@PostMapping("/asignacion/{idTipoTurno}/{idRecurso}")
-	public ResponseEntity<?> guardarTipoTurno(@PathVariable Long idTipoTurno,@PathVariable Long idRecurso) throws JsonProcessingException {
+	public ResponseEntity<?> guardarAsignacion(@PathVariable Long idTipoTurno,@PathVariable Long idRecurso) throws JsonProcessingException {
 		Recurso r = recursoRepo.getById(idRecurso);
 		TipoTurno t = tipoTurnoRepo.getById(idTipoTurno);
 		//si tienen el mismo usuario y son del usuario que hizo el POST
@@ -198,6 +206,7 @@ public class AdmController {
 	}
 	
 	@PutMapping("/asignacion/{idAsig}/edit")
+	@Transactional
 	public ResponseEntity<?> editarAsignacion(@PathVariable Long idAsig ,
 			@RequestBody AsignacionRecursoTipoTurno asigStr) throws JsonProcessingException {
 		AsignacionRecursoTipoTurno a =  asignacionRepo.getById(idAsig);
@@ -208,6 +217,7 @@ public class AdmController {
 			if(a.getRecurso().getUsuario()==usuarioRepo.getById(getUserId())) {
 				AsignacionRecursoTipoTurno savedAsig = asignacionRepo.save(asigStr);
 				if(!asigStr.getHorarios().isEmpty()) {
+					horarioRepo.deleteByAsignacion(a);
 					Set<Horario> horarios = new HashSet<>();
 					for(Horario h : asigStr.getHorarios()) {
 						h.setAsignacion(savedAsig);
@@ -216,6 +226,7 @@ public class AdmController {
 					savedAsig.setHorarios(horarios);
 				}
 				if(!asigStr.getHorariosEspeciales().isEmpty()) {
+					horarioEspRepo.deleteByAsignacion(a);
 					Set<HorarioEspecial> horariosespeciales = new HashSet<>();
 					for(HorarioEspecial h : asigStr.getHorariosEspeciales()) {
 						h.setAsignacion(savedAsig);
@@ -244,7 +255,7 @@ public class AdmController {
 		reservaStr.setReservante(existente);
 		AsignacionRecursoTipoTurno a = asignacionRepo.getById(idAsignacion);
 		//comprobar si el dia y hora es valido
-		if(comprobarHorario(a,reservaStr.getHora(), reservaStr.getFecha())) {
+		//if(comprobarHorario(a,reservaStr.getHora(), reservaStr.getFecha())) {
 			reservaStr.setAsignacionTipoTurno(a);
 			if(reservaStr.getAsignacionTipoTurno().getSeniaCtvos()>0) {
 				reservaStr.setEstado(estadoRepo.getById((long)1));// id del estado RESERVADO - CON SEÑA
@@ -252,9 +263,9 @@ public class AdmController {
 				reservaStr.setEstado(estadoRepo.getById((long)2));// id del estado RESERVADO - SIN SEÑA
 			}
 			return ResponseEntity.ok(reservaRepo.save(reservaStr));	
-		}else {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Horario o Fecha Incorrecto o Ocupado");
-		}
+		//}else {
+			//return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Horario o Fecha Incorrecto o Ocupado");
+		//}
 	}
 	
 	@PutMapping("/reservas/{idReserva}/edit")
@@ -368,7 +379,7 @@ public class AdmController {
 	
 
 	
-
+	/*
 	
 	
 	public boolean comprobarHorario(AsignacionRecursoTipoTurno asig,Time hora, Date fecha) {
@@ -447,24 +458,50 @@ public class AdmController {
         }
 	}
 	
-	
+	*/
 	
 	@GetMapping("prueba")
-	public String comprobar() {
-		AsignacionRecursoTipoTurno asig =  asignacionRepo.getById((long)1);
-		Horario hEjemplo = horarioRepo.getById((long)27);
-		HorarioEspecial heEjemplo = horarioEspRepo.getById((long)7);
-		Reserva rEjemplo = reservaRepo.getById((long)1);
+	public String comprobar(@RequestBody Reserva reservaStr) {
+		//List<Horario> h = horarioRepo.obtenerPorHoraYAsignacion(d, reservaStr.getHora(), reservaStr.getAsignacionTipoTurno());
+		//List<HorarioEspecial> he = horarioEspRepo.obtenerPorFechaHoraYAsignacion(reservaStr.getFecha(), reservaStr.getHora(), reservaStr.getAsignacionTipoTurno());
+		//List<HorarioEspecial> he2 = horarioEspRepo.findByAsignacionAndFecha(asig, reservaStr.getFecha());
+		//List<Reserva> r = reservaRepo.buscarPorFechaHoraRecurso(reservaStr.getFecha(), reservaStr.getHora(), reservaStr.getAsignacionTipoTurno().getRecurso().getId());
 		
-		List<Horario> h = horarioRepo.obtenerPorHoraYAsignacion(hEjemplo.getDia(), hEjemplo.getDesde(), hEjemplo.getAsignacion());
-		List<HorarioEspecial> he = horarioEspRepo.obtenerPorFechaHoraYAsignacion(heEjemplo.getFecha(), heEjemplo.getHasta(), heEjemplo.getAsignacion());
-		List<Reserva> r = reservaRepo.buscarPorFechaHoraRecurso(rEjemplo.getFecha(), rEjemplo.getHora(), rEjemplo.getAsignacionTipoTurno().getRecurso().getId());
-		
-		System.out.println(h.size());
-		System.out.println(he.size());
-		System.out.println(r.size());
-
-		return ""+""+"";
+		//if horario no menor a actual
+		if(reservaStr.getFecha().isBefore(LocalDate.now())) {
+			System.out.println("La fecha es anterior a la actual");
+		}else if(!reservaStr.getFecha().isBefore(LocalDate.now()) && reservaStr.getHora().isBefore(LocalTime.now())){
+			System.out.println("La hora es anterior a la actual");
+		}
+		//if !HorarioEspecial
+		List<HorarioEspecial> he2 = horarioEspRepo.findByAsignacionAndFecha(reservaStr.getAsignacionTipoTurno(), reservaStr.getFecha());
+		if(he2.size()==1) {
+			for(HorarioEspecial he : he2) {
+				if(he.isCerrado()) {
+					System.out.println("El dia "+he.getFecha()+" el negocio esta cerrado. Motivo: "+he.getMotivo());
+				}
+			}
+		}
+		//if Horario especial
+		List<HorarioEspecial> he = horarioEspRepo.obtenerPorFechaHoraYAsignacion(reservaStr.getFecha(), reservaStr.getHora(), reservaStr.getAsignacionTipoTurno());
+		if(he.size()==1) {
+			System.out.println("Puede ser posible dentro del horario");
+		}else if(he.size()<1){
+			//if Horario
+			Dias d = Dias.valueOf(reservaStr.getFecha().getDayOfWeek().getDisplayName(TextStyle.FULL, new Locale("es", "ES")).toUpperCase()); 
+			List<Horario> h = horarioRepo.obtenerPorHoraYAsignacion(d, reservaStr.getHora(), reservaStr.getAsignacionTipoTurno());
+			if(h.size()==1) {
+				System.out.println("El horario esta correcto");
+			}	
+		}else {
+			System.out.println("Hay registrados mas de un HorarioEspecial para la misma fecha y misma hora");
+		}
+		//if !Reserva
+		List<Reserva> r = reservaRepo.buscarPorFechaHoraRecurso(reservaStr.getFecha(), reservaStr.getHora(), reservaStr.getAsignacionTipoTurno().getRecurso().getId());
+		if(!r.isEmpty()) {
+			System.out.println("El recurso ya tiene una reserva para el dia y la fecha especificada");
+		}
+		return "";
 	}
 	
 	

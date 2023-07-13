@@ -2,6 +2,8 @@
 package com.sistema.examenes.anterior.modelo;
 
 import java.sql.Time;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Date;
 import java.util.List;
 
@@ -50,13 +52,13 @@ public class Reserva {
 	//@JsonManagedReference
 	private Estado estado;
 	
-	@Temporal(TemporalType.DATE)
-	@Column(name = "fecha",nullable = false)
-	@JsonFormat(pattern="yyyy-MM-dd")
-	private Date fecha;
+	@Column(name = "fecha", nullable = false)
+	@JsonFormat(pattern = "yyyy-MM-dd")
+	private LocalDate fecha;
+
 	
 	@Column(name = "hora",nullable = false)
-	private Time hora;
+	private LocalTime hora;
 
 	
 	@ManyToOne(fetch = FetchType.EAGER)
@@ -103,29 +105,31 @@ public class Reserva {
 		this.estado = estado;
 	}
 
-	public Date getFecha() {
+
+
+	public LocalDate getFecha() {
 		return fecha;
 	}
 
-	public void setFecha(Date fecha) {
+	public void setFecha(LocalDate fecha) {
 		this.fecha = fecha;
 	}
 
-	public Time getHora() {
+	public LocalTime getHora() {
 		return hora;
 	}
 
-	public void setHora(Time hora) {
+	public void setHora(LocalTime hora) {
 		this.hora = hora;
 	}
-
+	/*
 	public AsignacionRecursoTipoTurno getTipoTurno() {
 		return asignacionTipoTurno;
 	}
 
 	public void setTipoTurno(AsignacionRecursoTipoTurno asignacionTipoTurno) {
 		this.asignacionTipoTurno = asignacionTipoTurno;
-	}
+	}*/
 
 	public String getTipoReserva() {
 		return tipoReserva;

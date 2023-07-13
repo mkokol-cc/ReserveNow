@@ -1,6 +1,7 @@
 package com.sistema.examenes.anterior.modelo;
 
 import java.sql.Time;
+import java.time.LocalTime;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -31,10 +32,10 @@ public class Horario {
 	private Long id;
 	
 	@Column(name = "desde", nullable=false)
-	private Time desde;
+	private LocalTime desde;
 	
 	@Column(name = "hasta", nullable=false)
-	private Time hasta;
+	private LocalTime hasta;
 	
 	@Column(name = "dia", nullable=false)
 	private Dias dia;
@@ -62,19 +63,21 @@ public class Horario {
 		this.id = id;
 	}
 
-	public Time getDesde() {
+
+
+	public LocalTime getDesde() {
 		return desde;
 	}
 
-	public void setDesde(Time desde) {
+	public void setDesde(LocalTime desde) {
 		this.desde = desde;
 	}
 
-	public Time getHasta() {
+	public LocalTime getHasta() {
 		return hasta;
 	}
 
-	public void setHasta(Time hasta) {
+	public void setHasta(LocalTime hasta) {
 		this.hasta = hasta;
 	}
 
