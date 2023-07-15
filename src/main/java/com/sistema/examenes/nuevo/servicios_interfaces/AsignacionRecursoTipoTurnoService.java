@@ -7,8 +7,8 @@ import com.sistema.examenes.nuevo.servicios.ApiResponse;
 
 public interface AsignacionRecursoTipoTurnoService {
 
-	public ApiResponse<AsignacionRecursoTipoTurno> guardarAsignacion(AsignacionRecursoTipoTurno asignacion);
-	public ApiResponse<AsignacionRecursoTipoTurno> editarAsignacion(AsignacionRecursoTipoTurno asignacion);
+	public ApiResponse<AsignacionRecursoTipoTurno> guardarAsignacion(AsignacionRecursoTipoTurno asignacion, long idUsuario);
+	public ApiResponse<AsignacionRecursoTipoTurno> editarAsignacion(AsignacionRecursoTipoTurno asignacion, long idUsuario);
 	public ApiResponse<List<AsignacionRecursoTipoTurno>> listarAsignacion(Long id);
 	public ApiResponse<List<AsignacionRecursoTipoTurno>> listarAsignacionPorUsuario(Long idUsuario);
 	

@@ -10,7 +10,8 @@ import com.sistema.examenes.nuevo.servicios.ApiResponse;
 
 public interface HorarioService {
 	
-	public ApiResponse<Horario> guardarHorario(Horario h);
+	public ApiResponse<Horario> guardarHorarioRecurso(Horario h);
+	public ApiResponse<Horario> guardarHorarioAsignacion(Horario h, AsignacionRecursoTipoTurno asignacion);
 	
 	public ApiResponse<Horario> comprobarHorarioRecurso(LocalTime hora, Dias dia, Recurso recurso);
 	public ApiResponse<Horario> comprobarHorarioAsignacion(LocalTime hora, Dias dia, AsignacionRecursoTipoTurno asignacion);

@@ -1,14 +1,14 @@
 package com.sistema.examenes.nuevo.servicios;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.sistema.examenes.anterior.modelo.Reservante;
 import com.sistema.examenes.anterior.repositorios.ReservanteRepository;
+import com.sistema.examenes.modelo.usuario.Usuario;
 import com.sistema.examenes.nuevo.servicios_interfaces.ReservanteService;
-import com.sistema.examenes.nuevo.servicios.ApiResponse;
 
 @Service
 public class ReservanteServiceImpl implements ReservanteService{
@@ -18,32 +18,56 @@ public class ReservanteServiceImpl implements ReservanteService{
 
 	@Override
 	public ApiResponse<Reservante> guardarReservante(Reservante reservante) {
-		System.out.println("LLEGUE ACA");
-		ApiResponse<Reservante> existente = obtenerPorTelefonoYUsuario(reservante)/* reservanteRepo.findByTelefono(reservaStr.getReservante().getTelefono())*/; 
-		if(existente.isSuccess()) {
-			return new ApiResponse<>(true,"",existente.getData());//reservanteRepo.save(reservaStr.getReservante());
-		}else {
-			Reservante nuevoReservante  = reservanteRepo.save(reservante);
-			return new ApiResponse<>(true,"",nuevoReservante);
+		try {
+			ApiResponse<Reservante> existente = obtenerPorTelefonoYUsuario(reservante)/* reservanteRepo.findByTelefono(reservaStr.getReservante().getTelefono())*/; 
+			if(existente.isSuccess()) {
+				return new ApiResponse<>(true,"",existente.getData());//reservanteRepo.save(reservaStr.getReservante());
+			}else {
+				Reservante nuevoReservante  = reservanteRepo.save(reservante);
+				return new ApiResponse<>(true,"",nuevoReservante);
+			}	
+		}catch(Exception e){
+			return new ApiResponse<>(false,e.getMessage(),null);
 		}
 	}
 
 	@Override
 	public ApiResponse<Reservante> obtenerPorTelefonoYUsuario(Reservante reservante) {
-		System.out.println("LLEGUE ACA");
-		Reservante r = reservanteRepo.findByTelefonoAndUsuario(reservante.getTelefono(), reservante.getUsuario());
-		System.out.println("LLEGUE ACA");
-		if(r!=null) {
-			System.out.println("LLEGUE ACA");
-			return new ApiResponse<>(true,"",r);
+		try {
+			Reservante r = reservanteRepo.findByTelefonoAndUsuario(reservante.getTelefono(), reservante.getUsuario());
+			if(r!=null) {
+				return new ApiResponse<>(true,"",r);
+			}
+			return new ApiResponse<>(false,"No se obtuvo el Reservante",r);	
+		}catch(Exception e){
+			return new ApiResponse<>(false,e.getMessage(),null);
 		}
-		return new ApiResponse<>(false,"No se obtuvo el Reservante",r);
 	}
 
 	@Override
-	public ApiResponse<Reservante> editarReservante(Reservante reservante) {
-		// TODO Auto-generated method stub
-		return null;
+	public ApiResponse<Reservante> editarReservante(Reservante reservante, long idUsuario) {
+		try {
+			Reservante r = reservanteRepo.getById(reservante.getId());
+			if(reservante.getUsuario().getId()==idUsuario) {
+				reservante.setReservas(r.getReservas());
+				reservante.setUsuario(r.getUsuario());
+				Reservante guardado = reservanteRepo.save(reservante);
+				return new ApiResponse<>(true,"",guardado);
+			}
+			return new ApiResponse<>(false,"Usuario no autorizado",r);	
+		}catch(Exception e){
+			return new ApiResponse<>(false,e.getMessage(),null);
+		}
+	}
+
+	@Override
+	public ApiResponse<List<Reservante>> listarReservanteDeUsuario(Usuario usuario) {
+		try {
+			List<Reservante> reservantes = reservanteRepo.findByUsuario(usuario);
+			return new ApiResponse<>(true,"",null);
+		}catch(Exception e){
+			return new ApiResponse<>(false,e.getMessage(),null);
+		}
 	}
 
 }

@@ -10,5 +10,6 @@ public interface ReservaService {
 	public ApiResponse<Reserva> guardarReserva(Reserva r);
 	public ApiResponse<Reserva> editarReserva(Reserva r);
 	public ApiResponse<List<Reserva>> listarReservaPorUsuario(long idUsuario);
+	public ApiResponse<Reserva> eliminarReservaPorId(long idReserva,long idUsuario);
 	
 }

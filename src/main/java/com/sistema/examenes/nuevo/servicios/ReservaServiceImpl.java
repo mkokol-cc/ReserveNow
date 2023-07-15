@@ -106,8 +106,26 @@ public class ReservaServiceImpl implements ReservaService{
 			}
 			return new ApiResponse<>(true,"",reservas);
 		}
-		return null;
+		return new ApiResponse<>(false,"Hubo un Problema al obtener las Reservas",null);
 	}
+	
+	@Override
+	public ApiResponse<Reserva> eliminarReservaPorId(long r, long idUsuario) {
+		try {
+			Reserva reserva = reservaRepo.getById(r);
+			if(reserva!=null) {
+				if(reserva.getAsignacionTipoTurno().getRecurso().getUsuario().getId()==idUsuario) {
+					reservaRepo.delete(reserva);
+					return new ApiResponse<>(true,"",null);	
+				}
+				return new ApiResponse<>(false,"No se encontro la reserva",null);
+			}
+			return new ApiResponse<>(false,"Usuario no autorizado",null);
+		}catch(Exception e) {
+			return new ApiResponse<>(false,"Error: "+e.getMessage(),null);
+		}
+	}
+	
 	
 	
 	private ApiResponse<Reserva> setDatosObligatorios(Reserva r) {
@@ -204,4 +222,5 @@ public class ReservaServiceImpl implements ReservaService{
 			return new ApiResponse<>(false,"Error: "+e.getMessage(),null);
 		}
 	}
+
 }

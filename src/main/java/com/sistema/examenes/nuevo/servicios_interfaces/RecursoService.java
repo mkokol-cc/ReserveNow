@@ -1,11 +1,19 @@
 package com.sistema.examenes.nuevo.servicios_interfaces;
 
-import org.springframework.http.ResponseEntity;
+import java.util.List;
 
 import com.sistema.examenes.anterior.modelo.Recurso;
+import com.sistema.examenes.modelo.usuario.Usuario;
+import com.sistema.examenes.nuevo.servicios.ApiResponse;
 
 public interface RecursoService {
 	
-	public ResponseEntity<Recurso> guardarRecurso(Recurso recurso);
+	public ApiResponse<Recurso> guardarRecurso(Recurso recurso);
+	
+	public ApiResponse<Recurso> editarRecurso(Recurso recurso, long userId);
+	
+	public ApiResponse<List<Recurso>> listarRecurso(Usuario userId);
+	
+	public ApiResponse<Recurso> obtenerRecursoPorId(long idRecurso);
 
 }
