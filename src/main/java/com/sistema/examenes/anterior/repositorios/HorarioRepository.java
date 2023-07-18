@@ -26,4 +26,7 @@ public interface HorarioRepository extends JpaRepository<Horario,Long>{
 	
     @Query("SELECT h FROM Horario h WHERE h.dia = :dia AND :hora BETWEEN h.desde AND h.hasta AND h.asignacion = :asignacion")
     List<Horario> obtenerPorHoraYAsignacion(@Param("dia") Dias dia, @Param("hora") LocalTime hora, @Param("asignacion") AsignacionRecursoTipoTurno asignacion);
+    
+    @Query("SELECT h FROM Horario h WHERE h.dia = :dia AND :hora BETWEEN h.desde AND h.hasta AND h.recurso = :recurso")
+    List<Horario> obtenerPorHoraYRecurso(@Param("dia") Dias dia, @Param("hora") LocalTime hora, @Param("recurso") Recurso recurso);
 }

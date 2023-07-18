@@ -26,36 +26,25 @@ public class EstadoServiceImpl implements EstadoService{
 	private CambioEstadoRepository cambioEstadoRepo;
 	
 	@Override
-	public ApiResponse<Reserva> nuevoCambioEstadoReserva(Reserva r) {
-		ApiResponse<Estado> buscarEstadoPorNombreRes = getEstadoByNombre(r.getEstado().getNombre());
-		if(buscarEstadoPorNombreRes.isSuccess()) {
-			//obtener cambio de estado con la fecha mayor (la ultima)
-			List<CambioEstado> cambiosDeEstado = r.getCambioEstado();
-			CambioEstado cambioEstadoMasReciente = Collections.max(cambiosDeEstado, Comparator.comparing(CambioEstado::getFecha));
-			//de ese cambio de estado obtener el estado nuevo (q en este caso vendria a ser el anterior)
-			//hacer con ese estado y el estado actual un nuevo cambio de estado
-			CambioEstado cambio = new CambioEstado();
-			if(buscarEstadoPorNombreRes.getData() != cambioEstadoMasReciente.getEstadoNuevo()) {
-				cambio.setEstadoAnterior(cambioEstadoMasReciente.getEstadoNuevo());
-				cambio.setEstadoNuevo(buscarEstadoPorNombreRes.getData());
-				cambio.setFecha(LocalDate.now());
-				cambio.setHora(LocalTime.now());//nose si guaardar el cambio de estado antes de setearsela a la reserva
-				r.setEstado(buscarEstadoPorNombreRes.getData());
-				//agregar cambio de estado a la reserva y devolver
-				ApiResponse<CambioEstado> reponseGuardarCambioEstado = guardarCambioEstado(cambio);
-				if(reponseGuardarCambioEstado.isSuccess()) {
-					cambiosDeEstado.add(reponseGuardarCambioEstado.getData());
-					r.setCambioEstado(cambiosDeEstado);
-					return new ApiResponse<>(true,"",r);
-				}else {
-					return new ApiResponse<>(false,reponseGuardarCambioEstado.getMessage(),null);
-				}
-			}else {
-				return new ApiResponse<>(false,"Error, agregar un cambio de estado con dos estados iguales",null);
-			}
-		}
-		return new ApiResponse<>(false,buscarEstadoPorNombreRes.getMessage(),null);
+	public ApiResponse<Reserva> nuevoCambioEstadoReserva(Reserva r, Estado anterior) {
+		
+		try {
+			CambioEstado c = new CambioEstado();
+			c.setEstadoAnterior(anterior);
+			c.setEstadoNuevo(r.getEstado());
+			c.setFecha(LocalDate.now());
+			c.setHora(LocalTime.now());
+			c.setReserva(r);
+			CambioEstado guardado = cambioEstadoRepo.save(c);
+			List<CambioEstado> cambios = r.getCambioEstado();
+			cambios.add(guardado);
+			r.setCambioEstado(cambios);
+			return new ApiResponse<>(true,"",r);
+		}catch(Exception e) {
+			return new ApiResponse<>(false,e.getMessage(),null);
+		}	
 	}
+	
 
 	@Override
 	public ApiResponse<Reserva> estadoReservaNueva(Reserva r) {
@@ -80,19 +69,6 @@ public class EstadoServiceImpl implements EstadoService{
 		}
 		
 	}
-	
-	private ApiResponse<CambioEstado> guardarCambioEstado(CambioEstado c){
-		try {
-			CambioEstado cambioGuardado = cambioEstadoRepo.save(c);
-			if(cambioGuardado!=null) {
-				return new ApiResponse<>(true,"",cambioGuardado);
-			}
-			return new ApiResponse<>(false,"No se pudo guardar el cambio de estado",null);
-		}catch(Exception e) {
-			return new ApiResponse<>(false,"Error al cambiar de estado. "+e.getMessage(),null);
-		}
-		
-		
-	}
+
 
 }

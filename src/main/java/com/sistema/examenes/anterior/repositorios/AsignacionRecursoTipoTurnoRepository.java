@@ -10,7 +10,7 @@ import com.sistema.examenes.anterior.modelo.Recurso;
 import com.sistema.examenes.anterior.modelo.TipoTurno;
 
 public interface AsignacionRecursoTipoTurnoRepository extends JpaRepository<AsignacionRecursoTipoTurno, Long> {
-    AsignacionRecursoTipoTurno findByRecursoAndTipoTurno(Recurso recurso, TipoTurno tipoTurno);
+    List<AsignacionRecursoTipoTurno> findByRecursoAndTipoTurno(Recurso recurso, TipoTurno tipoTurno);
     
     @Query("SELECT artt FROM AsignacionRecursoTipoTurno artt JOIN artt.recurso r JOIN r.usuario u WHERE u.id = :userId")
     List<AsignacionRecursoTipoTurno> findByRecursoUsuarioId(Long userId);

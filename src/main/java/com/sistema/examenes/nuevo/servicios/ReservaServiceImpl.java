@@ -1,5 +1,6 @@
 package com.sistema.examenes.nuevo.servicios;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.TextStyle;
 import java.util.ArrayList;
@@ -11,9 +12,9 @@ import org.springframework.stereotype.Service;
 
 import com.sistema.examenes.anterior.modelo.AsignacionRecursoTipoTurno;
 import com.sistema.examenes.anterior.modelo.Dias;
+import com.sistema.examenes.anterior.modelo.Estado;
 import com.sistema.examenes.anterior.modelo.Horario;
 import com.sistema.examenes.anterior.modelo.HorarioEspecial;
-import com.sistema.examenes.anterior.modelo.Recurso;
 import com.sistema.examenes.anterior.modelo.Reserva;
 import com.sistema.examenes.anterior.modelo.Reservante;
 import com.sistema.examenes.anterior.repositorios.ReservaRepository;
@@ -46,10 +47,10 @@ public class ReservaServiceImpl implements ReservaService{
 	private EstadoService estadoService;
 	
 	@Override
-	public ApiResponse<Reserva> guardarReserva(Reserva reserva) {
+	public ApiResponse<Reserva> guardarReserva(Reserva reserva, long idUsuario) {
         try {
-        	ApiResponse<Reserva> datosObligResponse = setDatosObligatorios(reserva);
-        	if(setDatosObligatorios(reserva).isSuccess()) {
+        	ApiResponse<Reserva> datosObligResponse = setDatosObligatorios(reserva, idUsuario);
+        	if(datosObligResponse.isSuccess()) {
         		ApiResponse<Reserva> horarioResponse = setHorariosReserva(reserva);
         		if(horarioResponse.isSuccess()) {
         			Reserva guardado = reservaRepo.save(reserva);
@@ -64,16 +65,17 @@ public class ReservaServiceImpl implements ReservaService{
         	return new ApiResponse<>(false,e.getMessage(),null);
         }
 	}
+	
 
 	@Override
 	public ApiResponse<Reserva> editarReserva(Reserva r) {
 		//get reserva por id
 		Reserva reservaAEditar = reservaRepo.getById(r.getId());
 		//setear todos los datos que no se pueden cambiar
+		r.setReservante(reservaAEditar.getReservante());
 		r.setAsignacionTipoTurno(reservaAEditar.getAsignacionTipoTurno());
-		r.setId(reservaAEditar.getId());
 		r.setCambioEstado(reservaAEditar.getCambioEstado());//le ponemos los cambios de estado
-		if(reservaAEditar.getFecha()!=r.getFecha() || reservaAEditar.getHora()!=r.getHora()) {
+		if(!reservaAEditar.getFecha().isEqual(r.getFecha()) || !reservaAEditar.getHora().equals(r.getHora())) {
 			ApiResponse<Reserva> horarioResponse = setHorariosReserva(r);
 			if(!horarioResponse.isSuccess()) {
 				return new ApiResponse<>(false,horarioResponse.getMessage(),null);	
@@ -81,12 +83,12 @@ public class ReservaServiceImpl implements ReservaService{
 			r.setFecha(horarioResponse.getData().getFecha());
 			r.setHora(horarioResponse.getData().getHora());
 		}
-		if(r.getEstado()!=reservaAEditar.getEstado()) {
-			ApiResponse<Reserva> cambiarEstadoResponse = cambiarEstado(r);
+		if(r.getEstado().getId()!=reservaAEditar.getEstado().getId()) {
+			ApiResponse<Reserva> cambiarEstadoResponse = cambiarEstado(r,reservaAEditar.getEstado());
 			if(cambiarEstadoResponse.isSuccess()) {
-				r.setCambioEstado(cambiarEstadoResponse.getData().getCambioEstado());
-				r.setEstado(cambiarEstadoResponse.getData().getEstado());
-				Reserva guardado = reservaRepo.save(r);
+				//r.setCambioEstado(cambiarEstadoResponse.getData().getCambioEstado());
+				//r.setEstado(cambiarEstadoResponse.getData().getEstado());
+				Reserva guardado = reservaRepo.save(cambiarEstadoResponse.getData());
     			return new ApiResponse<>(true,"",guardado);	
 			}else {
 				return new ApiResponse<>(false,cambiarEstadoResponse.getMessage(),null);	
@@ -128,14 +130,16 @@ public class ReservaServiceImpl implements ReservaService{
 	
 	
 	
-	private ApiResponse<Reserva> setDatosObligatorios(Reserva r) {
+	private ApiResponse<Reserva> setDatosObligatorios(Reserva r, long idUsuario) {
     	ApiResponse<Reservante> resReservante = reservanteService.guardarReservante(r.getReservante());
-    	System.out.println("EL ID DE LA ASGNACION ES "+r.getAsignacionTipoTurno().getId());
     	ApiResponse<AsignacionRecursoTipoTurno> resAsig = asignacionService.obtenerPorId(r.getAsignacionTipoTurno().getId());
     	ApiResponse<Reserva> setEstadoResponse = estadoService.estadoReservaNueva(r);
     	if(resReservante.isSuccess()) {
     		r.setReservante(resReservante.getData());
     		if(resAsig.isSuccess()) {
+    			if(resAsig.getData().getRecurso().getUsuario().getId()!=idUsuario || resAsig.getData().getTipoTurno().getUsuario().getId()!=idUsuario) {
+    				return new ApiResponse<>(false,"Usuario no autorizado",null);
+    			}
     			r.setAsignacionTipoTurno(resAsig.getData());
     			if(setEstadoResponse.isSuccess()) {
     				return new ApiResponse<>(true,"",setEstadoResponse.getData());	
@@ -150,9 +154,9 @@ public class ReservaServiceImpl implements ReservaService{
     	}
 	}
 	
-	private ApiResponse<Reserva> cambiarEstado(Reserva r) {
+	private ApiResponse<Reserva> cambiarEstado(Reserva r, Estado eAnterior) {
 		//nuevo cambio estado y set nuevo estado
-		ApiResponse<Reserva> estadoResponse = estadoService.nuevoCambioEstadoReserva(r);
+		ApiResponse<Reserva> estadoResponse = estadoService.nuevoCambioEstadoReserva(r,eAnterior);
 		if(estadoResponse.isSuccess()) {
 			return new ApiResponse<>(true,"",estadoResponse.getData());
 		}
@@ -160,6 +164,10 @@ public class ReservaServiceImpl implements ReservaService{
 	}
 	
 	private ApiResponse<Reserva> setHorariosReserva(Reserva r) {
+		if((r.getFecha().isEqual(LocalDate.now()) && !r.getHora().isAfter(LocalTime.now())) ||
+				r.getFecha().isBefore(LocalDate.now())) {
+			return new ApiResponse<>(false,"Fecha y Hora anterior a la actual",null);
+		}
 		ApiResponse<Reserva> ocupadoResponse = estaOcupado(r);
 		if(ocupadoResponse.isSuccess()) {
 			ApiResponse<Reserva> respuestaHorarioEsp = comprobarHoraPorHorarioEspecial(r);

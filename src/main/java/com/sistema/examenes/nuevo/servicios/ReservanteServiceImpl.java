@@ -48,7 +48,7 @@ public class ReservanteServiceImpl implements ReservanteService{
 	public ApiResponse<Reservante> editarReservante(Reservante reservante, long idUsuario) {
 		try {
 			Reservante r = reservanteRepo.getById(reservante.getId());
-			if(reservante.getUsuario().getId()==idUsuario) {
+			if(r.getUsuario().getId()==idUsuario) {
 				reservante.setReservas(r.getReservas());
 				reservante.setUsuario(r.getUsuario());
 				Reservante guardado = reservanteRepo.save(reservante);
@@ -64,7 +64,7 @@ public class ReservanteServiceImpl implements ReservanteService{
 	public ApiResponse<List<Reservante>> listarReservanteDeUsuario(Usuario usuario) {
 		try {
 			List<Reservante> reservantes = reservanteRepo.findByUsuario(usuario);
-			return new ApiResponse<>(true,"",null);
+			return new ApiResponse<>(true,"",reservantes);
 		}catch(Exception e){
 			return new ApiResponse<>(false,e.getMessage(),null);
 		}

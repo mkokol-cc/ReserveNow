@@ -19,6 +19,9 @@ public class TipoTurnoServiceImpl implements TipoTurnoService{
 	@Override
 	public ApiResponse<TipoTurno> guardarTipoTurno(TipoTurno tipoTurno) {
 		try {
+			if(tipoTurno.getNombre().trim().equals("")) {
+				return new ApiResponse<>(false,"El campo NOMBRE es obligatorio para guardar el Tipo de Turno",null);
+			}
 			TipoTurno t = tipoTurnoRepo.save(tipoTurno);
 			if(t!=null) {
 				return new ApiResponse<>(true,"",t);
@@ -32,9 +35,12 @@ public class TipoTurnoServiceImpl implements TipoTurnoService{
 	@Override
 	public ApiResponse<TipoTurno> editarTipoTurno(TipoTurno tipoTurno, long idUsuario) {
 		try {
+			if(tipoTurno.getNombre().trim().equals("")) {
+				return new ApiResponse<>(false,"El campo NOMBRE es obligatorio para guardar el Tipo de Turno",null);
+			}
 			TipoTurno t = tipoTurnoRepo.getById(tipoTurno.getId());
 			if(t!=null) {
-				if(t.getUsuario().getId()==idUsuario) {
+				if(t.getUsuario().getId()!=idUsuario) {
 					return new ApiResponse<>(false,"Usuario no autorizado",null);
 				}
 				if(!tipoTurno.getNombre().trim().equals("")) {

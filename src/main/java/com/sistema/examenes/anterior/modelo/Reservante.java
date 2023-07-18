@@ -34,7 +34,7 @@ public class Reservante {
 	@Column(name="dni")
 	private String dni;
 	
-	@Column(name="telefono",unique=true)
+	@Column(name="telefono",unique=false)
 	private String telefono;
 	
 	@Column(name="habilitado")

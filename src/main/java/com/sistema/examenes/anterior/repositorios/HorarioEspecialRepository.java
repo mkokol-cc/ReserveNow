@@ -25,6 +25,8 @@ public interface HorarioEspecialRepository extends JpaRepository<HorarioEspecial
 	
 	List<HorarioEspecial> findByFechaAndAsignacion(LocalDate fecha, AsignacionRecursoTipoTurno asignacion);
 	
+	List<HorarioEspecial> findByFechaAndRecurso(LocalDate fecha, Recurso recurso);
+	
     @Query("SELECT he FROM HorarioEspecial he WHERE he.fecha = :fecha AND :hora BETWEEN he.desde AND he.hasta AND he.asignacion = :asignacion")
     List<HorarioEspecial> obtenerPorFechaHoraYAsignacion(@Param("fecha") LocalDate fecha, @Param("hora") LocalTime hora, @Param("asignacion") AsignacionRecursoTipoTurno asignacion);
     

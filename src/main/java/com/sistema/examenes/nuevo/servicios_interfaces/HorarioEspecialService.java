@@ -12,6 +12,9 @@ public interface HorarioEspecialService {
 
 	public ApiResponse<HorarioEspecial> guardarHorarioEspecial(HorarioEspecial h);
 	
+	public ApiResponse<Recurso> guardarListaHorarioEspecialRecurso(Recurso recurso);
+	public ApiResponse<AsignacionRecursoTipoTurno> guardarListaHorarioEspecialAsignacion(AsignacionRecursoTipoTurno a);
+	
 	public ApiResponse<HorarioEspecial> comprobarHorarioEspecialRecurso(LocalTime hora, LocalDate fecha, Recurso recurso);
 	public ApiResponse<HorarioEspecial> comprobarHorarioEspecialAsignacion(LocalTime hora, LocalDate fecha,AsignacionRecursoTipoTurno asignacion);
 }
