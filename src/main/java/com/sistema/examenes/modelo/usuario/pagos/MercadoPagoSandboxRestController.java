@@ -1,7 +1,6 @@
 package com.sistema.examenes.modelo.usuario.pagos;
 
 import java.sql.Date;
-import java.time.Instant;
 import java.time.LocalDate;
 
 import javax.servlet.http.HttpServletRequest;
@@ -9,7 +8,6 @@ import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -29,7 +27,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.gson.GsonBuilder;
-import com.mercadopago.MercadoPago;
 import com.mercadopago.exceptions.MPException;
 import com.mercadopago.resources.Payment;
 import com.mercadopago.resources.Preference;
@@ -44,7 +41,7 @@ import com.sistema.examenes.servicios.UsuarioService;
 import com.sistema.examenes.servicios.impl.UserDetailsServiceImpl;
 
 import io.jsonwebtoken.JwtException;
-import lombok.var;
+//import lombok.var;
 
 @RestController
 @CrossOrigin("*")
@@ -144,8 +141,8 @@ public class MercadoPagoSandboxRestController {
         	.setDescription(l.getDescripcion() + " - Código de Compra: " + p.getId())
         	.setCurrencyId("ARS");
         	preference.appendItem(item);
-        	var result = preference.save();
-        	
+        	//var result = preference.save();
+        	Preference result = preference.save();
         	// result.getPayer();
         	//System.out.println("PAYER");
         	//System.out.println(result.getPayer());
@@ -194,7 +191,8 @@ public class MercadoPagoSandboxRestController {
             @RequestParam("merchant_account_id") String merchantAccountId,
             Model model
     		)throws MPException {
-    	var payment = Payment.findById(collectionId);
+    	//var payment = Payment.findById(collectionId);
+    	Payment payment = Payment.findById(collectionId);
     	System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(payment));
     	model.addAttribute("payment",payment);
     	return "ok";
@@ -213,7 +211,8 @@ public class MercadoPagoSandboxRestController {
             @RequestParam("merchant_account_id") String merchantAccountId,
             Model model
     		)throws MPException {
-    	var payment = Payment.findById(collectionId);
+    	//var payment = Payment.findById(collectionId);
+    	Payment payment = Payment.findById(collectionId);
     	System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(payment));
     	model.addAttribute("payment",payment);
     	return "no ok";

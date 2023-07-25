@@ -50,12 +50,12 @@ public class Recurso {
 	
 	
     @OneToMany(mappedBy = "recurso", fetch = FetchType.EAGER)
-    @JsonManagedReference
+    //@JsonManagedReference
     private Set<Horario> horarios = new HashSet<>();
     
     
     @OneToMany(mappedBy = "recurso", fetch = FetchType.EAGER)
-    @JsonManagedReference
+    //@JsonManagedReference
     private Set<HorarioEspecial> horariosEspeciales = new HashSet<>();
 
 	

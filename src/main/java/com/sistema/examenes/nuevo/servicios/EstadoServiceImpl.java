@@ -71,4 +71,18 @@ public class EstadoServiceImpl implements EstadoService{
 	}
 
 
+	@Override
+	public ApiResponse<List<Estado>> listarEstados() {
+		try {
+			List<Estado> e = estadoRepo.findAll();
+			if(e.isEmpty()) {
+				return new ApiResponse<>(false,"No se encontro ningun estado",null);
+			}
+			return new ApiResponse<>(true,"",e);
+		}catch(Exception e) {
+			return new ApiResponse<>(false,"Error al obtener los estados",null);
+		}
+	}
+
+
 }

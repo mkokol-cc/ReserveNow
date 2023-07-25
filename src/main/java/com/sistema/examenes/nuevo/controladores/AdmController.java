@@ -1,10 +1,8 @@
 package com.sistema.examenes.nuevo.controladores;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.format.TextStyle;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,9 +23,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sistema.examenes.anterior.modelo.AsignacionRecursoTipoTurno;
-import com.sistema.examenes.anterior.modelo.Dias;
-import com.sistema.examenes.anterior.modelo.Horario;
-import com.sistema.examenes.anterior.modelo.HorarioEspecial;
 import com.sistema.examenes.anterior.modelo.Recurso;
 import com.sistema.examenes.anterior.modelo.Reserva;
 import com.sistema.examenes.anterior.modelo.Reservante;
@@ -268,6 +263,7 @@ public class AdmController {
 	}
 	
 	@GetMapping("/reservas")
+	@Transactional
 	public ResponseEntity</*List<Reserva>*/?> listarReservas() throws JsonProcessingException {
 		
 		try {

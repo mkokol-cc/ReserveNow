@@ -1,10 +1,8 @@
 
 package com.sistema.examenes.anterior.modelo;
 
-import java.sql.Time;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.Date;
 import java.util.List;
 
 import javax.persistence.Column;
@@ -17,15 +15,11 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 /**
  * @author MATIAS
@@ -36,12 +30,13 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 @Entity
 @Table(name = "reserva")
 @JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
-@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "id")
+//@JsonIdentityInfo(generator = ObjectIdGenerators.UUIDGenerator.class, property = "id")
 public class Reserva {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "id")
+	@Column(name = "id",unique=true)
+	//@JsonIgnore
 	private Long id;
 	
 	@Column(name="tipoReserva")
@@ -63,14 +58,16 @@ public class Reserva {
 	
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "asignacionTipoTurno", referencedColumnName = "id", nullable = false, unique = false)
-	//@JsonManagedReference
+	@JsonManagedReference
+	//@JsonBackReference
 	private AsignacionRecursoTipoTurno asignacionTipoTurno;
 	
 	
 	@OneToMany(mappedBy="reserva")
 	@Column(name = "cambioEstado",nullable=true)
 	@JsonBackReference
-	@JsonIgnore
+	//@JsonIgnore
+	//@JsonIdentityReference
 	public List<CambioEstado> cambioEstado;
 	
 	@Column(name="nota")
@@ -78,7 +75,7 @@ public class Reserva {
 	
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "reservante", referencedColumnName = "id", nullable = false, unique = false)
-	//@JsonManagedReference
+	@JsonManagedReference
 	private Reservante reservante;
 	
 	public Reserva(){

@@ -59,7 +59,8 @@ public class HorarioEspecial {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "recurso_id")
-    @JsonBackReference
+    //@JsonBackReference
+    @JsonIgnore
     private Recurso recurso;
 	
 	public HorarioEspecial(){

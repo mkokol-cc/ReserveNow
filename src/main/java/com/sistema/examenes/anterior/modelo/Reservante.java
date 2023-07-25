@@ -15,6 +15,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.sistema.examenes.modelo.usuario.Usuario;
 
 @Entity
@@ -42,6 +43,7 @@ public class Reservante {
 	
 	@OneToMany(mappedBy = "reservante", fetch = FetchType.EAGER/*, cascade = CascadeType.ALL, orphanRemoval = true*/)
     //@JsonIgnore
+	@JsonBackReference
     private Set<Reserva> reservas = new HashSet<>();
 	
 	//RELACIONADO CON EL DUEÑO

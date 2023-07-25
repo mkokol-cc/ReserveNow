@@ -102,10 +102,24 @@ public class ReservaServiceImpl implements ReservaService{
 	public ApiResponse<List<Reserva>> listarReservaPorUsuario(long idUsuario) {
 		ApiResponse<List<AsignacionRecursoTipoTurno>> asignaciones = asignacionService.listarAsignacionPorUsuario(idUsuario);
 		if(asignaciones.isSuccess()) {
+
 			List<Reserva> reservas = new ArrayList<>();
 			for(AsignacionRecursoTipoTurno a : asignaciones.getData()) {
-				reservas.addAll(a.getReservas());
+				List<Reserva> aux = reservaRepo.findByAsignacionTipoTurno(a);
+				reservas.addAll(aux);
+				System.out.println("-----------------------------------------");
+				System.out.println("-----------------------------------------");
+				for(Reserva r : aux) {
+					System.out.println(r.getId());
+					System.out.println(r.getReservante().getNombre());
+					System.out.println(r.getReservante().getApellido());
+					System.out.println(r.getFecha());
+					System.out.println(r.getHora());
+					System.out.println(r.getNota());
+					System.out.println(r.getEstado());
+				}
 			}
+
 			return new ApiResponse<>(true,"",reservas);
 		}
 		return new ApiResponse<>(false,"Hubo un Problema al obtener las Reservas",null);

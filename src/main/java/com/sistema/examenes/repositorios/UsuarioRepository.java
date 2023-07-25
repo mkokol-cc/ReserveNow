@@ -7,5 +7,7 @@ import com.sistema.examenes.modelo.usuario.Usuario;
 public interface UsuarioRepository extends JpaRepository<Usuario,Long> {
 
     public Usuario findByEmail(String username);
+    
+    public Usuario findByDbUrl(String dbUrl);
 
 }
