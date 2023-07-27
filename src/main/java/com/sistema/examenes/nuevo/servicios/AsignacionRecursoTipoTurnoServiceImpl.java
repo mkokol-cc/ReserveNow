@@ -54,6 +54,10 @@ public class AsignacionRecursoTipoTurnoServiceImpl implements AsignacionRecursoT
 					AsignacionRecursoTipoTurno asignacion = new AsignacionRecursoTipoTurno();
 					asignacion.setRecurso(r.getData());
 					asignacion.setTipoTurno(t.getData());
+					asignacion.setDuracionEnMinutos(t.getData().getDuracionEnMinutos());
+					asignacion.setSeniaCtvos(t.getData().getSeniaCtvos());
+					asignacion.setPrecioEstimadoDesdeCtvos(t.getData().getPrecioEstimadoDesdeCtvos());
+					asignacion.setPrecioEstimadoHastaCtvos(t.getData().getPrecioEstimadoHastaCtvos());
 					//setear horarios
 					ApiResponse<AsignacionRecursoTipoTurno> resp = setHorarioAsignacionDesdeRecurso(asignacion);
 					if(resp.isSuccess()) {
@@ -287,6 +291,10 @@ public class AsignacionRecursoTipoTurnoServiceImpl implements AsignacionRecursoT
 			return new ApiResponse<>(false,e.getMessage(),null);
 		}
 	}
+	
+	
+
+	
 	
 
 }

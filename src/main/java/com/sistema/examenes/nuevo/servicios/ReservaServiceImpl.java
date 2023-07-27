@@ -6,6 +6,7 @@ import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,9 +16,11 @@ import com.sistema.examenes.anterior.modelo.Dias;
 import com.sistema.examenes.anterior.modelo.Estado;
 import com.sistema.examenes.anterior.modelo.Horario;
 import com.sistema.examenes.anterior.modelo.HorarioEspecial;
+import com.sistema.examenes.anterior.modelo.Recurso;
 import com.sistema.examenes.anterior.modelo.Reserva;
 import com.sistema.examenes.anterior.modelo.Reservante;
 import com.sistema.examenes.anterior.repositorios.ReservaRepository;
+import com.sistema.examenes.nuevo.dto.TurnoDTO;
 import com.sistema.examenes.nuevo.servicios_interfaces.AsignacionRecursoTipoTurnoService;
 import com.sistema.examenes.nuevo.servicios_interfaces.EstadoService;
 import com.sistema.examenes.nuevo.servicios_interfaces.HorarioEspecialService;
@@ -45,6 +48,7 @@ public class ReservaServiceImpl implements ReservaService{
 	
 	@Autowired
 	private EstadoService estadoService;
+	
 	
 	@Override
 	public ApiResponse<Reserva> guardarReserva(Reserva reserva, long idUsuario) {
@@ -82,6 +86,7 @@ public class ReservaServiceImpl implements ReservaService{
 			}
 			r.setFecha(horarioResponse.getData().getFecha());
 			r.setHora(horarioResponse.getData().getHora());
+			r.setHoraFin(horarioResponse.getData().getHoraFin());
 		}
 		if(r.getEstado().getId()!=reservaAEditar.getEstado().getId()) {
 			ApiResponse<Reserva> cambiarEstadoResponse = cambiarEstado(r,reservaAEditar.getEstado());
@@ -102,24 +107,11 @@ public class ReservaServiceImpl implements ReservaService{
 	public ApiResponse<List<Reserva>> listarReservaPorUsuario(long idUsuario) {
 		ApiResponse<List<AsignacionRecursoTipoTurno>> asignaciones = asignacionService.listarAsignacionPorUsuario(idUsuario);
 		if(asignaciones.isSuccess()) {
-
 			List<Reserva> reservas = new ArrayList<>();
 			for(AsignacionRecursoTipoTurno a : asignaciones.getData()) {
 				List<Reserva> aux = reservaRepo.findByAsignacionTipoTurno(a);
 				reservas.addAll(aux);
-				System.out.println("-----------------------------------------");
-				System.out.println("-----------------------------------------");
-				for(Reserva r : aux) {
-					System.out.println(r.getId());
-					System.out.println(r.getReservante().getNombre());
-					System.out.println(r.getReservante().getApellido());
-					System.out.println(r.getFecha());
-					System.out.println(r.getHora());
-					System.out.println(r.getNota());
-					System.out.println(r.getEstado());
-				}
 			}
-
 			return new ApiResponse<>(true,"",reservas);
 		}
 		return new ApiResponse<>(false,"Hubo un Problema al obtener las Reservas",null);
@@ -155,18 +147,17 @@ public class ReservaServiceImpl implements ReservaService{
     				return new ApiResponse<>(false,"Usuario no autorizado",null);
     			}
     			r.setAsignacionTipoTurno(resAsig.getData());
+    			r.setHoraFin(r.getHora().plusMinutes(resAsig.getData().getDuracionEnMinutos()));
     			if(setEstadoResponse.isSuccess()) {
     				return new ApiResponse<>(true,"",setEstadoResponse.getData());	
-    			}else {
-    				return new ApiResponse<>(false,setEstadoResponse.getMessage(),null);
     			}
-    		}else {
-    			return new ApiResponse<>(false,resAsig.getMessage(),null);
+    			return new ApiResponse<>(false,setEstadoResponse.getMessage(),null);
     		}
-    	}else {
-    		return new ApiResponse<>(false,resReservante.getMessage(),null);
+    		return new ApiResponse<>(false,resAsig.getMessage(),null);
     	}
+    	return new ApiResponse<>(false,resReservante.getMessage(),null);
 	}
+	
 	
 	private ApiResponse<Reserva> cambiarEstado(Reserva r, Estado eAnterior) {
 		//nuevo cambio estado y set nuevo estado
@@ -189,12 +180,9 @@ public class ReservaServiceImpl implements ReservaService{
 				if(respuestaHorarioEsp.getData()==null) {
 					//comprobar horario comun
 					return comprobarHoraPorHorarioComun(r);
-				}else {
-					return respuestaHorarioEsp;
 				}
-			}else {
-				return respuestaHorarioEsp;
-			}	
+			}
+			return respuestaHorarioEsp;
 		}else {
 			return ocupadoResponse;
 		}
@@ -210,10 +198,8 @@ public class ReservaServiceImpl implements ReservaService{
     		}
     		return new ApiResponse<>(true,"No hay horario especial para esa fecha",null);
     	}else{
-    		//ApiResponse
     		//--responder que no es posible, ya que para esa fecha hay un horario especial que lo impide
     		return new ApiResponse<>(false,"horario invalido: "+he.getMessage(),r);
-    		//return ;
     	}
 	}
 	
@@ -245,4 +231,64 @@ public class ReservaServiceImpl implements ReservaService{
 		}
 	}
 
+	
+	
+	
+	
+	
+	@Override
+	public List<TurnoDTO> crearTurnos(AsignacionRecursoTipoTurno asignacion, LocalDate fecha){
+		List<TurnoDTO> turnos = new ArrayList<>();
+		List<HorarioEspecial> horariosEspeciales = new ArrayList<>();
+		for(HorarioEspecial he : asignacion.getHorariosEspeciales()) {
+			if(he.getFecha().isEqual(fecha)) {
+				horariosEspeciales.add(he);
+			}
+		}
+		if(horariosEspeciales.size()>0) {
+			for(HorarioEspecial h : horariosEspeciales) {
+				if(!h.isCerrado()) {
+					turnos.addAll(listarTurnos(h.getDesde(), h.getHasta(), asignacion.getDuracionEnMinutos(), fecha));
+				}
+			}
+		}else {
+			Dias d = Dias.valueOf(fecha.getDayOfWeek().getDisplayName(TextStyle.FULL, new Locale("es", "ES")).toUpperCase());
+			for(Horario h : asignacion.getHorarios()) {
+				if(h.getDia().equals(d)) {
+					turnos.addAll(listarTurnos(h.getDesde(), h.getHasta(), asignacion.getDuracionEnMinutos(), fecha));	
+				}
+			}
+		}
+		return actualizarDisponibilidadDeTurnos(turnos,asignacion.getRecurso());
+	}
+	
+	
+	private List<TurnoDTO> listarTurnos(LocalTime desde, LocalTime hasta, int duracion, LocalDate fecha){
+		List<TurnoDTO> turnos = new ArrayList<>();
+		LocalTime hora = desde;
+		while(hasta.isAfter(hora)) {
+			turnos.add(new TurnoDTO(fecha,hora,duracion,false));
+			hora= hora.plusMinutes(duracion);
+		}
+		return turnos;
+	}
+	
+	private List<TurnoDTO> actualizarDisponibilidadDeTurnos(List<TurnoDTO> turnos,Recurso r){
+		List<Reserva> reservas = reservaRepo.buscarRecurso(r.getId());
+		for(Reserva reserva : reservas) {
+			for(TurnoDTO turno : turnos) {
+				if(reserva.getFecha().isEqual(turno.getFecha())){
+					if(turno.getHora().compareTo(reserva.getHoraFin()) >= 0 ||
+							reserva.getHora().compareTo(turno.getHasta()) >= 0) {
+						turno.setOcupado(false);
+					}else {
+						turno.setOcupado(true);
+					}
+				}
+			}	
+		}
+		return turnos;
+	}
+	
+	
 }

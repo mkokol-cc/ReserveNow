@@ -22,7 +22,7 @@ public class HorarioEspecialServiceImpl implements HorarioEspecialService{
 	@Autowired
 	private HorarioEspecialRepository horarioEspRepo;
 	
-
+/*
 	@Override
 	public ApiResponse<HorarioEspecial> comprobarHorarioEspecialRecurso(LocalTime hora, LocalDate fecha,
 			Recurso recurso) {
@@ -35,7 +35,7 @@ public class HorarioEspecialServiceImpl implements HorarioEspecialService{
 					return new ApiResponse<>(false,"Fecha Cerrada: "+he.getMotivo(),he);
 				}else{
 					//LocalTime horaMasDuracion = hora.plusMinutes((long)asignacion.getDuracionEnMinutos());
-					if(!he.getDesde().isAfter(hora) /*&& !he.getDesde().isBefore(horaMasDuracion)*/) {
+					if(!he.getDesde().isAfter(hora) /*&& !he.getDesde().isBefore(horaMasDuracion)*//*) {
 						horarioEspCompatible = he;
 					}
 				}
@@ -47,7 +47,7 @@ public class HorarioEspecialServiceImpl implements HorarioEspecialService{
 		}else {
 			return new ApiResponse<>(true,"No hay ningun horario especial que se oponga",null);	
 		}
-	}
+	}*/
 
 	@Override
 	public ApiResponse<HorarioEspecial> comprobarHorarioEspecialAsignacion(LocalTime hora, LocalDate fecha,
@@ -60,8 +60,8 @@ public class HorarioEspecialServiceImpl implements HorarioEspecialService{
 				if(he.isCerrado()) {
 					return new ApiResponse<>(false,"Fecha Cerrada: "+he.getMotivo(),he);
 				}else{
-					LocalTime horaMasDuracion = hora.plusMinutes((long)asignacion.getDuracionEnMinutos());
-					if(!he.getDesde().isAfter(hora) && !he.getDesde().isBefore(horaMasDuracion)) {
+					//LocalTime horaMasDuracion = hora.plusMinutes((long)asignacion.getDuracionEnMinutos());
+					if(comprobarHorario(he.getDesde(),he.getHasta(),asignacion.getDuracionEnMinutos(),hora)) {
 						horarioEspCompatible = he;
 					}
 				}
@@ -165,6 +165,23 @@ public class HorarioEspecialServiceImpl implements HorarioEspecialService{
 		}catch(Exception e) {
 			return new ApiResponse<>(false,e.getMessage(),null);
 		}
+	}
+	
+	
+	
+	
+	
+	
+	private boolean comprobarHorario(LocalTime desde, LocalTime hasta, int duracion, LocalTime hora) {
+		LocalTime auxiliar = desde;
+		while (auxiliar.isBefore(hasta)) {
+			if(hora.equals(auxiliar)) {
+				return true;
+			}
+			auxiliar.plusMinutes(duracion);
+		    // Código a ejecutar mientras la condición sea verdadera
+		}
+		return false;
 	}
 
 }

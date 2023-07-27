@@ -54,6 +54,9 @@ public class Reserva {
 	
 	@Column(name = "hora",nullable = false)
 	private LocalTime hora;
+	
+	@Column(name = "horaFin",nullable = false)
+	private LocalTime horaFin;
 
 	
 	@ManyToOne(fetch = FetchType.EAGER)
@@ -167,6 +170,16 @@ public class Reserva {
 	public void setReservante(Reservante reservante) {
 		this.reservante = reservante;
 	}
+
+	public LocalTime getHoraFin() {
+		return horaFin;
+	}
+
+	public void setHoraFin(LocalTime horaFin) {
+		this.horaFin = horaFin;
+	}
+	
+	
 
 
 	

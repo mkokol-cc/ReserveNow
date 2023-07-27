@@ -16,6 +16,6 @@ public interface HorarioService {
 	public ApiResponse<Recurso> guardarListaHorariosRecurso(Recurso r);
 	public ApiResponse<AsignacionRecursoTipoTurno> guardarListaHorariosAsignacion(AsignacionRecursoTipoTurno asignacion);
 	
-	public ApiResponse<Horario> comprobarHorarioRecurso(LocalTime hora, Dias dia, Recurso recurso);
+	/*public ApiResponse<Horario> comprobarHorarioRecurso(LocalTime hora, Dias dia, Recurso recurso);*/
 	public ApiResponse<Horario> comprobarHorarioAsignacion(LocalTime hora, Dias dia, AsignacionRecursoTipoTurno asignacion);
 }

@@ -31,11 +31,16 @@ public interface ReservaRepository extends JpaRepository<Reserva,Long>{
 	@Query("SELECT r FROM Reserva r WHERE r.fecha = :fecha AND r.hora = :hora AND r.asignacionTipoTurno.recurso.id = :recursoId")
     List<Reserva> buscarPorFechaHoraRecurso(@Param("fecha") LocalDate fecha, @Param("hora") LocalTime hora, @Param("recursoId") Long recursoId);
 	
-	@Query("SELECT r FROM Reserva r WHERE r.fecha = :fecha AND r.hora >= :horaInicio AND r.hora <= :horaFin AND r.asignacionTipoTurno.recurso.id = :recursoId")
+	@Query("SELECT r FROM Reserva r WHERE r.asignacionTipoTurno.recurso.id = :recursoId")
+    List<Reserva> buscarRecurso(@Param("recursoId") Long recursoId);
+	
+	//no es mayoy igual o menor igual porque puede haber un turno desde las 12:00 - 13:00 y otro de 13:00 a 14:00 y si fuera igual
+	//entonces 13:00==13:00 y seria ocupado
+	@Query("SELECT r FROM Reserva r WHERE r.fecha = :fecha AND NOT (:horaDesde >= r.horaFin OR :horaHasta <= r.hora) AND r.asignacionTipoTurno.recurso.id = :recursoId")
 	List<Reserva> buscarPorFechaRangoHorarioRecurso(
 	        @Param("fecha") LocalDate fecha,
-	        @Param("horaInicio") LocalTime horaInicio,
-	        @Param("horaFin") LocalTime horaFin,
+	        @Param("horaDesde") LocalTime horaDesde,
+	        @Param("horaHasta") LocalTime horaHasta,
 	        @Param("recursoId") Long recursoId
 	);
 

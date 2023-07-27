@@ -17,6 +17,7 @@ import javax.persistence.Table;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.sistema.examenes.modelo.usuario.Usuario;
 
@@ -29,6 +30,7 @@ import com.sistema.examenes.modelo.usuario.Usuario;
 @Table(name = "tipoTurno")
 @JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class TipoTurno {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -54,6 +56,19 @@ public class TipoTurno {
 	@JoinColumn(name = "usuario", referencedColumnName = "id", nullable = false, unique = false)
 	@JsonBackReference
     private Usuario usuario;
+	
+	
+	@Column(name = "duracionEnMinutos",nullable=true)
+	private Integer duracionEnMinutos;
+	
+	@Column(name = "seniaCtvs",nullable=true)
+	private Integer seniaCtvos;
+	
+	@Column(name = "precioEstimadoDesdeCtvos",nullable=true)
+	private Integer precioEstimadoDesdeCtvos;
+	
+	@Column(name = "precioEstimadoHastaCtvos",nullable=true)
+	private Integer precioEstimadoHastaCtvos;
 	
 	public TipoTurno(){
 
@@ -114,4 +129,38 @@ public class TipoTurno {
 	public void finalize() throws Throwable {
 
 	}
+
+	public int getDuracionEnMinutos() {
+		return duracionEnMinutos != null ? duracionEnMinutos.intValue() : 0;
+	}
+
+	public void setDuracionEnMinutos(int duracionEnMinutos) {
+		this.duracionEnMinutos = duracionEnMinutos;
+	}
+
+	public int getSeniaCtvos() {
+		return seniaCtvos != null ? seniaCtvos.intValue() : 0;
+	}
+
+	public void setSeniaCtvos(int seniaCtvos) {
+		this.seniaCtvos = seniaCtvos;
+	}
+
+	public int getPrecioEstimadoDesdeCtvos() {
+		return precioEstimadoDesdeCtvos != null ? precioEstimadoDesdeCtvos.intValue() : 0;
+	}
+
+	public void setPrecioEstimadoDesdeCtvos(int precioEstimadoDesdeCtvos) {
+		this.precioEstimadoDesdeCtvos = precioEstimadoDesdeCtvos;
+	}
+
+	public int getPrecioEstimadoHastaCtvos() {
+		return precioEstimadoHastaCtvos != null ? precioEstimadoHastaCtvos.intValue() : 0;
+	}
+
+	public void setPrecioEstimadoHastaCtvos(int precioEstimadoHastaCtvos) {
+		this.precioEstimadoHastaCtvos = precioEstimadoHastaCtvos;
+	}
+	
+	
 }//end TipoTurno

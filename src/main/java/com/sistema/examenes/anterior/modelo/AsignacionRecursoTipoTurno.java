@@ -1,7 +1,6 @@
 package com.sistema.examenes.anterior.modelo;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -19,13 +18,13 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 @Entity
 @Table(name = "AsignacionRecursoTipoTurno")
 @JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class AsignacionRecursoTipoTurno {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -70,16 +69,16 @@ public class AsignacionRecursoTipoTurno {
 	
 	
 	@Column(name = "duracionEnMinutos",nullable=true)
-	private int duracionEnMinutos;
+	private Integer duracionEnMinutos;
 	
 	@Column(name = "seniaCtvs",nullable=true)
-	private int seniaCtvos;
+	private Integer seniaCtvos;
 	
 	@Column(name = "precioEstimadoDesdeCtvos",nullable=true)
-	private int precioEstimadoDesdeCtvos;
+	private Integer precioEstimadoDesdeCtvos;
 	
 	@Column(name = "precioEstimadoHastaCtvos",nullable=true)
-	private int precioEstimadoHastaCtvos;
+	private Integer precioEstimadoHastaCtvos;
 
 	public Long getId() {
 		return id;
@@ -153,8 +152,8 @@ public class AsignacionRecursoTipoTurno {
 		this.eliminado = eliminado;
 	}
 
-	public int getDuracionEnMinutos() {
-		return duracionEnMinutos;
+	public Integer getDuracionEnMinutos() {
+		return duracionEnMinutos != null ? duracionEnMinutos.intValue() : 0;
 	}
 
 	public void setDuracionEnMinutos(int duracionEnMinutos) {

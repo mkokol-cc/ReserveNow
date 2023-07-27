@@ -21,7 +21,7 @@ public class HorarioServiceImpl implements HorarioService{
 	@Autowired
 	private HorarioRepository horarioRepo;
 
-
+	/*
 	@Override
 	public ApiResponse<Horario> comprobarHorarioRecurso(LocalTime hora, Dias dia, Recurso recurso) {
 		//comprobar si no hay horarios para el mismo dia que se pisen
@@ -37,7 +37,7 @@ public class HorarioServiceImpl implements HorarioService{
 		}
 		// TODO Auto-generated method stub
 		return new ApiResponse<>(false,"Horario Invalido para el dia "+dia.name()+" a las "+hora,null);
-	}
+	}*/
 
 	@Override
 	public ApiResponse<Horario> comprobarHorarioAsignacion(LocalTime hora, Dias dia,
@@ -46,8 +46,8 @@ public class HorarioServiceImpl implements HorarioService{
 		List<Horario> horarios = horarioRepo.obtenerPorHoraYAsignacion(dia, hora, asignacion);
 		if(horarios.size()>0) {
 			for(Horario h : horarios) {
-				LocalTime horaMasDuracion = hora.plusMinutes((long)asignacion.getDuracionEnMinutos());
-				if(!horaMasDuracion.isAfter(h.getHasta())) {
+				//LocalTime horaMasDuracion = hora.plusMinutes((long)asignacion.getDuracionEnMinutos());
+				if(comprobarHorario(h.getDesde(),h.getHasta(),asignacion.getDuracionEnMinutos(),hora)/*!horaMasDuracion.isAfter(h.getHasta())*/) {
 					//si horarios.size()>1 entonces hay horarios para la misma fecha que se pisan
 					return new ApiResponse<>(true,"Horario Valido",h);
 				}
@@ -134,6 +134,21 @@ public class HorarioServiceImpl implements HorarioService{
 		}catch(Exception e) {
 			return new ApiResponse<>(false,e.getMessage(),null);
 		}
+	}
+	
+	
+	
+	
+	private boolean comprobarHorario(LocalTime desde, LocalTime hasta, int duracion, LocalTime hora) {
+		LocalTime auxiliar = desde;
+		while (auxiliar.isBefore(hasta)) {
+			if(hora.equals(auxiliar)) {
+				return true;
+			}
+			auxiliar.plusMinutes(duracion);
+		    // Código a ejecutar mientras la condición sea verdadera
+		}
+		return false;
 	}
 	
 

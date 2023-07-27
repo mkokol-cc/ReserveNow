@@ -1,5 +1,7 @@
 package com.sistema.examenes.nuevo.controladores;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,14 +18,13 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sistema.examenes.anterior.modelo.AsignacionRecursoTipoTurno;
 import com.sistema.examenes.anterior.modelo.Estado;
-import com.sistema.examenes.anterior.modelo.Recurso;
 import com.sistema.examenes.anterior.modelo.Reserva;
 import com.sistema.examenes.anterior.modelo.Reservante;
 import com.sistema.examenes.modelo.usuario.Usuario;
+import com.sistema.examenes.nuevo.dto.TurnoDTO;
 import com.sistema.examenes.nuevo.servicios.ApiResponse;
 import com.sistema.examenes.nuevo.servicios_interfaces.AsignacionRecursoTipoTurnoService;
 import com.sistema.examenes.nuevo.servicios_interfaces.EstadoService;
-import com.sistema.examenes.nuevo.servicios_interfaces.RecursoService;
 import com.sistema.examenes.nuevo.servicios_interfaces.ReservaService;
 import com.sistema.examenes.repositorios.UsuarioRepository;
 
@@ -48,20 +49,7 @@ public class PublicController {
 	
 	@Autowired
 	ReservaService reservaService;
-	/*
-	@GetMapping("/{idUserPage}/recurso")
-	public ResponseEntity<?> listarRecursosPorPageId(@PathVariable String idUserPage) {
-		try {
-			Usuario u = getUserByPageId(idUserPage);
-			ApiResponse<List<Recurso>> resp = recursoService.listarRecurso(u);
-			if(resp.isSuccess()) {
-				return ResponseEntity.ok(resp.getData());
-			}
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp.getMessage());
-		}catch(Exception e) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: "+e.getMessage());
-		}
-	}*/
+	
 	
 	@GetMapping("/{idUserPage}/asignacion")
 	public ResponseEntity<?> listarAsignacionesPorPageId(@PathVariable String idUserPage) {
@@ -107,6 +95,30 @@ public class PublicController {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: "+e.getMessage());
 		}
 	}
+	
+	
+	@GetMapping("/{idUserPage}/reservas/{idAsignacion}/{fecha}/disponibles")
+	public ResponseEntity<?> listarTurnosDisponibles(@PathVariable String idUserPage,@PathVariable Long idAsignacion,@PathVariable String fecha){
+		try {
+			ApiResponse<AsignacionRecursoTipoTurno> respAsig = asignacionService.obtenerPorId(idAsignacion);
+			if(respAsig.isSuccess()) {
+				if(respAsig.getData().getRecurso().getUsuario()==getUserByPageId(idUserPage) && 
+						respAsig.getData().getTipoTurno().getUsuario()==getUserByPageId(idUserPage)) {
+					DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+			        LocalDate date = LocalDate.parse(fecha, dateFormatter);
+					List<TurnoDTO> respTurnos = reservaService.crearTurnos(respAsig.getData(), date);
+					return ResponseEntity.ok(respTurnos);
+				}
+				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario no autorizado.");
+			}
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(respAsig.getMessage());
+		}catch(Exception e){
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: "+e.getMessage());
+		}
+	}
+	
+	
+	
 	
 	
 	private Usuario getUserByPageId(String url){
