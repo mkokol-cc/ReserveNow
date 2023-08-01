@@ -2,6 +2,7 @@ package com.sistema.examenes.nuevo.controladores;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -107,6 +108,35 @@ public class PublicController {
 					DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 			        LocalDate date = LocalDate.parse(fecha, dateFormatter);
 					List<TurnoDTO> respTurnos = reservaService.crearTurnos(respAsig.getData(), date);
+					return ResponseEntity.ok(respTurnos);
+				}
+				//System.out.println("Voy a devolver 401");
+				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario no autorizado.");
+			}
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(respAsig.getMessage());
+		}catch(Exception e){
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: "+e.getMessage());
+		}
+	}
+	
+	
+	@GetMapping("/{idUserPage}/reservas/{idAsignacion}/{fechaDesde}/{fechaHasta}/disponibles")
+	public ResponseEntity<?> listarTurnosDisponibles(@PathVariable String idUserPage,
+			@PathVariable Long idAsignacion,
+			@PathVariable String fechaDesde,
+			@PathVariable String fechaHasta){
+		try {
+			ApiResponse<AsignacionRecursoTipoTurno> respAsig = asignacionService.obtenerPorId(idAsignacion);
+			if(respAsig.isSuccess()) {
+				if(respAsig.getData().getRecurso().getUsuario()==getUserByPageId(idUserPage) && 
+						respAsig.getData().getTipoTurno().getUsuario()==getUserByPageId(idUserPage)) {
+					List<TurnoDTO> respTurnos = new ArrayList<>();
+					DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+			        LocalDate desde = LocalDate.parse(fechaDesde, dateFormatter);
+			        LocalDate hasta = LocalDate.parse(fechaHasta, dateFormatter);
+			        for (LocalDate fecha = desde; !fecha.isAfter(hasta); fecha = fecha.plusDays(1)) {
+			        	respTurnos.addAll(reservaService.crearTurnos(respAsig.getData(), fecha));
+			        }
 					return ResponseEntity.ok(respTurnos);
 				}
 				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario no autorizado.");

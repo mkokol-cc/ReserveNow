@@ -20,6 +20,7 @@ import javax.persistence.Table;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Table(name = "AsignacionRecursoTipoTurno")
@@ -37,6 +38,7 @@ public class AsignacionRecursoTipoTurno {
 
     @ManyToOne(cascade = CascadeType.DETACH)
     @JoinColumn(name = "id_tipoTurno")
+    @JsonManagedReference
     private TipoTurno tipoTurno;
     
     @OneToMany(mappedBy = "asignacion", fetch = FetchType.EAGER/*, cascade = CascadeType.ALL, orphanRemoval = true*/)
@@ -68,7 +70,7 @@ public class AsignacionRecursoTipoTurno {
 	public Set<Reserva> reservas;
 	
 	
-	@Column(name = "duracionEnMinutos",nullable=true)
+	@Column(name = "duracionEnMinutos",nullable=false)
 	private Integer duracionEnMinutos;
 	
 	@Column(name = "seniaCtvs",nullable=true)

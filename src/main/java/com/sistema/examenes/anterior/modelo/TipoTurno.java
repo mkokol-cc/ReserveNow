@@ -16,6 +16,7 @@ import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
@@ -29,7 +30,7 @@ import com.sistema.examenes.modelo.usuario.Usuario;
 @Entity
 @Table(name = "tipoTurno")
 @JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+//@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class TipoTurno {
 	@Id
@@ -46,8 +47,9 @@ public class TipoTurno {
 	@Column(name = "descripcion")
 	private String descripcion;
 	
-
+	//@JsonIgnore
 	@OneToMany(mappedBy = "tipoTurno", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+	@JsonBackReference
 	private List<AsignacionRecursoTipoTurno> recursosTipoTurno;
 
 	
