@@ -17,6 +17,7 @@ import javax.persistence.Table;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.sistema.examenes.anterior.modelo.Recurso;
 import com.sistema.examenes.anterior.modelo.Reservante;
@@ -71,7 +72,8 @@ public class Usuario implements UserDetails {
     private List<Pago> pagos;
 
     @OneToMany(mappedBy = "usuario", fetch = FetchType.EAGER)
-    @JsonManagedReference
+    //@JsonManagedReference
+    @JsonIgnore
     private List<Recurso> recursos;
 
     @OneToMany(mappedBy = "usuario", fetch = FetchType.LAZY)

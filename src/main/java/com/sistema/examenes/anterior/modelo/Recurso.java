@@ -19,9 +19,10 @@ import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.sistema.examenes.modelo.usuario.Usuario;
 
 /**
@@ -33,7 +34,7 @@ import com.sistema.examenes.modelo.usuario.Usuario;
 @Entity
 @Table(name = "recurso")
 @JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
-//@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "id")
+@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "id")
 public class Recurso {
 	
 	@Id
@@ -65,7 +66,8 @@ public class Recurso {
 	//RELACIONADO CON EL DUEÑO
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "usuario", referencedColumnName = "id", nullable = false, unique = false)
-	@JsonBackReference
+	//@JsonBackReference
+	@JsonIgnore
     private Usuario usuario;
 	
 	public Recurso(){
