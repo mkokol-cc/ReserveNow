@@ -34,7 +34,7 @@ import com.sistema.examenes.modelo.usuario.Usuario;
 @Entity
 @Table(name = "recurso")
 @JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
-@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "id")
+//@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "id")
 public class Recurso {
 	
 	@Id

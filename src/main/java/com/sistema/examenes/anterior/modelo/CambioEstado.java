@@ -1,9 +1,7 @@
 package com.sistema.examenes.anterior.modelo;
 
-import java.sql.Time;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -16,6 +14,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "cambioEstado")
@@ -44,7 +43,7 @@ public class CambioEstado {
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "reserva", referencedColumnName = "id", nullable = false)
-	//@JsonManagedReference
+	@JsonIgnore
 	private Reserva reserva;
 
 	public Long getId() {

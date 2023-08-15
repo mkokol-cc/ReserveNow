@@ -18,8 +18,10 @@ import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 /**
  * @author MATIAS
@@ -61,14 +63,14 @@ public class Reserva {
 	
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "asignacionTipoTurno", referencedColumnName = "id", nullable = false, unique = false)
-	@JsonManagedReference
+	//@JsonManagedReference
 	//@JsonBackReference
 	private AsignacionRecursoTipoTurno asignacionTipoTurno;
 	
 	
 	@OneToMany(mappedBy="reserva")
 	@Column(name = "cambioEstado",nullable=true)
-	@JsonBackReference
+	//@JsonBackReference
 	//@JsonIgnore
 	//@JsonIdentityReference
 	public List<CambioEstado> cambioEstado;

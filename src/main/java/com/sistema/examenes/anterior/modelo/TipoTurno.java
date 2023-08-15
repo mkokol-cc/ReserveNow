@@ -19,6 +19,7 @@ import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.sistema.examenes.modelo.usuario.Usuario;
 
@@ -47,16 +48,19 @@ public class TipoTurno {
 	@Column(name = "descripcion")
 	private String descripcion;
 	
-	//@JsonIgnore
+
 	@OneToMany(mappedBy = "tipoTurno", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-	@JsonBackReference
+	//@JsonBackReference
+	//@JsonManagedReference
+	@JsonIgnore
 	private List<AsignacionRecursoTipoTurno> recursosTipoTurno;
 
 	
 	//RELACIONADO CON EL DUEÑO
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "usuario", referencedColumnName = "id", nullable = false, unique = false)
-	@JsonBackReference
+	//@JsonBackReference
+	@JsonIgnore
     private Usuario usuario;
 	
 	

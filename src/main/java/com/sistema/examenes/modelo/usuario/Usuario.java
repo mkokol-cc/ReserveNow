@@ -77,7 +77,8 @@ public class Usuario implements UserDetails {
     private List<Recurso> recursos;
 
     @OneToMany(mappedBy = "usuario", fetch = FetchType.LAZY)
-    @JsonManagedReference
+    //@JsonManagedReference
+    @JsonIgnore
     private List<TipoTurno> tiposDeTurno;
     
     @OneToMany(mappedBy = "usuario", fetch = FetchType.LAZY)

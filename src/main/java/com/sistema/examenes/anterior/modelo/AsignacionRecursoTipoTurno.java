@@ -17,10 +17,12 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 @Entity
 @Table(name = "AsignacionRecursoTipoTurno")
@@ -38,15 +40,16 @@ public class AsignacionRecursoTipoTurno {
 
     @ManyToOne(cascade = CascadeType.DETACH)
     @JoinColumn(name = "id_tipoTurno")
-    @JsonManagedReference
+    //@JsonManagedReference
+    //@JsonBackReference
     private TipoTurno tipoTurno;
     
     @OneToMany(mappedBy = "asignacion", fetch = FetchType.EAGER/*, cascade = CascadeType.ALL, orphanRemoval = true*/)
-    //@JsonManagedReference
+    @JsonIgnore
     private Set<Horario> horarios = new HashSet<>();
 	
     @OneToMany(mappedBy = "asignacion", fetch = FetchType.EAGER/*, cascade = CascadeType.ALL, orphanRemoval = true*/)
-    //@JsonManagedReference
+    @JsonIgnore
 	private Set<HorarioEspecial> horariosEspeciales = new HashSet<>();
 
 	@Column(name = "cantidadConcurrencia",nullable=false)
@@ -60,13 +63,14 @@ public class AsignacionRecursoTipoTurno {
 	@JoinTable(name = "asignacion_recurso_tipo_turno_simultaneo",
 	    joinColumns = @JoinColumn(name = "id_asignacion_recurso_tipo_turno"),
 	    inverseJoinColumns = @JoinColumn(name = "id_asignacion_recurso_tipo_turno_simultaneo"))
+	@JsonIgnore
 	private Set<AsignacionRecursoTipoTurno> simultaneos = new HashSet<>();//un recurso especifico puede tener tipos de turnos que sean simultaneos
 
-	@OneToMany(mappedBy="asignacionTipoTurno"/*, orphanRemoval = true*/)
+	@OneToMany(mappedBy="asignacionTipoTurno")
 	@Column(name = "reservas",nullable=true)
-	//@JsonIgnore
+	@JsonIgnore
 	//@JsonManagedReference
-	@JsonBackReference
+	//@JsonBackReference
 	public Set<Reserva> reservas;
 	
 	
