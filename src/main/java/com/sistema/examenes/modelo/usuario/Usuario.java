@@ -13,6 +13,11 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -34,11 +39,33 @@ public class Usuario implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotNull(message = "Debes ingresar el email.")
+    @NotBlank(message = "El email no puede estar en blanco.")
+    @Email(message = "El email debe ser válido.")
     private String email;
+    
+    @NotNull(message = "Debes ingresar la contraseña.")
+    @NotBlank(message = "La contraseña no puede estar en blanco.")
+    @Size(min = 8, max = 24, message = "La contraseña debe tener entre 8 y 24 caracteres.")
     private String password;
+    
+    @NotNull(message = "Debes ingresar el nombre.")
+    @NotBlank(message = "El nombre no puede estar en blanco.")
+    @Size(min = 2, max = 50, message = "El nombre debe tener entre 2 y 50 caracteres.")
     private String nombre;
+    
+    @NotNull(message = "Debes ingresar el apellido.")
+    @NotBlank(message = "El apellido no puede estar en blanco.")
+    @Size(min = 2, max = 50, message = "El apellido debe tener entre 2 y 50 caracteres.")
     private String apellido;
+    
+    @NotNull(message = "Debes ingresar el DNI.")
+    @NotBlank(message = "El DNI no puede estar en blanco.")
     private String dni;
+    
+    @NotNull(message = "Debes ingresar el telefono.")
+    @NotBlank(message = "El telefono no puede estar en blanco.")
+    @Pattern(regexp = "^(\\+\\d{1,3}[- ]?)?\\d{3,14}$", message = "El número de teléfono esta en formato incorrecto.")
     private String telefono;
     private boolean enabled = true;
     private boolean emailVerificado = false;
@@ -53,6 +80,11 @@ public class Usuario implements UserDetails {
     
     private boolean autopago;
     private boolean deshabilitarAutopagoSiCambiaElPrecio;
+    
+    //CONFIGURACION
+    private boolean requiereReservanteConDni;
+    private boolean requiereReservanteConTelefono;
+    private boolean requiereReservanteConNombreYApellido;
     
     @Column(unique = true, nullable = true)
     private String dbUrl;
@@ -354,7 +386,63 @@ public class Usuario implements UserDetails {
 	public void setClientes(List<Reservante> clientes) {
 		this.clientes = clientes;
 	}
-    
+
+	public boolean isRequiereReservanteConDni() {
+		return requiereReservanteConDni;
+	}
+
+	public void setRequiereReservanteConDni(boolean requiereReservanteConDni) {
+		this.requiereReservanteConDni = requiereReservanteConDni;
+	}
+
+	public boolean isRequiereReservanteConTelefono() {
+		return requiereReservanteConTelefono;
+	}
+
+	public void setRequiereReservanteConTelefono(boolean requiereReservanteConTelefono) {
+		this.requiereReservanteConTelefono = requiereReservanteConTelefono;
+	}
+
+	public boolean isRequiereReservanteConNombreYApellido() {
+		return requiereReservanteConNombreYApellido;
+	}
+
+	public void setRequiereReservanteConNombreYApellido(boolean requiereReservanteConNombreYApellido) {
+		this.requiereReservanteConNombreYApellido = requiereReservanteConNombreYApellido;
+	}
+	
+	//VALIDACIONES
+	
+	/*
+	 *     private String email;
+    private String password;
+    private String nombre;
+    private String apellido;
+    private String dni;
+    private String telefono;*/
+	
+	public boolean tieneLosDatosMinimos() {
+		return (this.nombre != null && this.apellido != null && this.dni != null 
+				&& this.telefono != null && this.email != null && this.password != null);
+	}
+	
+	public boolean sonValidosLosDatos() {
+		return ( validarNombre() && validarDni() &&  validarPassword());
+	}
+	
+
+	private boolean validarDni() {
+        return (!this.dni.isBlank() && !this.dni.isEmpty() && this.dni != null);
+	}
+	
+	private boolean validarNombre() {
+		return (this.nombre != null && this.apellido != null && !this.nombre.isBlank() && !this.apellido.isBlank());
+	}
+	
+
+    private boolean validarPassword() {
+    	return (this.password.length()>7 && this.password.length()<25);
+    }
 	
 	
 }

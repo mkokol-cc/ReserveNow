@@ -5,6 +5,8 @@ package com.sistema.examenes.anterior.modelo;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -15,12 +17,13 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.validation.constraints.AssertFalse;
+import javax.validation.constraints.AssertTrue;
+import javax.validation.constraints.Future;
+import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 /**
  * @author MATIAS
@@ -42,9 +45,12 @@ public class HorarioEspecial {
 	@Column(name = "hasta", nullable=true)
 	private LocalTime hasta;
 	
+	@NotNull(message = "Debes ingresar si estará cerrado.")
 	@Column(name = "cerrado")
 	private boolean cerrado;
 	
+    @NotNull(message = "Debes ingresar una fecha.")
+    @Future(message = "La fecha debe ser en el futuro.")
 	@Column(name = "fecha",nullable = false)
 	@JsonFormat(pattern="yyyy-MM-dd")
 	private LocalDate fecha;
@@ -155,4 +161,68 @@ public class HorarioEspecial {
 	public void finalize() throws Throwable {
 
 	}
+	
+	//VALIDACIONES
+	@AssertTrue(message = "La hora desde debe ser mayor que la hora hasta.")
+	private boolean horaDesdeMenorQueHoraHasta() {
+		if(!this.cerrado) {
+			return this.desde.isBefore(this.hasta);	
+		}
+		return true;
+	}
+	
+	@AssertTrue(message = "La fecha debe ser mayor a la actual.")
+	private boolean validarFecha() {
+		return (this.fecha.isAfter(LocalDate.now()));
+	}
+	
+	@AssertTrue(message = "El horario debe estar asociado a un recurso o a una asignacion.")
+	private boolean estaAsociado() {
+		return (this.asignacion != null || this.recurso != null) 
+				&& !(this.asignacion != null && this.recurso != null);
+	}
+	
+	@AssertFalse(message = "El horario se pisa con otros horarios ya registrados.")
+	private boolean sePisaConAlgunHorarioRegistrado() {
+		Set<HorarioEspecial> horarios = this.asignacion != null ? this.asignacion.getHorariosEspeciales() 
+				: this.recurso.getHorariosEspeciales();
+		return sePisaConAlgunoDeEstos(horarios);
+	}
+	
+	
+	
+	public boolean tieneLosDatosMinimos() {
+		if(this.fecha != null) {
+			if(!this.cerrado) {
+				if(this.desde == null || this.hasta == null) {
+					return false;
+				}
+			}
+			return true;
+		}
+		return false;
+	}
+	
+	public boolean sonValidosLosDatos() {
+		return validarHorarios() && validarFecha();
+	}
+	
+	public boolean sePisaConAlgunoDeEstos(Set<HorarioEspecial> horarios) {
+		boolean sePisa = false;
+		for(HorarioEspecial h : horarios) {
+			if(this.fecha.isEqual(h.getFecha())) {
+				sePisa = true;
+			}
+		}
+		return sePisa;
+	}
+	
+	private boolean validarHorarios(){
+		if(!this.cerrado) {
+			return this.desde.isBefore(this.hasta);	
+		}
+		return true;
+	}
+	
+
 }//end Horario

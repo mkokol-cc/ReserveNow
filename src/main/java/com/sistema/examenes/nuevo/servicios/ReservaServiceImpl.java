@@ -51,20 +51,14 @@ public class ReservaServiceImpl implements ReservaService{
 	
 	
 	@Override
-	public ApiResponse<Reserva> guardarReserva(Reserva reserva, long idUsuario) {
+	public ApiResponse<Reserva> guardarReserva(Reserva reserva) {
         try {
-        	ApiResponse<Reserva> datosObligResponse = setDatosObligatorios(reserva, idUsuario);
-        	if(datosObligResponse.isSuccess()) {
-        		ApiResponse<Reserva> horarioResponse = setHorariosReserva(reserva);
-        		if(horarioResponse.isSuccess()) {
-        			Reserva guardado = reservaRepo.save(reserva);
-        			return new ApiResponse<>(true,"",guardado);	
-        		}else {
-        			return new ApiResponse<Reserva>(false,horarioResponse.getMessage(),null);
-        		}
-        	}else {
-        		return new ApiResponse<>(false,"Datos Erroneos: "+datosObligResponse.getMessage(),null);
+        	if(reserva.tieneLosDatosMinimos() && reserva.sonValidosLosDatos()) {
+        		Reserva guardado = reservaRepo.save(reserva);
+    			return guardado!=null ? new ApiResponse<>(true,"",guardado) : 
+    				new ApiResponse<>(false,"Error al guardar la reserva.",null);	
         	}
+        	return new ApiResponse<>(false,"Datos inválidos.",null);
         } catch (Exception e) {
         	return new ApiResponse<>(false,e.getMessage(),null);
         }
@@ -72,7 +66,8 @@ public class ReservaServiceImpl implements ReservaService{
 	
 
 	@Override
-	public ApiResponse<Reserva> editarReserva(Reserva r) {
+	public ApiResponse<Reserva> editarReserva(Reserva r, long idUsuario) {
+		
 		//get reserva por id
 		Reserva reservaAEditar = reservaRepo.getById(r.getId());
 		//setear todos los datos que no se pueden cambiar

@@ -19,14 +19,14 @@ public class TipoTurnoServiceImpl implements TipoTurnoService{
 	@Override
 	public ApiResponse<TipoTurno> guardarTipoTurno(TipoTurno tipoTurno) {
 		try {
-			if(tipoTurno.getNombre().trim().equals("")) {
-				return new ApiResponse<>(false,"El campo NOMBRE es obligatorio para guardar el Tipo de Turno",null);
+			if(tipoTurno.sonValidosLosDatos() && tipoTurno.tieneLosDatosMinimos()) {
+				TipoTurno t = tipoTurnoRepo.save(tipoTurno);
+				if(t!=null) {
+					return new ApiResponse<>(true,"",t);
+				}
+				return new ApiResponse<>(false,"Error al guardar el Tipo de Turno",null);
 			}
-			TipoTurno t = tipoTurnoRepo.save(tipoTurno);
-			if(t!=null) {
-				return new ApiResponse<>(true,"",t);
-			}
-			return new ApiResponse<>(false,"Error al cargar el Tipo de Turno",null);
+			return new ApiResponse<>(false,"Datos inválidos",null);
 		}catch(Exception e) {
 			return new ApiResponse<>(false,e.getMessage(),null);
 		}
@@ -35,23 +35,12 @@ public class TipoTurnoServiceImpl implements TipoTurnoService{
 	@Override
 	public ApiResponse<TipoTurno> editarTipoTurno(TipoTurno tipoTurno, long idUsuario) {
 		try {
-			if(tipoTurno.getNombre().trim().equals("")) {
-				return new ApiResponse<>(false,"El campo NOMBRE es obligatorio para guardar el Tipo de Turno",null);
+			ApiResponse<TipoTurno> response = obtenerTipoTurnoPorId(tipoTurno.getId());
+			if(response.isSuccess()) {
+				return (response.getData().getUsuario().getId()==idUsuario ? guardarTipoTurno(tipoTurno) 
+						: new ApiResponse<>(false,"Usuario no autorizado",null));
 			}
-			TipoTurno t = tipoTurnoRepo.getById(tipoTurno.getId());
-			if(t!=null) {
-				if(t.getUsuario().getId()!=idUsuario) {
-					return new ApiResponse<>(false,"Usuario no autorizado",null);
-				}
-				if(!tipoTurno.getNombre().trim().equals("")) {
-					t.setDescripcion(tipoTurno.getDescripcion());
-					t.setNombre(tipoTurno.getNombre());
-					return new ApiResponse<>(true,"",t);	
-				}else {
-					return new ApiResponse<>(false,"Error al cargar el Tipo de Turno, El nombre es obligatorio",null);
-				}
-			}
-			return new ApiResponse<>(false,"Error al cargar el Tipo de Turno",null);
+			return response;
 		}catch(Exception e) {
 			return new ApiResponse<>(false,e.getMessage(),null);
 		}
@@ -82,5 +71,7 @@ public class TipoTurnoServiceImpl implements TipoTurnoService{
 			return new ApiResponse<>(false,e.getMessage(),null);
 		}
 	}
+	
+	
 
 }

@@ -12,6 +12,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -31,16 +32,19 @@ public class CambioEstado {
 	@Column(name = "hora",nullable = false)
 	private LocalTime hora;
 	
+	@NotNull(message = "Debes ingresar el estado anterior.")
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "estadoAnterior", referencedColumnName = "id", nullable = false)
 	//@JsonManagedReference
 	private Estado estadoAnterior;
 	
+	@NotNull(message = "Debes ingresar el estado actual.")
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "estadoNuevo", referencedColumnName = "id", nullable = false)
 	//@JsonManagedReference
 	private Estado estadoNuevo;
 	
+	@NotNull(message = "Debes ingresar la reserva asociada.")
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "reserva", referencedColumnName = "id", nullable = false)
 	@JsonIgnore

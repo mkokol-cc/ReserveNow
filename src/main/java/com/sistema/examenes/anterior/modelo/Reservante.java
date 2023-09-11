@@ -2,6 +2,8 @@ package com.sistema.examenes.anterior.modelo;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.regex.Matcher;
+//import java.util.regex.Pattern;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -13,9 +15,12 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+import javax.validation.constraints.Pattern;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.sistema.examenes.modelo.usuario.Usuario;
 
 @Entity
@@ -26,15 +31,26 @@ public class Reservante {
 	@Column(name = "id")
 	private Long id;
 	
+	@NotNull(message = "Debes ingresar el nombre.")
+    @NotBlank(message = "El nombre no puede estar en blanco.")
+    @Size(min = 2, max = 50, message = "El nombre debe tener entre 2 y 50 caracteres.")
 	@Column(name="nombre")
 	private String nombre;
 	
-	@Column(name="apellido")
+	@NotNull(message = "Debes ingresar el apellido.")
+    @NotBlank(message = "El apellido no puede estar en blanco.")
+    @Size(min = 2, max = 50, message = "El apellido debe tener entre 2 y 50 caracteres.")
+    @Column(name = "apellido")
 	private String apellido;
 	
+	@NotNull(message = "Debes ingresar el DNI.")
+    @NotBlank(message = "El DNI no puede estar en blanco.")
 	@Column(name="dni")
 	private String dni;
 	
+	@NotNull(message = "Debes ingresar el telefono.")
+    @NotBlank(message = "El telefono no puede estar en blanco.")
+    @Pattern(regexp = "^(\\+\\d{1,3}[- ]?)?\\d{3,14}$", message = "El número de teléfono esta en formato incorrecto.")
 	@Column(name="telefono",unique=false)
 	private String telefono;
 	
@@ -47,6 +63,7 @@ public class Reservante {
     private Set<Reserva> reservas = new HashSet<>();
 	
 	//RELACIONADO CON EL DUEÑO
+	@NotNull(message = "El usuario no puede ser nulo.")
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "usuario", referencedColumnName = "id", nullable = false, unique = false)
 	@JsonBackReference
@@ -116,6 +133,43 @@ public class Reservante {
 		this.usuario = usuario;
 	}
 	
+	
+	//VALIDACIONES
+	
+	public boolean tieneLosDatosMinimos() {
+		if(this.dni == null && this.usuario.isRequiereReservanteConDni()) {
+			return false;
+		}
+		if((this.nombre == null || this.apellido == null || this.nombre.isBlank() || this.apellido.isBlank()) 
+				&& this.usuario.isRequiereReservanteConNombreYApellido()) {
+			return false;
+		}
+		if((this.telefono.isBlank() || this.telefono == null) 
+				&& this.usuario.isRequiereReservanteConTelefono()) {
+			return false;
+		}
+		return true;
+	}
+	
+	public boolean sonValidosLosDatos() {
+		return (this.usuario.isRequiereReservanteConTelefono() ? validarTelefono() : true);
+	}
+	
+	private boolean validarTelefono() {/*
+		String regex = "^(\\+\\d{1,3}[- ]?)?\\d{3,14}$";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(this.telefono);
+        return matcher.matches();*/
+        return true;
+	}
+	
+	private boolean validarDni() {
+        return (!this.dni.isBlank() && !this.dni.isEmpty() && this.dni != null);
+	}
+	
+	private boolean validarNombre() {
+		return (this.nombre != null && this.apellido != null && !this.nombre.isBlank() && !this.apellido.isBlank());
+	}
 	
 
 }

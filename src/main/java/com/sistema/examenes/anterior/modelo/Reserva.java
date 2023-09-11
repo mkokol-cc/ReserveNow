@@ -15,13 +15,11 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 /**
  * @author MATIAS
@@ -38,46 +36,43 @@ public class Reserva {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id",unique=true)
-	//@JsonIgnore
 	private Long id;
 	
 	@Column(name="tipoReserva")
 	private String tipoReserva;
 	
+	@NotNull(message = "La reserva debe tener un estado.")
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "estado", referencedColumnName = "id", nullable = false, unique = false)
-	//@JsonManagedReference
 	private Estado estado;
 	
+	@NotNull(message = "Debes ingresar la fecha.")
 	@Column(name = "fecha", nullable = false)
 	@JsonFormat(pattern = "yyyy-MM-dd")
 	private LocalDate fecha;
 
-	
+	@NotNull(message = "Debes ingresar la hora.")
 	@Column(name = "hora",nullable = false)
 	private LocalTime hora;
 	
+	@NotNull(message = "Debes ingresar la hora de fin.")
 	@Column(name = "horaFin",nullable = false)
 	private LocalTime horaFin;
 
-	
+	@NotNull(message = "Debes seleccionar un recurso y tipo de turno.")	
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "asignacionTipoTurno", referencedColumnName = "id", nullable = false, unique = false)
-	//@JsonManagedReference
-	//@JsonBackReference
 	private AsignacionRecursoTipoTurno asignacionTipoTurno;
 	
 	
 	@OneToMany(mappedBy="reserva")
 	@Column(name = "cambioEstado",nullable=true)
-	//@JsonBackReference
-	//@JsonIgnore
-	//@JsonIdentityReference
 	public List<CambioEstado> cambioEstado;
 	
 	@Column(name="nota")
 	private String nota;
 	
+	@NotNull(message = "Debes ingresar los datos de la persona que va a reservar.")	
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "reservante", referencedColumnName = "id", nullable = false, unique = false)
 	@JsonManagedReference
@@ -182,7 +177,38 @@ public class Reserva {
 	}
 	
 	
+	//VALIDACIONES
 
-
+	public boolean tieneLosDatosMinimos() {
+		if(this.fecha != null && this.asignacionTipoTurno != null && this.hora != null
+				&& this.reservante != null && this.horaFin != null && this.estado != null) {
+			return true;
+		}
+		return false;
+	}
+	
+	public boolean sonValidosLosDatos() {
+		return validarHorarios() && validarUsuario() && validarFecha();
+	}
+	
+	private boolean validarUsuario() {
+		return(this.asignacionTipoTurno.getRecurso().getUsuario() == this.reservante.getUsuario());
+	}
+	
+	private boolean validarHorarios(){
+		return (this.hora.isBefore(this.horaFin) || this.hora.equals(this.horaFin));
+	}
+	
+	private boolean validarFecha() {
+		if(this.fecha.isAfter(LocalDate.now())) {
+			return true;
+		}else {
+			return (this.fecha.equals(LocalDate.now()) ? this.hora.isBefore(LocalTime.now()) : false);
+		}
+	}
+	
+	private boolean validarHorarioDeTurno() {
+		for(Horario)
+	}
 	
 }//end Reserva

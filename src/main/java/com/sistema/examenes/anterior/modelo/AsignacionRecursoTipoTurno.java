@@ -16,13 +16,13 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 @Entity
 @Table(name = "AsignacionRecursoTipoTurno")
@@ -34,10 +34,12 @@ public class AsignacionRecursoTipoTurno {
     @Column(name = "id")
     private Long id;
 
+    @NotNull(message = "Debes seleccionar el recurso.")
     @ManyToOne(cascade = CascadeType.REMOVE)
     @JoinColumn(name = "id_recurso")
     private Recurso recurso;
 
+    @NotNull(message = "Debes seleccionar el tipo de turno.")
     @ManyToOne(cascade = CascadeType.DETACH)
     @JoinColumn(name = "id_tipoTurno")
     //@JsonManagedReference
@@ -52,6 +54,7 @@ public class AsignacionRecursoTipoTurno {
     @JsonIgnore
 	private Set<HorarioEspecial> horariosEspeciales = new HashSet<>();
 
+    @Min(value = 1, message = "La concurrencia debe ser de al menos 1 persona.")
 	@Column(name = "cantidadConcurrencia",nullable=false)
 	private int cantidadConcurrencia;
 	
@@ -73,16 +76,20 @@ public class AsignacionRecursoTipoTurno {
 	//@JsonBackReference
 	public Set<Reserva> reservas;
 	
-	
+	@Min(value = 1, message = "La duración debe ser al menos 1 minuto.")
+	@Max(value = 1440, message = "La duración no puede ser mayor de 1440 minutos (24 horas).")
 	@Column(name = "duracionEnMinutos",nullable=false)
 	private Integer duracionEnMinutos;
 	
+	@Min(value = 0, message = "La seña no puede ser negativa.")
 	@Column(name = "seniaCtvs",nullable=true)
 	private Integer seniaCtvos;
 	
+	@Min(value = 0, message = "El precio estimado desde no puede ser negativa.")
 	@Column(name = "precioEstimadoDesdeCtvos",nullable=true)
 	private Integer precioEstimadoDesdeCtvos;
 	
+	@Min(value = 0, message = "El precio estimado hasta no puede ser negativa.")
 	@Column(name = "precioEstimadoHastaCtvos",nullable=true)
 	private Integer precioEstimadoHastaCtvos;
 
@@ -190,5 +197,38 @@ public class AsignacionRecursoTipoTurno {
 		this.precioEstimadoHastaCtvos = precioEstimadoHastaCtvos;
 	}
 	
+	
+	//validar cantidadConcurrencia
+	
+	public boolean tieneLosDatosMinimos() {
+		return(this.tipoTurno!=null && this.recurso!=null);
+	}
+	
+	public boolean sonValidosLosDatos() {
+		return (validarConcurrencia() && validarDuracion() && validarPrecioEstimado() && validarSenia() && validarUsuarios());
+	}
+	
+	private boolean validarConcurrencia(){
+		return (getCantidadConcurrencia()>=0);
+	}
+	
+	private boolean validarDuracion(){
+		return (getDuracionEnMinutos()>0);
+	}
+	
+	private boolean validarUsuarios() {
+		return (this.recurso.getUsuario()==this.tipoTurno.getUsuario());
+	}
+	
+	private boolean validarPrecioEstimado() {
+		return (this.precioEstimadoDesdeCtvos != null && 
+				this.precioEstimadoHastaCtvos != null &&
+				this.precioEstimadoDesdeCtvos >= 0 &&
+				this.precioEstimadoDesdeCtvos <= this.precioEstimadoHastaCtvos);
+	}
+	
+	private boolean validarSenia() {
+		return (this.seniaCtvos == null && this.seniaCtvos >= 0);
+	}
 	
 }

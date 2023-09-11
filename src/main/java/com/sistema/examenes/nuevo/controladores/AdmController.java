@@ -1,8 +1,8 @@
 package com.sistema.examenes.nuevo.controladores;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+
+import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sistema.examenes.anterior.modelo.AsignacionRecursoTipoTurno;
@@ -93,152 +94,108 @@ public class AdmController {
 	
 	//CRUD RECURSO
 	@PostMapping("/recurso/add")
-	public ResponseEntity<?> guardarRecurso(@RequestBody Recurso recursoStr) throws JsonProcessingException {
-		try {
-			Usuario u = usuarioRepo.getById(getUserId());
-			recursoStr.setUsuario(u);
-			ApiResponse<Recurso> resp = recursoService.guardarRecurso(recursoStr);
-			if(resp.isSuccess()) {
-				return ResponseEntity.ok(resp.getData());
-			}
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp.getMessage());
-		}catch(Exception e) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: "+e.getMessage());
+	public ResponseEntity<?> guardarRecurso(@Valid @RequestBody Recurso recursoStr) throws JsonProcessingException {
+		ApiResponse<Recurso> resp = recursoService.guardarRecurso(recursoStr);
+		if(resp.isSuccess()) {
+			return new ResponseEntity<>("Se guardó correctamente el Recurso.", HttpStatus.CREATED);	
 		}
+		throw new ResponseStatusException(HttpStatus.BAD_REQUEST, resp.getMessage());
 	}
 
-	@PutMapping("/recurso/{idRecurso}/edit")
+	@PutMapping("/recurso/edit")
 	@Transactional
-	public ResponseEntity<?> editarRecurso(@PathVariable Long idRecurso,@RequestBody Recurso recursoStr) throws JsonProcessingException {
-		try {
-			ApiResponse<Recurso> resp = recursoService.editarRecurso(recursoStr, getUserId());
-			if(resp.isSuccess()) {
-				return ResponseEntity.ok(resp.getData());
-			}
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp.getMessage());
-		}catch(Exception e) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: "+e.getMessage());
+	public ResponseEntity<?> editarRecurso(@Valid @RequestBody Recurso recursoStr) throws JsonProcessingException {
+		ApiResponse<Recurso> resp = recursoService.editarRecurso(recursoStr, getUserId());
+		if(resp.isSuccess()) {
+			return new ResponseEntity<>("Se actualizó correctamente el Recurso.", HttpStatus.OK);
 		}
+		throw new ResponseStatusException(HttpStatus.BAD_REQUEST, resp.getMessage());
 	}
 	
 	@GetMapping("/recurso")
 	public ResponseEntity</*List<Recurso>*/?> listarRecursos(){
-		try {
-			ApiResponse<List<Recurso>> resp = recursoService.listarRecurso(usuarioRepo.getById(getUserId()));
-			if(resp.isSuccess()) {
-				return ResponseEntity.ok(resp.getData());
-			}
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp.getMessage());
-		}catch(Exception e) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: "+e.getMessage());
+		ApiResponse<List<Recurso>> resp = recursoService.listarRecurso(usuarioRepo.getById(getUserId()));
+		if(resp.isSuccess()) {
+			return ResponseEntity.ok(resp.getData());
 		}
+		throw new ResponseStatusException(HttpStatus.BAD_REQUEST, resp.getMessage());
 	}
 	
 	
 	//CRUD TIPO TURNO
 	@PostMapping("/tipo-turno/add")
-	public ResponseEntity</*TipoTurno*/?> guardarTipoTurno(@RequestBody TipoTurno tipoTurnoStr) throws JsonProcessingException {
-		try {
-			tipoTurnoStr.setUsuario(usuarioRepo.getById(getUserId()));
-			ApiResponse<TipoTurno> resp = tipoTurnoService.guardarTipoTurno(tipoTurnoStr);
-			if(resp.isSuccess()) {
-				return ResponseEntity.ok(resp.getData());
-			}
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp.getMessage());
-		}catch(Exception e) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: "+e.getMessage());
+	public ResponseEntity</*TipoTurno*/?> guardarTipoTurno(@Valid @RequestBody TipoTurno tipoTurnoStr) throws JsonProcessingException {
+		ApiResponse<TipoTurno> resp = tipoTurnoService.guardarTipoTurno(tipoTurnoStr);
+		if(resp.isSuccess()) {
+			return new ResponseEntity<>("Se guardó correctamente el Tipo de Turno.", HttpStatus.CREATED);	
 		}
+		throw new ResponseStatusException(HttpStatus.BAD_REQUEST, resp.getMessage());
 	}
 
-	@PutMapping("/tipo-turno/{idTipoTurno}/edit")
-	public ResponseEntity<?> editarTipoTurno(@PathVariable Long idTipoTurno,@RequestBody TipoTurno tipoTurnoStr) throws JsonProcessingException {
-		try {
-			ApiResponse<TipoTurno> resp = tipoTurnoService.editarTipoTurno(tipoTurnoStr, getUserId());
-			if(resp.isSuccess()) {
-				return ResponseEntity.ok(resp.getData());
-			}
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp.getMessage());
-		}catch(Exception e) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: "+e.getMessage());
+	@PutMapping("/tipo-turno/edit")
+	public ResponseEntity<?> editarTipoTurno(@Valid @RequestBody TipoTurno tipoTurnoStr) throws JsonProcessingException {
+		ApiResponse<TipoTurno> resp = tipoTurnoService.editarTipoTurno(tipoTurnoStr,getUserId());
+		if(resp.isSuccess()) {
+			return new ResponseEntity<>("Se editó correctamente el Tipo de Turno.", HttpStatus.CREATED);	
 		}
+		throw new ResponseStatusException(HttpStatus.BAD_REQUEST, resp.getMessage());
 	}
 	
 	@GetMapping("/tipo-turno")
 	public ResponseEntity<?/*List<TipoTurno>*/> listarTipoTurno(){
-		try {
-			ApiResponse<List<TipoTurno>> resp = tipoTurnoService.listarTipoTurnoDeUsuario(usuarioRepo.getById(getUserId()));
-			if(resp.isSuccess()) {
-				return ResponseEntity.ok(resp.getData());
-			}
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp.getMessage());
-		}catch(Exception e) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: "+e.getMessage());
+		ApiResponse<List<TipoTurno>> resp = tipoTurnoService.listarTipoTurnoDeUsuario(usuarioRepo.getById(getUserId()));
+		if(resp.isSuccess()) {
+			return ResponseEntity.ok(resp.getData());
 		}
+		throw new ResponseStatusException(HttpStatus.BAD_REQUEST, resp.getMessage());
 	}
 	
 	
 	//CRUD ASIGNACION
 	@PostMapping("/asignacion/{idTipoTurno}/{idRecurso}")
 	public ResponseEntity<?> guardarAsignacion(@PathVariable Long idTipoTurno,@PathVariable Long idRecurso) throws JsonProcessingException {
-		try {
-			ApiResponse<AsignacionRecursoTipoTurno> resp = asignacionService.guardarAsignacion(idTipoTurno, idRecurso, getUserId());
-			if(resp.isSuccess()) {
-				return ResponseEntity.ok(resp.getData());
-			}
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp.getMessage());
-		}catch(Exception e) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: "+e.getMessage());
+		ApiResponse<AsignacionRecursoTipoTurno> resp = asignacionService.guardarAsignacion(idTipoTurno, idRecurso, getUserId());
+		if(resp.isSuccess()) {
+			return ResponseEntity.ok(resp.getData());
 		}
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp.getMessage());
 	}
 	
 	@GetMapping("/asignacion")
 	public ResponseEntity<?> listarAsignaciones(){
-		try {
-			ApiResponse<List<AsignacionRecursoTipoTurno>> resp = asignacionService.listarAsignacionPorUsuario(getUserId());
-			if(resp.isSuccess()) {
-				return ResponseEntity.ok(resp.getData());
-			}
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp.getMessage());
-		}catch(Exception e) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: "+e.getMessage());
+		ApiResponse<List<AsignacionRecursoTipoTurno>> resp = asignacionService.listarAsignacionPorUsuario(getUserId());
+		if(resp.isSuccess()) {
+			return ResponseEntity.ok(resp.getData());
 		}
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp.getMessage());
 	}
 	
-	@PutMapping("/asignacion/{idAsig}/edit")
+	@PutMapping("/asignacion/edit")
 	@Transactional
-	public ResponseEntity<?> editarAsignacion(@PathVariable Long idAsig ,
-			@RequestBody AsignacionRecursoTipoTurno asigStr) throws JsonProcessingException {
-		try {
-			ApiResponse<AsignacionRecursoTipoTurno> resp = asignacionService.editarAsignacion(asigStr, getUserId());
-			if(resp.isSuccess()) {
-				return ResponseEntity.ok(resp.getData());
-			}
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp.getMessage());
-		}catch(Exception e) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: "+e.getMessage());
+	public ResponseEntity<?> editarAsignacion(@Valid @RequestBody AsignacionRecursoTipoTurno asigStr) throws JsonProcessingException {
+		ApiResponse<AsignacionRecursoTipoTurno> resp = asignacionService.editarAsignacion(asigStr, getUserId());
+		if(resp.isSuccess()) {
+			return ResponseEntity.ok(resp.getData());
 		}
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp.getMessage());
 	}
 	
 	
 	//CRUD RESERVAS
 	@PostMapping("/reservas/{idAsignacion}/add")
-	public ResponseEntity<?> registrarReserva(@PathVariable Long idAsignacion,@RequestBody Reserva reservaStr) throws JsonProcessingException {
-		try {
-			Reservante r = reservaStr.getReservante();
-			Usuario u = usuarioRepo.getById(getUserId());
-			r.setUsuario(u);
-			ApiResponse<Reserva> resp = reservaService.guardarReserva(reservaStr,getUserId());
-			if(resp.isSuccess()) {
-				return ResponseEntity.ok(resp.getData());
-			}
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp.getMessage());
-		}catch(Exception e){
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: "+e.getMessage());
+	public ResponseEntity<?> registrarReserva(@PathVariable Long idAsignacion,@Valid @RequestBody Reserva reservaStr) throws JsonProcessingException {
+		Reservante r = reservaStr.getReservante();
+		Usuario u = usuarioRepo.getById(getUserId());
+		r.setUsuario(u);
+		ApiResponse<Reserva> resp = reservaService.guardarReserva(reservaStr,getUserId());
+		if(resp.isSuccess()) {
+			return ResponseEntity.ok(resp.getData());
 		}
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp.getMessage());
 	}
 	
 	@PutMapping("/reservas/{idReserva}/edit")
-	public ResponseEntity<?> editarReserva(@PathVariable Long idReserva,@RequestBody Reserva reservaStr) throws JsonProcessingException {
+	public ResponseEntity<?> editarReserva(@PathVariable Long idReserva,@Valid @RequestBody Reserva reservaStr) throws JsonProcessingException {
 		try {
 			reservaStr.setId(idReserva);
 			ApiResponse<Reserva> resp = reservaService.editarReserva(reservaStr);
@@ -352,7 +309,7 @@ public class AdmController {
 	}
 	
 	@PutMapping("/clientes/{idCliente}/edit")
-	public ResponseEntity<?> editarCliente(@PathVariable Long idCliente,@RequestBody Reservante reservanteStr) throws JsonProcessingException {
+	public ResponseEntity<?> editarCliente(@PathVariable Long idCliente,@Valid @RequestBody Reservante reservanteStr) throws JsonProcessingException {
 		try {
 			ApiResponse<Reservante> resp = reservanteService.editarReservante(reservanteStr, getUserId());
 			if(resp.isSuccess()) {

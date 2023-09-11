@@ -14,15 +14,15 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.sistema.examenes.modelo.usuario.Usuario;
 
 /**
@@ -42,6 +42,10 @@ public class Recurso {
 	private Long id;
 	
 	private String descripcion;
+	
+	@NotNull(message = "Debes ingresar el nombre.")
+    @NotBlank(message = "El nombre no puede estar en blanco.")
+	@Size(min=2,max=30, message = "El nombre debe tener entre 2 y 30 caracteres.")
 	private String nombre;
 	
 	@OneToMany(mappedBy = "recurso"/*, cascade = CascadeType.ALL, orphanRemoval = true*/)
@@ -64,6 +68,7 @@ public class Recurso {
 	private boolean eliminado;
 
 	//RELACIONADO CON EL DUEÑO
+	@NotNull(message = "El usuario no puede ser nulo.")
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "usuario", referencedColumnName = "id", nullable = false, unique = false)
 	//@JsonBackReference
@@ -150,5 +155,25 @@ public class Recurso {
 
 	public void finalize() throws Throwable {
 
+	}
+	
+	//validaciones
+	
+	public boolean tieneLosDatosMinimos() {
+		if(this.nombre != null && this.usuario != null) {
+			return true;
+		}
+		return false;
+	}
+	
+	public boolean sonValidosLosDatos() {
+		return validarNombre();
+	}
+	
+	private boolean validarNombre(){
+		if(this.nombre.length()>=2 && this.nombre.length()<=30) {
+			return true;
+		}
+		return false;
 	}
 }//end Recurso

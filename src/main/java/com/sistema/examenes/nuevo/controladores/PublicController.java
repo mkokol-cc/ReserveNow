@@ -82,7 +82,7 @@ public class PublicController {
 	
 	
 	@PostMapping("/{idUserPage}/reservas/{idAsignacion}/add")
-	public ResponseEntity<?> registrarReserva(@PathVariable String idUserPage,@PathVariable Long idAsignacion,@RequestBody Reserva reservaStr) throws JsonProcessingException {
+	public ResponseEntity<?> registrarReserva(@PathVariable String idUserPage,@PathVariable Long idAsignacion,@Valid @RequestBody Reserva reservaStr) throws JsonProcessingException {
 		try {
 			Reservante r = reservaStr.getReservante();
 			Usuario u = getUserByPageId(idUserPage);

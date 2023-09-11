@@ -1,7 +1,8 @@
 package com.sistema.examenes.anterior.modelo;
 
-import java.sql.Time;
 import java.time.LocalTime;
+import java.util.List;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -12,8 +13,10 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.validation.constraints.AssertFalse;
+import javax.validation.constraints.AssertTrue;
+import javax.validation.constraints.NotNull;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
@@ -31,12 +34,15 @@ public class Horario {
 	@Column(name = "id")
 	private Long id;
 	
+	@NotNull(message = "Debes ingresar la hora de inicio (desde).")
 	@Column(name = "desde", nullable=false)
 	private LocalTime desde;
 	
+	@NotNull(message = "Debes ingresar la hora de inicio (hasta).")
 	@Column(name = "hasta", nullable=false)
 	private LocalTime hasta;
 	
+	@NotNull(message = "Debes ingresar el día.")
 	@Column(name = "dia", nullable=false)
 	private Dias dia;
 	
@@ -111,5 +117,64 @@ public class Horario {
 
 	public void finalize() throws Throwable {
 
+	}
+	
+	
+	//VALIDACIONES
+	
+	@AssertTrue(message = "La hora desde debe ser mayor que la hora hasta.")
+	private boolean horaDesdeMenorQueHoraHasta() {
+		return this.desde.isBefore(this.hasta);
+	}
+	
+	@AssertTrue(message = "El horario debe estar asociado a un recurso o a una asignacion.")
+	private boolean estaAsociado() {
+		return (this.asignacion != null || this.recurso != null) 
+				&& !(this.asignacion != null && this.recurso != null);
+	}
+	
+	@AssertFalse(message = "El horario se pisa con otros horarios ya registrados.")
+	private boolean sePisaConAlgunHorarioRegistrado() {
+		Set<Horario> horarios = this.asignacion != null ? this.asignacion.getHorarios() : this.recurso.getHorarios();
+		return sePisaConAlgunoDeEstos(horarios);
+	}
+	
+	
+	
+	public boolean sePisaConAlgunoDeEstos(Set<Horario> horarios) {
+		boolean sePisa = false;
+		for(Horario h : horarios) {
+			if(!(this.hasta.isBefore(h.getDesde()) || this.hasta.equals(h.getDesde())) 
+					|| !(this.desde.isAfter(h.getHasta()) || this.hasta.equals(h.getDesde())) ) {
+				sePisa = true;
+			}
+		}
+		return sePisa;
+	}
+	
+	public boolean tieneLosDatosMinimos() {
+		if(this.desde != null && this.hasta != null && this.dia != null) {
+			return true;
+		}
+		return false;
+	}
+	
+	public boolean sonValidosLosDatos() {
+		return validarHorarios();
+	}
+	
+	public boolean sePisaConAlgunoDeEstos(List<Horario> horarios) {
+		boolean sePisa = false;
+		for(Horario h : horarios) {
+			if(!(this.hasta.isBefore(h.getDesde()) || this.hasta.equals(h.getDesde())) 
+					|| !(this.desde.isAfter(h.getHasta()) || this.hasta.equals(h.getDesde())) ) {
+				sePisa = true;
+			}
+		}
+		return sePisa;
+	}
+	
+	private boolean validarHorarios(){
+		return this.desde.isBefore(this.hasta);
 	}
 }//end Horario
