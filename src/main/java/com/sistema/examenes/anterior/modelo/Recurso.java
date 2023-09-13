@@ -1,5 +1,8 @@
 package com.sistema.examenes.anterior.modelo;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -14,6 +17,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -68,7 +72,7 @@ public class Recurso {
 	private boolean eliminado;
 
 	//RELACIONADO CON EL DUEÑO
-	@NotNull(message = "El usuario no puede ser nulo.")
+	//@NotNull(message = "El usuario no puede ser nulo.")
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "usuario", referencedColumnName = "id", nullable = false, unique = false)
 	//@JsonBackReference
@@ -175,5 +179,20 @@ public class Recurso {
 			return true;
 		}
 		return false;
+	}
+	
+	
+	
+	
+	
+	
+
+	
+	public List<Reserva> obtenerReservasPorFecha(LocalDate fecha){
+		List<Reserva> reservas = new ArrayList<>();
+		for(AsignacionRecursoTipoTurno a : this.recursosTipoTurno) {
+			reservas.addAll(a.obtenerReservasPorFecha(fecha));
+		}
+		return reservas;
 	}
 }//end Recurso

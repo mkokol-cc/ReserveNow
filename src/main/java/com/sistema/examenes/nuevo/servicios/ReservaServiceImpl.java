@@ -286,4 +286,22 @@ public class ReservaServiceImpl implements ReservaService{
 	}
 	
 	
+	
+	
+	public ApiResponse<Reserva> nuevaReserva(Reserva reserva){
+		if(reserva.getReservante().isHabilitado()) {
+			List<LocalTime> horariosPosibles = reserva.getAsignacionTipoTurno().turnosParaLaFecha(reserva.getFecha());
+			//filtrar horarios ocupados
+		}else {
+			return new ApiResponse<Reserva>(false,"Usuario no habilitado para hacer reservas",null);
+		}
+		return new ApiResponse<Reserva>(false,"Usuario no habilitado para hacer reservas",null);
+	}
+	
+	private Dias localDateToDia(LocalDate fecha) {
+		Dias d = Dias.valueOf(fecha.getDayOfWeek().getDisplayName(TextStyle.FULL, new Locale("es", "ES")).toUpperCase());
+		return d;
+	}
+	
+	
 }

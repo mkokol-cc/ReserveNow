@@ -1,6 +1,12 @@
 package com.sistema.examenes.anterior.modelo;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.TextStyle;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -231,4 +237,66 @@ public class AsignacionRecursoTipoTurno {
 		return (this.seniaCtvos == null && this.seniaCtvos >= 0);
 	}
 	
+	
+	
+	
+	
+	
+	public List<LocalTime> turnosParaLaFecha(LocalDate fecha){
+		List<LocalTime> times = new ArrayList<>();
+		HorarioEspecial horarioEspecial = obtenerHorarioEspecialPorFecha(fecha);
+		for(Horario h : obtenerTurnosPorDia(fecha)) {
+			times.addAll(h.obtenerHorarioCadaXMinutos(this.duracionEnMinutos));
+		}
+		if(horarioEspecial != null) {
+			for(LocalTime t : times) {
+				if(t.isBefore(horarioEspecial.getDesde()) || 
+						t.plusMinutes(this.duracionEnMinutos).isAfter(horarioEspecial.getHasta())) {
+					times.remove(t);
+				}
+			}
+		}
+		return times;
+	}
+	
+	
+	private HorarioEspecial obtenerHorarioEspecialPorFecha(LocalDate fecha) {
+		for(HorarioEspecial he : this.horariosEspeciales) {
+			if(he.getFecha().isEqual(fecha)) {
+				return he; 
+			}
+		}
+		return null;
+	}
+	
+	private List<Horario> obtenerTurnosPorDia(LocalDate fecha) {
+		List<Horario> horarios = new ArrayList<>();
+		Dias d = Dias.valueOf(fecha.getDayOfWeek().getDisplayName(TextStyle.FULL, new Locale("es", "ES")).toUpperCase());
+		for(Horario h : this.horarios) {
+			if(h.getDia().equals(d)) {
+				horarios.add(h);
+			}
+		}
+		return horarios;
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	public List<Reserva> obtenerReservasPorFecha(LocalDate fecha){
+		List<Reserva> reservas = new ArrayList<>();
+		for(Reserva r : this.reservas) {
+			if(r.getFecha().isEqual(fecha)) {
+				reservas.add(r);
+			}
+		}
+		return reservas;
+	}
+	
+
 }

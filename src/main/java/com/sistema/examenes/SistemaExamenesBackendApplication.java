@@ -9,6 +9,7 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.mercadopago.MercadoPago;
+
 @SpringBootApplication
 @ComponentScan(basePackages = {"com.sistema.examenes"})
 public class SistemaExamenesBackendApplication implements CommandLineRunner {

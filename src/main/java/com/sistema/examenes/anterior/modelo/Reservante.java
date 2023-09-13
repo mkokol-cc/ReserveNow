@@ -21,6 +21,7 @@ import javax.validation.constraints.Size;
 import javax.validation.constraints.Pattern;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.sistema.examenes.modelo.usuario.Usuario;
 
 @Entity
@@ -66,7 +67,8 @@ public class Reservante {
 	@NotNull(message = "El usuario no puede ser nulo.")
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "usuario", referencedColumnName = "id", nullable = false, unique = false)
-	@JsonBackReference
+	//@JsonBackReference
+	//@JsonManagedReference
     private Usuario usuario;
 
 	public Long getId() {

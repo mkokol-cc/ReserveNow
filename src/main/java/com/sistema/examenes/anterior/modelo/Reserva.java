@@ -15,8 +15,10 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -41,7 +43,7 @@ public class Reserva {
 	@Column(name="tipoReserva")
 	private String tipoReserva;
 	
-	@NotNull(message = "La reserva debe tener un estado.")
+	//@NotNull(message = "La reserva debe tener un estado.") no lo pongo poque si es nueva reserva no tiene estado y se le asigna automaticamente el estado correspondiente
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "estado", referencedColumnName = "id", nullable = false, unique = false)
 	private Estado estado;
@@ -75,7 +77,8 @@ public class Reserva {
 	@NotNull(message = "Debes ingresar los datos de la persona que va a reservar.")	
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "reservante", referencedColumnName = "id", nullable = false, unique = false)
-	@JsonManagedReference
+	//@JsonManagedReference
+	@JsonBackReference
 	private Reservante reservante;
 	
 	public Reserva(){
@@ -206,9 +209,94 @@ public class Reserva {
 			return (this.fecha.equals(LocalDate.now()) ? this.hora.isBefore(LocalTime.now()) : false);
 		}
 	}
-	
+	/*
 	private boolean validarHorarioDeTurno() {
 		for(Horario)
+	}*/
+	
+	/*
+	 * PARA VALIDAR SI SE PUEDE RESERVAR
+	 * -EL RESERVANTE DEBE ESTAR PERMITIDO
+	 * -LOS HORARIOSESTAN CORRECTOS 
+	 * -LA CONCURRENCIA ES CORRECTA
+	 * */
+	@AssertTrue(message="Se intento reservar para un dia y hora que ya pasaron.")
+	private boolean validarFechaYHoraFuturas() {
+		LocalDate hoy = LocalDate.now();
+		if(hoy.isBefore(this.fecha)) {
+			return true;
+		}else if(hoy.equals(this.fecha)) {
+			return hora.isAfter(LocalTime.now());
+		}
+		return false;
 	}
+	
+	
+	
+	@AssertTrue(message="La hora fin esta mal.")
+	private boolean isValidaHoraFin() {
+		return this.hora.plusMinutes((long)this.asignacionTipoTurno.getDuracionEnMinutos()).equals(this.horaFin);
+	}
+	
+	
+	@AssertTrue(message="No tiene permitido reservas a su nombre.")
+	private boolean isReservanteValido() {
+		return this.reservante.isHabilitado();
+	}
+	
+	@AssertTrue(message="Horario no aceptado.")
+	private boolean isHorarioValido() {
+		return this.asignacionTipoTurno.turnosParaLaFecha(this.fecha).contains(this.hora);
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	//------------------------------------------
+	//primero hay que setear la AsignacionRecursoTipoTurno a la Reserva
+	//------------------------------------------
+	
+	@AssertTrue(message="Recurso ocupado.")
+	public boolean isOcupadoElRecurso() {
+		System.out.println("-------------HOLA ENTRE EN EL ASSERTTRUE----------");
+		List<Reserva> reservasDelRecursoParaElDia = this.asignacionTipoTurno.getRecurso().obtenerReservasPorFecha(this.fecha);
+		for(Reserva r : reservasDelRecursoParaElDia) {
+			if(sePisaLosHorariosConEstaReserva(r) && !r.getAsignacionTipoTurno().equals(this.asignacionTipoTurno)) {
+				return false;//ocupado con otro tipo de turno
+			}
+		}
+		return true;//libre
+	}
+
+	@AssertTrue(message="Concurrencia llena para el horario.")
+	private boolean isValidaConcurrencia() {
+		int concurrencias = 0;
+		List<Reserva> reservasDelRecursoParaElDia = this.asignacionTipoTurno.getRecurso().obtenerReservasPorFecha(this.fecha);
+		for(Reserva r : reservasDelRecursoParaElDia) {
+			if(r.getHora().equals(this.hora) && r.getAsignacionTipoTurno().equals(this.asignacionTipoTurno)) {
+				concurrencias++;
+				if(concurrencias == this.asignacionTipoTurno.getCantidadConcurrencia()) {
+					return false;
+				}
+			}
+		}
+		return true;//libre
+	}
+	
+	private boolean sePisaLosHorariosConEstaReserva(Reserva r) {
+		//hd hh HD HH - (hd>=HH || hh<=HD)
+		//hd this.hora - hh this.horaFin
+		if(( this.hora.isAfter(r.getHoraFin()) || this.hora.equals(r.getHoraFin()) ) || (
+				(this.horaFin.isBefore(r.getHora()) ||  this.horaFin.equals(r.getHora())) ) ) {
+			return false;
+		}
+		return true;
+	}
+	//public boolean estaEn
 	
 }//end Reserva

@@ -61,7 +61,7 @@ public class TipoTurno {
 
 	
 	//RELACIONADO CON EL DUEÑO
-	@NotNull(message = "El usuario no puede ser nulo.")
+	//@NotNull(message = "El usuario no puede ser nulo.")
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "usuario", referencedColumnName = "id", nullable = false, unique = false)
 	//@JsonBackReference

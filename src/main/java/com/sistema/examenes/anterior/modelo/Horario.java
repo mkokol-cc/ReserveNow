@@ -1,6 +1,7 @@
 package com.sistema.examenes.anterior.modelo;
 
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -176,5 +177,24 @@ public class Horario {
 	
 	private boolean validarHorarios(){
 		return this.desde.isBefore(this.hasta);
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	public List<LocalTime> obtenerHorarioCadaXMinutos(int minutos){
+		List<LocalTime> listaHorarios = new ArrayList<>();
+		LocalTime aux = this.getDesde();
+		//mientras el auxiliar + la duracion no supere el horarioHasta
+		while(!aux.plusMinutes((long) minutos).isAfter(this.getHasta())) {
+			listaHorarios.add(aux);
+			aux = aux.plusMinutes((long) minutos);
+		}
+		return listaHorarios;
 	}
 }//end Horario

@@ -5,6 +5,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -87,7 +89,7 @@ public class PublicController {
 			Reservante r = reservaStr.getReservante();
 			Usuario u = getUserByPageId(idUserPage);
 			r.setUsuario(u);
-			ApiResponse<Reserva> resp = reservaService.guardarReserva(reservaStr,u.getId());
+			ApiResponse<Reserva> resp = reservaService.guardarReserva(reservaStr/*,u.getId()*/);
 			if(resp.isSuccess()) {
 				return ResponseEntity.ok(resp.getData());
 			}

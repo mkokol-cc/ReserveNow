@@ -187,7 +187,7 @@ public class AdmController {
 		Reservante r = reservaStr.getReservante();
 		Usuario u = usuarioRepo.getById(getUserId());
 		r.setUsuario(u);
-		ApiResponse<Reserva> resp = reservaService.guardarReserva(reservaStr,getUserId());
+		ApiResponse<Reserva> resp = reservaService.guardarReserva(reservaStr/*,getUserId()*/);
 		if(resp.isSuccess()) {
 			return ResponseEntity.ok(resp.getData());
 		}
@@ -198,7 +198,7 @@ public class AdmController {
 	public ResponseEntity<?> editarReserva(@PathVariable Long idReserva,@Valid @RequestBody Reserva reservaStr) throws JsonProcessingException {
 		try {
 			reservaStr.setId(idReserva);
-			ApiResponse<Reserva> resp = reservaService.editarReserva(reservaStr);
+			ApiResponse<Reserva> resp = reservaService.editarReserva(reservaStr,getUserId());
 			if(resp.isSuccess()) {
 				return ResponseEntity.ok(resp.getData());
 			}

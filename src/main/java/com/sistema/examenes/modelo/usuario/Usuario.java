@@ -82,9 +82,9 @@ public class Usuario implements UserDetails {
     private boolean deshabilitarAutopagoSiCambiaElPrecio;
     
     //CONFIGURACION
-    private boolean requiereReservanteConDni;
-    private boolean requiereReservanteConTelefono;
-    private boolean requiereReservanteConNombreYApellido;
+    private boolean requiereReservanteConDni=false;
+    private boolean requiereReservanteConTelefono=false;
+    private boolean requiereReservanteConNombreYApellido=false;
     
     @Column(unique = true, nullable = true)
     private String dbUrl;
@@ -114,7 +114,8 @@ public class Usuario implements UserDetails {
     private List<TipoTurno> tiposDeTurno;
     
     @OneToMany(mappedBy = "usuario", fetch = FetchType.LAZY)
-    @JsonManagedReference
+    //@JsonManagedReference
+    @JsonIgnore
     private List<Reservante> clientes;
 
 
