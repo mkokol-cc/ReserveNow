@@ -1,17 +1,24 @@
 package com.sistema.examenes.nuevo.servicios;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Optional;
+
+import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.Errors;
+import org.springframework.validation.ValidationUtils;
+import org.springframework.validation.Validator;
 
 import com.sistema.examenes.anterior.modelo.AsignacionRecursoTipoTurno;
+import com.sistema.examenes.anterior.modelo.CambioEstado;
 import com.sistema.examenes.anterior.modelo.Dias;
 import com.sistema.examenes.anterior.modelo.Estado;
 import com.sistema.examenes.anterior.modelo.Horario;
@@ -49,9 +56,49 @@ public class ReservaServiceImpl implements ReservaService{
 	@Autowired
 	private EstadoService estadoService;
 	
+	private final Validator validator;
+	
+    public ReservaServiceImpl(Validator validator) {
+        this.validator = validator;
+    }
+    public ApiResponse<Reserva> validar(Reserva reserva) {
+        Errors errors = new BeanPropertyBindingResult(reserva, "reserva");
+        ValidationUtils.invokeValidator(validator, reserva, errors);
+        if (errors.hasErrors()) {
+        	//System.out.println(errors.getAllErrors());
+        	return new ApiResponse<>(false,errors.getAllErrors().toString(),null);
+        } else {
+        	//System.out.println("---------------EXITO---------------");
+        	return new ApiResponse<>(true,"".toString(),reserva);
+        	//return save(recursoDTO);
+        }
+    }
+    private ApiResponse<Reserva> save(Reserva reserva){
+    	Reserva guardado = reservaRepo.save(reserva);
+		return (guardado!=null ? new ApiResponse<>(true,"",guardado) 
+				: new ApiResponse<>(false,"Error al guardar la Reserva",null));
+	}	
+	
+	
+	
+	
 	
 	@Override
 	public ApiResponse<Reserva> guardarReserva(Reserva reserva) {
+		ApiResponse<Reserva> resp = validar(reserva);
+		if(resp.isSuccess()) {
+			ApiResponse<Reservante> reservanteResp = reservanteService.guardarReservante(reserva.getReservante());
+			if(reservanteResp.isSuccess()) {
+				reserva = resp.getData();
+				reserva.setReservante(reservanteResp.getData());
+				return save(reserva);
+			}
+			return new ApiResponse<>(false,"Error al guardar la Reserva, "+reservanteResp.getMessage(),null);
+		}else {
+			return new ApiResponse<>(false,"Error al guardar la Reserva, "+resp.getMessage(),null);
+		}/*
+		
+		
         try {
         	if(reserva.tieneLosDatosMinimos() && reserva.sonValidosLosDatos()) {
         		Reserva guardado = reservaRepo.save(reserva);
@@ -61,12 +108,30 @@ public class ReservaServiceImpl implements ReservaService{
         	return new ApiResponse<>(false,"Datos inválidos.",null);
         } catch (Exception e) {
         	return new ApiResponse<>(false,e.getMessage(),null);
-        }
+        }*/
 	}
 	
 
 	@Override
 	public ApiResponse<Reserva> editarReserva(Reserva r, long idUsuario) {
+		Reserva reservaEditada;
+		ApiResponse<Reserva> response = obtenerReservaPorId(r.getId());
+		if(response.isSuccess()) {
+			if(idUsuario==response.getData().getAsignacionTipoTurno().getRecurso().getUsuario().getId()
+					&& idUsuario==response.getData().getAsignacionTipoTurno().getTipoTurno().getUsuario().getId()) {
+				reservaEditada = editarDatosPorAdministrador(response.getData(),r);
+			}else {
+				reservaEditada = editarDatosPorGuest(response.getData(),r);
+			}
+			return guardarReserva(reservaEditada);
+		}
+		return new ApiResponse<>(false,"Datos inválidos.",null);
+		//si el usuario no es null entonces es administrador
+		//si el usuario 
+		/*
+		
+		
+		
 		
 		//get reserva por id
 		Reserva reservaAEditar = reservaRepo.getById(r.getId());
@@ -95,8 +160,104 @@ public class ReservaServiceImpl implements ReservaService{
 			}	
 		}
 		Reserva guardado = reservaRepo.save(r);
-		return new ApiResponse<>(true,"",guardado);
+		return new ApiResponse<>(true,"",guardado);*/
 	}
+
+	@Override
+	public ApiResponse<Reserva> nuevaReserva(Reserva datosReserva, long idAsignacion){
+		//setear asignacion
+		ApiResponse<AsignacionRecursoTipoTurno> resp = this.asignacionService.obtenerPorId(idAsignacion);
+		if(resp.isSuccess()) {
+			datosReserva.setAsignacionTipoTurno(resp.getData());
+			return guardarReserva(datosReserva);
+		}else {
+			return new ApiResponse<Reserva>(false,"Error al obtener la Asignacion Recurso Tipo Turno.",null);
+		}
+		/*
+		
+		
+		//obtener el estado Nuevo
+		ApiResponse<Reserva> respEstado = this.estadoService.estadoReservaNueva(datosReserva);
+		if(respEstado.isSuccess()) {
+			datosReserva = respEstado.getData();
+		}else {
+			return new ApiResponse<Reserva>(false,"Error al obtener el estado de la reserva.",null);
+		}
+		
+		
+		return new ApiResponse<Reserva>(true,"",datosReserva);
+		
+		//obtener Las Reservas de la asignacion
+		//System.out.println(datosReserva.getAsignacionTipoTurno().getReservas());
+		
+		
+		//validar
+		/*
+		ApiResponse<Reserva> respValidacion = validarReserva(datosReserva);
+		if(respValidacion.isSuccess()) {
+			Reserva reservaGuardada = reservaRepo.save(datosReserva);
+			return (reservaGuardada!=null ? new ApiResponse<Reserva>(true,"",reservaGuardada) 
+					: new ApiResponse<Reserva>(false,"Error al guardar la reserva",null));
+		}
+		return respValidacion;
+		*/
+		
+		
+		//validar2
+		/*
+		return valid(datosReserva) ? new ApiResponse<Reserva>(true,"",datosReserva) : 
+			new ApiResponse<Reserva>(false,"Error al guardar la reserva",null);
+		*/
+		
+	}
+	
+	private Reserva editarDatosPorAdministrador(Reserva original, Reserva editada) {
+		original.setFecha(editada.getFecha());
+		original.setHora(editada.getHora());
+		original.setHoraFin(editada.getHoraFin());
+		original.setNota(editada.getNota());
+		if(!original.getEstado().equals(editada.getEstado())) {
+			ApiResponse<Reserva> response = cambiarEstado(editada, original.getEstado());
+			original = response.isSuccess() ? response.getData() : original;
+		}
+		return original;
+	}
+	private Reserva editarDatosPorGuest(Reserva original, Reserva editada) {
+		//puede editar solo el estado y los horarios
+		original.setFecha(editada.getFecha());
+		original.setHora(editada.getHora());
+		original.setHoraFin(editada.getHoraFin());
+		if(!original.getEstado().equals(editada.getEstado())) {
+			ApiResponse<Reserva> response = cambiarEstado(editada, original.getEstado());
+			original = response.isSuccess() ? response.getData() : original;
+		}
+		return original;
+	}
+	private ApiResponse<Reserva> obtenerReservaPorId(long id){
+		Reserva r = reservaRepo.getById(id);
+		if(r!=null) {
+			return new ApiResponse<>(true,"",r);
+		}
+		return new ApiResponse<>(false,"Error al obtener la Reserva id:"+id+".",null);
+	}
+	private ApiResponse<Reserva> cambiarEstado(Reserva r, Estado eAnterior) {
+		//nuevo cambio estado y set nuevo estado
+		ApiResponse<Reserva> estadoResponse = estadoService.nuevoCambioEstadoReserva(r,eAnterior);
+		if(estadoResponse.isSuccess()) {
+			return new ApiResponse<>(true,"",estadoResponse.getData());
+		}
+		return new ApiResponse<>(false,"Cambio de Estado Invalido",null);
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 
 	@Override
 	public ApiResponse<List<Reserva>> listarReservaPorUsuario(long idUsuario) {
@@ -114,19 +275,15 @@ public class ReservaServiceImpl implements ReservaService{
 	
 	@Override
 	public ApiResponse<Reserva> eliminarReservaPorId(long r, long idUsuario) {
-		try {
-			Reserva reserva = reservaRepo.getById(r);
-			if(reserva!=null) {
-				if(reserva.getAsignacionTipoTurno().getRecurso().getUsuario().getId()==idUsuario) {
-					reservaRepo.delete(reserva);
-					return new ApiResponse<>(true,"",null);	
-				}
-				return new ApiResponse<>(false,"No se encontro la reserva",null);
+		Reserva reserva = reservaRepo.getById(r);
+		if(reserva!=null) {
+			if(reserva.getAsignacionTipoTurno().getRecurso().getUsuario().getId()==idUsuario) {
+				reservaRepo.delete(reserva);
+				return new ApiResponse<>(true,"",null);	
 			}
-			return new ApiResponse<>(false,"Usuario no autorizado",null);
-		}catch(Exception e) {
-			return new ApiResponse<>(false,"Error: "+e.getMessage(),null);
+			return new ApiResponse<>(false,"No se encontro la reserva",null);
 		}
+		return new ApiResponse<>(false,"Usuario no autorizado",null);
 	}
 	
 	
@@ -154,14 +311,7 @@ public class ReservaServiceImpl implements ReservaService{
 	}
 	
 	
-	private ApiResponse<Reserva> cambiarEstado(Reserva r, Estado eAnterior) {
-		//nuevo cambio estado y set nuevo estado
-		ApiResponse<Reserva> estadoResponse = estadoService.nuevoCambioEstadoReserva(r,eAnterior);
-		if(estadoResponse.isSuccess()) {
-			return new ApiResponse<>(true,"",estadoResponse.getData());
-		}
-		return new ApiResponse<>(false,"Cambio de Estado Invalido",null);
-	}
+	
 	
 	private ApiResponse<Reserva> setHorariosReserva(Reserva r) {
 		if((r.getFecha().isEqual(LocalDate.now()) && !r.getHora().isAfter(LocalTime.now())) ||
@@ -288,20 +438,29 @@ public class ReservaServiceImpl implements ReservaService{
 	
 	
 	
-	public ApiResponse<Reserva> nuevaReserva(Reserva reserva){
-		if(reserva.getReservante().isHabilitado()) {
-			List<LocalTime> horariosPosibles = reserva.getAsignacionTipoTurno().turnosParaLaFecha(reserva.getFecha());
-			//filtrar horarios ocupados
-		}else {
-			return new ApiResponse<Reserva>(false,"Usuario no habilitado para hacer reservas",null);
+
+	private ApiResponse<Reserva> validarReserva(Reserva reserva){
+		String valido = reserva.validarReserva();
+		if(valido.equals("")) {
+			return new ApiResponse<Reserva>(true,"",reserva);
 		}
-		return new ApiResponse<Reserva>(false,"Usuario no habilitado para hacer reservas",null);
+		return new ApiResponse<Reserva>(false,valido,null);
 	}
+	
+	private boolean valid(@Valid Reserva reserva) {
+		return true;
+	}
+	
+	
 	
 	private Dias localDateToDia(LocalDate fecha) {
 		Dias d = Dias.valueOf(fecha.getDayOfWeek().getDisplayName(TextStyle.FULL, new Locale("es", "ES")).toUpperCase());
 		return d;
 	}
+	
+	
+	
+	
 	
 	
 }

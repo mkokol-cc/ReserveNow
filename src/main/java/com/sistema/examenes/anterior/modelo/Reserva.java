@@ -15,6 +15,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.validation.Valid;
 import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.NotNull;
 
@@ -74,6 +75,7 @@ public class Reserva {
 	@Column(name="nota")
 	private String nota;
 	
+	@Valid
 	@NotNull(message = "Debes ingresar los datos de la persona que va a reservar.")	
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "reservante", referencedColumnName = "id", nullable = false, unique = false)
@@ -206,7 +208,7 @@ public class Reserva {
 		if(this.fecha.isAfter(LocalDate.now())) {
 			return true;
 		}else {
-			return (this.fecha.equals(LocalDate.now()) ? this.hora.isBefore(LocalTime.now()) : false);
+			return (this.fecha.equals(LocalDate.now()) ? this.hora.isAfter(LocalTime.now()) : false);
 		}
 	}
 	/*
@@ -225,29 +227,16 @@ public class Reserva {
 		LocalDate hoy = LocalDate.now();
 		if(hoy.isBefore(this.fecha)) {
 			return true;
-		}else if(hoy.equals(this.fecha)) {
-			return hora.isAfter(LocalTime.now());
 		}
-		return false;
+		return (this.fecha.equals(LocalDate.now()) ? this.hora.isAfter(LocalTime.now()) : false);
 	}
-	
-	
-	
-	@AssertTrue(message="La hora fin esta mal.")
-	private boolean isValidaHoraFin() {
-		return this.hora.plusMinutes((long)this.asignacionTipoTurno.getDuracionEnMinutos()).equals(this.horaFin);
-	}
-	
 	
 	@AssertTrue(message="No tiene permitido reservas a su nombre.")
 	private boolean isReservanteValido() {
 		return this.reservante.isHabilitado();
 	}
 	
-	@AssertTrue(message="Horario no aceptado.")
-	private boolean isHorarioValido() {
-		return this.asignacionTipoTurno.turnosParaLaFecha(this.fecha).contains(this.hora);
-	}
+
 	
 	
 	
@@ -259,11 +248,11 @@ public class Reserva {
 	
 	//------------------------------------------
 	//primero hay que setear la AsignacionRecursoTipoTurno a la Reserva
-	//------------------------------------------
+	//------------------------------------------	
 	
 	@AssertTrue(message="Recurso ocupado.")
 	public boolean isOcupadoElRecurso() {
-		System.out.println("-------------HOLA ENTRE EN EL ASSERTTRUE----------");
+		System.out.println("ENTRE 1");
 		List<Reserva> reservasDelRecursoParaElDia = this.asignacionTipoTurno.getRecurso().obtenerReservasPorFecha(this.fecha);
 		for(Reserva r : reservasDelRecursoParaElDia) {
 			if(sePisaLosHorariosConEstaReserva(r) && !r.getAsignacionTipoTurno().equals(this.asignacionTipoTurno)) {
@@ -275,10 +264,11 @@ public class Reserva {
 
 	@AssertTrue(message="Concurrencia llena para el horario.")
 	private boolean isValidaConcurrencia() {
+		System.out.println("ENTRE 2");
 		int concurrencias = 0;
 		List<Reserva> reservasDelRecursoParaElDia = this.asignacionTipoTurno.getRecurso().obtenerReservasPorFecha(this.fecha);
 		for(Reserva r : reservasDelRecursoParaElDia) {
-			if(r.getHora().equals(this.hora) && r.getAsignacionTipoTurno().equals(this.asignacionTipoTurno)) {
+			if(r.getHora().equals(this.hora) && r.getAsignacionTipoTurno().equals(this.asignacionTipoTurno) && r.getHoraFin().equals(this.horaFin)) {
 				concurrencias++;
 				if(concurrencias == this.asignacionTipoTurno.getCantidadConcurrencia()) {
 					return false;
@@ -288,11 +278,44 @@ public class Reserva {
 		return true;//libre
 	}
 	
+	
+	@AssertTrue(message="La hora fin esta mal.")
+	private boolean isValidaHoraFin() {
+		System.out.println("ENTRE 3");
+		return this.hora.plusMinutes((long)this.asignacionTipoTurno.getDuracionEnMinutos()).equals(this.horaFin);
+	}
+	
+	
+	
+	@AssertTrue(message="Horario no aceptado.")
+	private boolean isHorarioValido() {
+		System.out.println("ENTRE 4");
+		return this.asignacionTipoTurno.turnosParaLaFecha(this.fecha).contains(this.hora);
+	}
+	
+	public String validarReserva() {
+		if(isHorarioValido()) {
+			if(isValidaHoraFin()) {
+				if(isOcupadoElRecurso()) {
+					if(isValidaConcurrencia()) {
+						return ""; 
+					}
+					return "Concurrencia llena para el horario.";
+				}else {
+					return "Recurso ocupado.";
+				}
+			}else {
+				return "La hora fin esta mal.";
+			}
+		}else {
+			return "Horario no aceptado.";
+		}
+	}
+	
 	private boolean sePisaLosHorariosConEstaReserva(Reserva r) {
 		//hd hh HD HH - (hd>=HH || hh<=HD)
 		//hd this.hora - hh this.horaFin
-		if(( this.hora.isAfter(r.getHoraFin()) || this.hora.equals(r.getHoraFin()) ) || (
-				(this.horaFin.isBefore(r.getHora()) ||  this.horaFin.equals(r.getHora())) ) ) {
+		if( this.hora.compareTo(r.getHoraFin()) >= 0 || this.horaFin.compareTo(r.getHora()) <= 0 ) {
 			return false;
 		}
 		return true;

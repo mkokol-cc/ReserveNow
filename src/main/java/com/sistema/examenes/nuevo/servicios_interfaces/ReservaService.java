@@ -16,4 +16,7 @@ public interface ReservaService {
 	public ApiResponse<Reserva> eliminarReservaPorId(long idReserva,long idUsuario);
 	List<TurnoDTO> crearTurnos(AsignacionRecursoTipoTurno asignacion, LocalDate fecha);
 	
+	
+	public ApiResponse<Reserva> nuevaReserva(Reserva r, long idAsignacion);
+	
 }

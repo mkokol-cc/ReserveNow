@@ -95,22 +95,40 @@ public class AdmController {
 	//CRUD RECURSO
 	@PostMapping("/recurso/add")
 	public ResponseEntity<?> guardarRecurso(@Valid @RequestBody Recurso recursoStr) throws JsonProcessingException {
+		
+		try {
+			recursoStr.setUsuario(usuarioRepo.getById(getUserId()));
+			ApiResponse<Recurso> resp = recursoService.guardarRecurso(recursoStr);
+			if(resp.isSuccess()) {
+				return new ResponseEntity<>("Se guardó correctamente el Recurso.", HttpStatus.CREATED);	
+			}
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, resp.getMessage());
+		}catch(Exception e) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+		}
+		/*
 		ApiResponse<Recurso> resp = recursoService.guardarRecurso(recursoStr);
+		
+		
+		
 		if(resp.isSuccess()) {
 			return new ResponseEntity<>("Se guardó correctamente el Recurso.", HttpStatus.CREATED);	
 		}
 		throw new ResponseStatusException(HttpStatus.BAD_REQUEST, resp.getMessage());
+		*/
 	}
-
+	/*
 	@PutMapping("/recurso/edit")
 	@Transactional
 	public ResponseEntity<?> editarRecurso(@Valid @RequestBody Recurso recursoStr) throws JsonProcessingException {
+		
 		ApiResponse<Recurso> resp = recursoService.editarRecurso(recursoStr, getUserId());
 		if(resp.isSuccess()) {
 			return new ResponseEntity<>("Se actualizó correctamente el Recurso.", HttpStatus.OK);
 		}
 		throw new ResponseStatusException(HttpStatus.BAD_REQUEST, resp.getMessage());
-	}
+		
+	}*/
 	
 	@GetMapping("/recurso")
 	public ResponseEntity</*List<Recurso>*/?> listarRecursos(){
@@ -134,11 +152,12 @@ public class AdmController {
 
 	@PutMapping("/tipo-turno/edit")
 	public ResponseEntity<?> editarTipoTurno(@Valid @RequestBody TipoTurno tipoTurnoStr) throws JsonProcessingException {
-		ApiResponse<TipoTurno> resp = tipoTurnoService.editarTipoTurno(tipoTurnoStr,getUserId());
+		/*ApiResponse<TipoTurno> resp = tipoTurnoService.editarTipoTurno(tipoTurnoStr,getUserId());
 		if(resp.isSuccess()) {
 			return new ResponseEntity<>("Se editó correctamente el Tipo de Turno.", HttpStatus.CREATED);	
 		}
-		throw new ResponseStatusException(HttpStatus.BAD_REQUEST, resp.getMessage());
+		throw new ResponseStatusException(HttpStatus.BAD_REQUEST, resp.getMessage());*/
+		return null;
 	}
 	
 	@GetMapping("/tipo-turno")

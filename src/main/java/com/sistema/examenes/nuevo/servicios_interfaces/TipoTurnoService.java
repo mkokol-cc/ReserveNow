@@ -9,7 +9,7 @@ import com.sistema.examenes.nuevo.servicios.ApiResponse;
 public interface TipoTurnoService {
 
 	public ApiResponse<TipoTurno> guardarTipoTurno(TipoTurno tipoTurno);
-	public ApiResponse<TipoTurno> editarTipoTurno(TipoTurno tipoTurno, long userId);
+	public ApiResponse<TipoTurno> editarTipoTurno(TipoTurno tipoTurno);
 	public ApiResponse<List<TipoTurno>> listarTipoTurnoDeUsuario(Usuario userId);
 	
 	public ApiResponse<TipoTurno> obtenerTipoTurnoPorId(long idTipoTurno);

@@ -6,6 +6,10 @@ import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.Errors;
+import org.springframework.validation.ValidationUtils;
+import org.springframework.validation.Validator;
 
 import com.sistema.examenes.anterior.modelo.AsignacionRecursoTipoTurno;
 import com.sistema.examenes.anterior.modelo.Horario;
@@ -37,15 +41,64 @@ public class AsignacionRecursoTipoTurnoServiceImpl implements AsignacionRecursoT
 	@Autowired
 	private HorarioEspecialService horarioEspService;
 	
+	
+	private final Validator validator;
+	
+    public AsignacionRecursoTipoTurnoServiceImpl(Validator validator) {
+        this.validator = validator;
+    }
+    public ApiResponse<AsignacionRecursoTipoTurno> validar(AsignacionRecursoTipoTurno asignacion) {
+        Errors errors = new BeanPropertyBindingResult(asignacion, "asignacion");
+        ValidationUtils.invokeValidator(validator, asignacion, errors);
+        if (errors.hasErrors()) {
+        	//System.out.println(errors.getAllErrors());
+        	return new ApiResponse<>(false,errors.getAllErrors().toString(),null);
+        } else {
+        	//System.out.println("---------------EXITO---------------");
+        	return new ApiResponse<>(true,"".toString(),asignacion);
+        	//return save(recursoDTO);
+        }
+    }
+    private ApiResponse<AsignacionRecursoTipoTurno> save(AsignacionRecursoTipoTurno asig){
+    	AsignacionRecursoTipoTurno guardado = asignacionRepo.save(asig);
+		return (guardado!=null ? new ApiResponse<>(true,"",guardado) 
+				: new ApiResponse<>(false,"Error al guardar el Tipo de Turno",null));
+	}
+    
+    
+    private ApiResponse<AsignacionRecursoTipoTurno> guardarAsignacion(AsignacionRecursoTipoTurno asignacion){
+    	ApiResponse<AsignacionRecursoTipoTurno> resp = validar(asignacion);
+		if(resp.isSuccess()) {
+			return save(resp.getData());
+		}else {
+			return new ApiResponse<>(false,"Error al guardar la Asignación, "+resp.getMessage(),null);
+		}
+    }
+    
+    
+	
 	@Override
 	public ApiResponse<AsignacionRecursoTipoTurno> guardarAsignacion(long idTipoTurno, long idRecurso/*AsignacionRecursoTipoTurno asignacion*/, long idUsuario) {
+		//obtener el recurso por id
+		ApiResponse<Recurso> r = recursoService.obtenerRecursoPorId(idRecurso);
+		//obtener el tipoturno por id
+		ApiResponse<TipoTurno> t = tipoTurnoService.obtenerTipoTurnoPorId(idTipoTurno);
+		if(r.isSuccess() && t.isSuccess()) {
+			if(r.getData().getUsuario() == t.getData().getUsuario() && r.getData().getUsuario().getId() == idUsuario) {
+				return guardarAsignacion(setearDatosPorDefecto(t.getData(), r.getData(), new AsignacionRecursoTipoTurno()));
+			}
+			return new ApiResponse<>(false,"Usuario no autorizado.",null);
+		}
+		return new ApiResponse<>(false,"Error al obtener los datos del Recurso y Tipo de Turno.",null);
+		
+		/*
 		try {
 			//obtener el recurso por id
 			ApiResponse<Recurso> r = recursoService.obtenerRecursoPorId(idRecurso);
 			//obtener el tipoturno por id
 			ApiResponse<TipoTurno> t = tipoTurnoService.obtenerTipoTurnoPorId(idTipoTurno);
 			//comprobar si el usuario es dueño de ambos
-			if(asignacionRepo.findByRecursoAndTipoTurno(r.getData(), t.getData()).size()>0/*!=null*/) {
+			if(asignacionRepo.findByRecursoAndTipoTurno(r.getData(), t.getData()).size()>0) {
 				return new ApiResponse<>(false,"La asignacion ya existe, no se puede volver a crear",null);
 			}
 			if(t.isSuccess() && r.isSuccess()) {
@@ -71,11 +124,46 @@ public class AsignacionRecursoTipoTurnoServiceImpl implements AsignacionRecursoT
 			return new ApiResponse<>(false,"Error obtener los datos para la asigancion",null);
 		}catch(Exception e) {
 			return new ApiResponse<>(false,"Error: "+e.getMessage(),null);
-		}
+		}*/
 	}
+	
+	
+	private AsignacionRecursoTipoTurno setearDatosPorDefecto(TipoTurno t, Recurso r, AsignacionRecursoTipoTurno a) {
+		a.setRecurso(r);
+		a.setTipoTurno(t);
+		a.setDuracionEnMinutos(t.getDuracionEnMinutos());
+		a.setSeniaCtvos(t.getSeniaCtvos());
+		a.setPrecioEstimadoDesdeCtvos(t.getPrecioEstimadoDesdeCtvos());
+		a.setPrecioEstimadoHastaCtvos(t.getPrecioEstimadoHastaCtvos());
+		a.setCantidadConcurrencia(1);
+		//a.setHorarios(r.getHorarios());
+		//a.setHorariosEspeciales(r.getHorariosEspeciales());
+		return a;
+	}
+	
+	
 
 	@Override
 	public ApiResponse<AsignacionRecursoTipoTurno> editarAsignacion(AsignacionRecursoTipoTurno asignacion, long idUsuario) {
+		
+		
+		ApiResponse<AsignacionRecursoTipoTurno> guardado = obtenerPorId(asignacion.getId());
+		if(guardado.isSuccess()) {
+			//si el usuario es el mismo que el usuario nuevo entonces validar y guardar
+			if(guardado.getData().getRecurso().getUsuario().getId() == idUsuario 
+					&& guardado.getData().getTipoTurno().getUsuario().getId() == idUsuario) {
+				asignacion.setRecurso(guardado.getData().getRecurso());
+				asignacion.setTipoTurno(guardado.getData().getTipoTurno());
+				asignacion.setReservas(guardado.getData().getReservas());
+				return guardarAsignacion(asignacion);//save
+			}else {
+				return new ApiResponse<>(false,"Usuario no autorizado a editar la Asignación.",null);
+			}
+		}else {
+			return guardado;
+		}/*
+		
+		
 		try {
 			ApiResponse<AsignacionRecursoTipoTurno> resp = obtenerPorId(asignacion.getId());
 			if(resp.isSuccess()) {
@@ -95,7 +183,7 @@ public class AsignacionRecursoTipoTurnoServiceImpl implements AsignacionRecursoT
 			return new ApiResponse<>(false,resp.getMessage(),null);
 		}catch(Exception e) {
 			return new ApiResponse<>(false,e.getMessage(),null);
-		}
+		}*/
 	}
 
 	@Override
@@ -125,7 +213,7 @@ public class AsignacionRecursoTipoTurnoServiceImpl implements AsignacionRecursoT
 		if(asig!=null) {
 			return new ApiResponse<>(true,"",asig);
 		}
-		return new ApiResponse<>(false,"No se obtuvo el Reservante",asig);
+		return new ApiResponse<>(false,"No se pudo obtener la asignacion",asig);
 	}/*
 	
 	private ApiResponse<AsignacionRecursoTipoTurno> setHorarioAsignacion(AsignacionRecursoTipoTurno a) {

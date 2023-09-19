@@ -10,7 +10,7 @@ public interface RecursoService {
 	
 	public ApiResponse<Recurso> guardarRecurso(Recurso recurso);
 	
-	public ApiResponse<Recurso> editarRecurso(Recurso recurso, long userId);
+	public ApiResponse<Recurso> editarRecurso(Recurso recurso);
 	
 	public ApiResponse<List<Recurso>> listarRecurso(Usuario userId);
 	

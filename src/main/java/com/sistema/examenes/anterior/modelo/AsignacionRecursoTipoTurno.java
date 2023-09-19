@@ -22,6 +22,8 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.validation.Valid;
+import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -298,5 +300,33 @@ public class AsignacionRecursoTipoTurno {
 		return reservas;
 	}
 	
+	
+	
+	@AssertTrue(message="El precio desde debe ser menor o igual al precio hasta.")
+	public boolean isValidaSenia() {
+		if(this.precioEstimadoDesdeCtvos <= this.precioEstimadoHastaCtvos) {
+			return true;
+		}
+		return false;
+	}
+	
+	
+	
+	/*
+	public boolean editarDuracion() {
+		for(Reserva r : this.getReservas()) {
+			if(r.getEstado().isProximo()) {
+				r.setHoraFin(null);
+			}
+		}
+	}
+	
+	public boolean reacomodarReservas() {
+		for(Reserva r : this.getReservas()) {
+			if(r.getEstado().isProximo()) {
+				
+			}
+		}
+	}*/
 
 }

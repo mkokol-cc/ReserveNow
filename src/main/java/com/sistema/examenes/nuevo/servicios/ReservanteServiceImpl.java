@@ -4,7 +4,12 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.Errors;
+import org.springframework.validation.ValidationUtils;
+import org.springframework.validation.Validator;
 
+import com.sistema.examenes.anterior.modelo.Reserva;
 import com.sistema.examenes.anterior.modelo.Reservante;
 import com.sistema.examenes.anterior.repositorios.ReservanteRepository;
 import com.sistema.examenes.modelo.usuario.Usuario;
@@ -16,10 +21,45 @@ public class ReservanteServiceImpl implements ReservanteService{
 	@Autowired
 	private ReservanteRepository reservanteRepo;
 
+	private final Validator validator;
+	
+    public ReservanteServiceImpl(Validator validator) {
+        this.validator = validator;
+    }
+    public ApiResponse<Reservante> validar(Reservante reservante) {
+        Errors errors = new BeanPropertyBindingResult(reservante, "reservante");
+        ValidationUtils.invokeValidator(validator, reservante, errors);
+        if (errors.hasErrors()) {
+        	return new ApiResponse<>(false,errors.getAllErrors().toString(),null);
+        } else {
+        	return new ApiResponse<>(true,"".toString(),reservante);
+        }
+    }
+    private ApiResponse<Reservante> save(Reservante reservante){
+    	Reservante guardado = reservanteRepo.save(reservante);
+		return (guardado!=null ? new ApiResponse<>(true,"",guardado) 
+				: new ApiResponse<>(false,"Error al guardar la Reserva",null));
+	}	
+	
+	
+	
+	
+	
+	
 	@Override
 	public ApiResponse<Reservante> guardarReservante(Reservante reservante) {
+		ApiResponse<Reservante> response = obtenerPorTelefonoYUsuario(reservante);
+		if(!response.isSuccess()) {
+			ApiResponse<Reservante> resp = validar(reservante);
+			if(resp.isSuccess()) {
+				return save(resp.getData());
+			}
+			return new ApiResponse<>(false,"Error al guardar el reservante, "+resp.getMessage(),null);	
+		}
+		return new ApiResponse<>(true,"El reservante ya esta guardado.",response.getData());
+		/*
 		try {
-			ApiResponse<Reservante> existente = obtenerPorTelefonoYUsuario(reservante)/* reservanteRepo.findByTelefono(reservaStr.getReservante().getTelefono())*/; 
+			ApiResponse<Reservante> existente = obtenerPorTelefonoYUsuario(reservante);// reservanteRepo.findByTelefono(reservaStr.getReservante().getTelefono()); 
 			if(existente.isSuccess()) {
 				return new ApiResponse<>(true,"",existente.getData());//reservanteRepo.save(reservaStr.getReservante());
 			}else {
@@ -28,7 +68,7 @@ public class ReservanteServiceImpl implements ReservanteService{
 			}	
 		}catch(Exception e){
 			return new ApiResponse<>(false,e.getMessage(),null);
-		}
+		}*/
 	}
 
 	@Override
@@ -46,18 +86,13 @@ public class ReservanteServiceImpl implements ReservanteService{
 
 	@Override
 	public ApiResponse<Reservante> editarReservante(Reservante reservante, long idUsuario) {
-		try {
-			Reservante r = reservanteRepo.getById(reservante.getId());
-			if(r.getUsuario().getId()==idUsuario) {
-				reservante.setReservas(r.getReservas());
-				reservante.setUsuario(r.getUsuario());
-				Reservante guardado = reservanteRepo.save(reservante);
-				return new ApiResponse<>(true,"",guardado);
-			}
-			return new ApiResponse<>(false,"Usuario no autorizado",r);	
-		}catch(Exception e){
-			return new ApiResponse<>(false,e.getMessage(),null);
+		Reservante r = reservanteRepo.getById(reservante.getId());
+		if(r.getUsuario().getId()==idUsuario) {
+			reservante.setReservas(r.getReservas());
+			reservante.setUsuario(r.getUsuario());
+			return guardarReservante(reservante);
 		}
+		return new ApiResponse<>(false,"Usuario no autorizado",null);	
 	}
 
 	@Override

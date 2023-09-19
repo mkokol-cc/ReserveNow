@@ -1,7 +1,6 @@
 package com.sistema.examenes.anterior.modelo;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -17,7 +16,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.validation.constraints.AssertTrue;
+import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -57,12 +56,12 @@ public class Recurso {
 	@JsonIgnore
 	private List<AsignacionRecursoTipoTurno> recursosTipoTurno;
 	
-	
+	@Valid
     @OneToMany(mappedBy = "recurso", fetch = FetchType.EAGER)
     //@JsonManagedReference
     private Set<Horario> horarios = new HashSet<>();
     
-    
+	@Valid
     @OneToMany(mappedBy = "recurso", fetch = FetchType.EAGER)
     //@JsonManagedReference
     private Set<HorarioEspecial> horariosEspeciales = new HashSet<>();
@@ -72,10 +71,9 @@ public class Recurso {
 	private boolean eliminado;
 
 	//RELACIONADO CON EL DUEÑO
-	//@NotNull(message = "El usuario no puede ser nulo.")
+	@NotNull(message = "El usuario no puede ser nulo.")
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "usuario", referencedColumnName = "id", nullable = false, unique = false)
-	//@JsonBackReference
 	@JsonIgnore
     private Usuario usuario;
 	

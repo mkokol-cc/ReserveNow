@@ -13,6 +13,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
@@ -61,7 +62,7 @@ public class TipoTurno {
 
 	
 	//RELACIONADO CON EL DUEÑO
-	//@NotNull(message = "El usuario no puede ser nulo.")
+	@NotNull(message = "El usuario no puede ser nulo.")
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "usuario", referencedColumnName = "id", nullable = false, unique = false)
 	//@JsonBackReference
@@ -84,6 +85,15 @@ public class TipoTurno {
 	@Min(value = 0, message = "El precio estimado hasta no puede ser negativa.")
 	@Column(name = "precioEstimadoHastaCtvos",nullable=true)
 	private Integer precioEstimadoHastaCtvos;
+	
+	
+	@AssertTrue(message="El precio desde debe ser menor o igual al precio hasta.")
+	public boolean isValidaSenia() {
+		if(this.precioEstimadoDesdeCtvos <= this.precioEstimadoHastaCtvos) {
+			return true;
+		}
+		return false;
+	}
 	
 	public TipoTurno(){
 
