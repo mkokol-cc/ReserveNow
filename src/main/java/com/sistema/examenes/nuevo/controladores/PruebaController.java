@@ -114,9 +114,11 @@ public class PruebaController {
 				if(resp.isSuccess()) {
 					return new ResponseEntity<>("Se guardó correctamente el Tipo de Turno.", HttpStatus.CREATED);	
 				}
-				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, resp.getMessage());
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp.getMessage());
+				//throw new ResponseStatusException(HttpStatus.BAD_REQUEST, resp.getMessage());
 			}catch(Exception e) {
-				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error inesperado: "+e.getMessage());
+				//throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 			}
 			//return new ResponseEntity<>("Esta BIEN", HttpStatus.CREATED);
 		}

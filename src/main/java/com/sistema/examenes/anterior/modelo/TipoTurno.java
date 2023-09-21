@@ -72,19 +72,19 @@ public class TipoTurno {
 	@Min(value = 1, message = "La duración debe ser al menos 1 minuto.")
 	@Max(value = 1440, message = "La duración no puede ser mayor de 1440 minutos (24 horas).")
 	@Column(name = "duracionEnMinutos",nullable=true)
-	private Integer duracionEnMinutos;
+	private Integer duracionEnMinutos = 1;
 	
 	@Min(value = 0, message = "La seña no puede ser negativa.")
 	@Column(name = "seniaCtvs",nullable=true)
-	private Integer seniaCtvos;
+	private Integer seniaCtvos = 0;
 	
 	@Min(value = 0, message = "El precio estimado desde no puede ser negativa.")
 	@Column(name = "precioEstimadoDesdeCtvos",nullable=true)
-	private Integer precioEstimadoDesdeCtvos;
+	private Integer precioEstimadoDesdeCtvos = 0;
 	
 	@Min(value = 0, message = "El precio estimado hasta no puede ser negativa.")
 	@Column(name = "precioEstimadoHastaCtvos",nullable=true)
-	private Integer precioEstimadoHastaCtvos;
+	private Integer precioEstimadoHastaCtvos = 0;
 	
 	
 	@AssertTrue(message="El precio desde debe ser menor o igual al precio hasta.")
