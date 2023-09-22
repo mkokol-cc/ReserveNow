@@ -30,7 +30,7 @@ public class ReservanteServiceImpl implements ReservanteService{
         Errors errors = new BeanPropertyBindingResult(reservante, "reservante");
         ValidationUtils.invokeValidator(validator, reservante, errors);
         if (errors.hasErrors()) {
-        	return new ApiResponse<>(false,errors.getAllErrors().toString(),null);
+        	return new ApiResponse<>(false,errors.getFieldError().getDefaultMessage().toString(),null);
         } else {
         	return new ApiResponse<>(true,"".toString(),reservante);
         }

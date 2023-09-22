@@ -67,9 +67,9 @@ public class PruebaController {
 				if(resp.isSuccess()) {
 					return new ResponseEntity<>("Se guardó correctamente el Recurso.", HttpStatus.CREATED);	
 				}
-				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, resp.getMessage());
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp.getMessage());
 			}catch(Exception e) {
-				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error inesperado: "+e.getMessage());
 			}
 		}
 
@@ -82,9 +82,9 @@ public class PruebaController {
 				if(resp.isSuccess()) {
 					return new ResponseEntity<>("Se editó correctamente el Recurso.", HttpStatus.OK);	
 				}
-				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, resp.getMessage());
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp.getMessage());
 			}catch(Exception e) {
-				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error inesperado: "+e.getMessage());
 			}
 			//return new ResponseEntity<>("Esta BIEN", HttpStatus.CREATED);
 		}
@@ -97,9 +97,9 @@ public class PruebaController {
 				if(resp.isSuccess()) {
 					return new ResponseEntity<>(resp.getData(), HttpStatus.OK);	
 				}
-				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, resp.getMessage());
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp.getMessage());
 			}catch(Exception e) {
-				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error inesperado: "+e.getMessage());
 			}
 			//return new ResponseEntity<>("Esta BIEN", HttpStatus.CREATED);
 		}
@@ -115,10 +115,8 @@ public class PruebaController {
 					return new ResponseEntity<>("Se guardó correctamente el Tipo de Turno.", HttpStatus.CREATED);	
 				}
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp.getMessage());
-				//throw new ResponseStatusException(HttpStatus.BAD_REQUEST, resp.getMessage());
 			}catch(Exception e) {
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error inesperado: "+e.getMessage());
-				//throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 			}
 			//return new ResponseEntity<>("Esta BIEN", HttpStatus.CREATED);
 		}
@@ -131,9 +129,9 @@ public class PruebaController {
 				if(resp.isSuccess()) {
 					return new ResponseEntity<>("Se editó correctamente el Tipo de Turno.", HttpStatus.OK);	
 				}
-				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, resp.getMessage());
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp.getMessage());
 			}catch(Exception e) {
-				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error inesperado: "+e.getMessage());
 			}
 			//return new ResponseEntity<>("Esta BIEN", HttpStatus.CREATED);
 		}
@@ -145,9 +143,9 @@ public class PruebaController {
 				if(resp.isSuccess()) {
 					return new ResponseEntity<>(resp.getData(), HttpStatus.OK);	
 				}
-				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, resp.getMessage());
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp.getMessage());
 			}catch(Exception e) {
-				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error inesperado: "+e.getMessage());
 			}
 			//return new ResponseEntity<>("Esta BIEN", HttpStatus.CREATED);
 		}
@@ -161,9 +159,9 @@ public class PruebaController {
 				if(resp.isSuccess()) {
 					return new ResponseEntity<>(resp.getData(), HttpStatus.CREATED);	
 				}
-				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, resp.getMessage());
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp.getMessage());
 			}catch(Exception e) {
-				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error inesperado: "+e.getMessage());
 			}
 		}
 		
@@ -174,9 +172,9 @@ public class PruebaController {
 				if(resp.isSuccess()) {
 					return new ResponseEntity<>(resp.getData(), HttpStatus.OK);	
 				}
-				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, resp.getMessage());
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp.getMessage());
 			}catch(Exception e) {
-				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error inesperado: "+e.getMessage());
 			}
 		}
 		
@@ -188,9 +186,9 @@ public class PruebaController {
 				if(resp.isSuccess()) {
 					return new ResponseEntity<>(resp.getData(), HttpStatus.OK);	
 				}
-				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, resp.getMessage());
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp.getMessage());
 			}catch(Exception e) {
-				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error inesperado: "+e.getMessage());
 			}
 		}
 		
@@ -203,9 +201,9 @@ public class PruebaController {
 				if(resp.isSuccess()) {
 					return new ResponseEntity<>(resp.getData(), HttpStatus.CREATED);	
 				}
-				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, resp.getMessage());
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp.getMessage());
 			}catch(Exception e) {
-				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error inesperado: "+e.getMessage());
 			}
 			/*
 			
@@ -226,9 +224,9 @@ public class PruebaController {
 				if(resp.isSuccess()) {
 					return new ResponseEntity<>(resp.getData(), HttpStatus.OK);	
 				}
-				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, resp.getMessage());
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp.getMessage());
 			}catch(Exception e) {
-				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error inesperado: "+e.getMessage());
 			}
 			//return new ResponseEntity<>("Esta BIEN", HttpStatus.CREATED);
 		}
@@ -241,9 +239,9 @@ public class PruebaController {
 				if(resp.isSuccess()) {
 					return new ResponseEntity<>(resp.getData(), HttpStatus.OK);	
 				}
-				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, resp.getMessage());
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp.getMessage());
 			}catch(Exception e) {
-				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error inesperado: "+e.getMessage());
 			}
 			//return new ResponseEntity<>("Esta BIEN", HttpStatus.CREATED);
 		}
@@ -255,9 +253,9 @@ public class PruebaController {
 				if(resp.isSuccess()) {
 					return new ResponseEntity<>(resp.getData(), HttpStatus.OK);	
 				}
-				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, resp.getMessage());
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp.getMessage());
 			}catch(Exception e) {
-				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error inesperado: "+e.getMessage());
 			}
 			//return new ResponseEntity<>("Esta BIEN", HttpStatus.CREATED);
 		}
@@ -273,9 +271,9 @@ public class PruebaController {
 				if(resp.isSuccess()) {
 					return new ResponseEntity<>(resp.getData(), HttpStatus.OK);	
 				}
-				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, resp.getMessage());
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp.getMessage());
 			}catch(Exception e) {
-				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error inesperado: "+e.getMessage());
 			}
 			//return new ResponseEntity<>("Esta BIEN", HttpStatus.CREATED);
 		}
@@ -287,9 +285,9 @@ public class PruebaController {
 				if(resp.isSuccess()) {
 					return new ResponseEntity<>(resp.getData(), HttpStatus.OK);	
 				}
-				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, resp.getMessage());
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp.getMessage());
 			}catch(Exception e) {
-				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error inesperado: "+e.getMessage());
 			}
 			//return new ResponseEntity<>("Esta BIEN", HttpStatus.CREATED);
 		}

@@ -66,7 +66,7 @@ public class ReservaServiceImpl implements ReservaService{
         ValidationUtils.invokeValidator(validator, reserva, errors);
         if (errors.hasErrors()) {
         	//System.out.println(errors.getAllErrors());
-        	return new ApiResponse<>(false,errors.getAllErrors().toString(),null);
+        	return new ApiResponse<>(false,errors.getFieldError().getDefaultMessage().toString(),null);
         } else {
         	//System.out.println("---------------EXITO---------------");
         	return new ApiResponse<>(true,"".toString(),reserva);
