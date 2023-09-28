@@ -11,14 +11,18 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
 
+import com.sistema.examenes.anterior.modelo.AsignacionRecursoTipoTurno;
 import com.sistema.examenes.anterior.modelo.Horario;
 import com.sistema.examenes.anterior.modelo.HorarioEspecial;
 import com.sistema.examenes.anterior.modelo.Recurso;
+import com.sistema.examenes.anterior.modelo.TipoTurno;
 import com.sistema.examenes.anterior.repositorios.RecursoRepository;
 import com.sistema.examenes.modelo.usuario.Usuario;
+import com.sistema.examenes.nuevo.servicios_interfaces.AsignacionRecursoTipoTurnoService;
 import com.sistema.examenes.nuevo.servicios_interfaces.HorarioEspecialService;
 import com.sistema.examenes.nuevo.servicios_interfaces.HorarioService;
 import com.sistema.examenes.nuevo.servicios_interfaces.RecursoService;
+import com.sistema.examenes.nuevo.servicios_interfaces.TipoTurnoService;
 
 @Service
 public class RecursoServiceImpl implements RecursoService{
@@ -32,6 +36,13 @@ public class RecursoServiceImpl implements RecursoService{
 	@Autowired
 	private HorarioEspecialService horarioEspService;
 	
+	@Autowired
+	private TipoTurnoService tipoTurnoService;
+	
+	/*
+	@Autowired
+	private AsignacionRecursoTipoTurnoService asignacionService;
+	*/
 	private final Validator validator;
 	
     public RecursoServiceImpl(Validator validator) {
@@ -265,4 +276,35 @@ public class RecursoServiceImpl implements RecursoService{
 		*/
 	}
 
+	
+	
+	
+	
+	
+	
+	@Override
+	public ApiResponse<Recurso> actualizarAsignaciones(List<Long> idTiposDeTurno, long recId,Usuario usuario){
+		String mensajeError = "";
+		//ApiResponse<Recurso> rec = obtenerRecursoPorId(recId);
+		ApiResponse<List<TipoTurno>> todosLosTipoTurno = tipoTurnoService.listarTipoTurnoDeUsuario(usuario);
+		if(/*rec.isSuccess() && */todosLosTipoTurno.isSuccess()) {
+			for(TipoTurno tt : todosLosTipoTurno.getData()) {
+				if(idTiposDeTurno.contains(tt.getId())) {
+					//guardar nueva asignacion
+					System.out.println(" -GUARDAR la relacion entre recId:"+recId+" ttID:"+tt.getId()+"- ");
+					//ApiResponse<AsignacionRecursoTipoTurno> resp = asignacionService.guardarAsignacion(tt.getId(), recId, usuario.getId());
+					//mensajeError = resp.isSuccess() ? mensajeError : mensajeError + resp.getMessage() + " ";
+				}else {
+					//eliminar asignacion
+					System.out.println(" -ELIMINAR la relacion entre recId:"+recId+" ttID:"+tt.getId()+"- ");
+					//ApiResponse<AsignacionRecursoTipoTurno> resp = asignacionService.eliminarAsignacion(tt.getId(), recId, usuario.getId());
+					//mensajeError = resp.isSuccess() ? mensajeError : mensajeError + resp.getMessage() + " ";
+				}
+			}
+			return mensajeError.length()>0 ? new ApiResponse<>(false,"Error al actualizar las asignaciones del Recurso, "+mensajeError,null)
+					: new ApiResponse<>(true,"Se guardaron correctamente los cambios.",null);
+		}else {
+			return new ApiResponse<>(false,"Error al actualizar las asignaciones del Recurso",null);
+		}
+	}
 }

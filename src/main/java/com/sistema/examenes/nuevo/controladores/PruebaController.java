@@ -193,6 +193,20 @@ public class PruebaController {
 		}
 		
 		
+		@PutMapping("/asignacion/recurso/{idRecurso}/edit")
+		public ResponseEntity<?> editarAsignacionesDeRecurso(@RequestBody List<Long> listaIdtt,@PathVariable Long idRecurso){
+			try {
+				ApiResponse<Recurso> resp = asignacionService.actualizarAsignaciones(listaIdtt, idRecurso, getUser());
+				if(resp.isSuccess()) {
+					return new ResponseEntity<>(resp.getData(), HttpStatus.CREATED);	
+				}
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp.getMessage());
+			}catch(Exception e) {
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error inesperado: "+e.getMessage());
+			}
+		}
+		
+		
 		//CRUD RESERVAS
 		@PostMapping("/reservas/{idAsignacion}/add")
 		public ResponseEntity<?> registrarReserva(@PathVariable Long idAsignacion,/*@Valid*/ @RequestBody Reserva reservaStr) throws JsonProcessingException {

@@ -15,5 +15,7 @@ public interface RecursoService {
 	public ApiResponse<List<Recurso>> listarRecurso(Usuario userId);
 	
 	public ApiResponse<Recurso> obtenerRecursoPorId(long idRecurso);
+	
+	public ApiResponse<Recurso> actualizarAsignaciones(List<Long> idTiposDeTurno, long recId,Usuario usuario);
 
 }

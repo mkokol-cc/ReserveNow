@@ -22,7 +22,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.validation.Valid;
+import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
@@ -33,7 +33,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 @Entity
-@Table(name = "AsignacionRecursoTipoTurno")
+@Table(name = "AsignacionRecursoTipoTurno", uniqueConstraints = @UniqueConstraint(columnNames = {"id_recurso", "id_tipoTurno"}))
 @JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class AsignacionRecursoTipoTurno {

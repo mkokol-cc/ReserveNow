@@ -1,7 +1,9 @@
 package com.sistema.examenes.nuevo.servicios;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,8 +17,10 @@ import com.sistema.examenes.anterior.modelo.AsignacionRecursoTipoTurno;
 import com.sistema.examenes.anterior.modelo.Horario;
 import com.sistema.examenes.anterior.modelo.HorarioEspecial;
 import com.sistema.examenes.anterior.modelo.Recurso;
+import com.sistema.examenes.anterior.modelo.Reserva;
 import com.sistema.examenes.anterior.modelo.TipoTurno;
 import com.sistema.examenes.anterior.repositorios.AsignacionRecursoTipoTurnoRepository;
+import com.sistema.examenes.modelo.usuario.Usuario;
 import com.sistema.examenes.nuevo.servicios_interfaces.AsignacionRecursoTipoTurnoService;
 import com.sistema.examenes.nuevo.servicios_interfaces.HorarioEspecialService;
 import com.sistema.examenes.nuevo.servicios_interfaces.HorarioService;
@@ -67,6 +71,9 @@ public class AsignacionRecursoTipoTurnoServiceImpl implements AsignacionRecursoT
     
     
     private ApiResponse<AsignacionRecursoTipoTurno> guardarAsignacion(AsignacionRecursoTipoTurno asignacion){
+    	if(asignacionRepo.existeAsignacion(asignacion.getRecurso(), asignacion.getTipoTurno())!=0) {
+    		asignacion.setEliminado(false);
+    	}
     	ApiResponse<AsignacionRecursoTipoTurno> resp = validar(asignacion);
 		if(resp.isSuccess()) {
 			return save(resp.getData());
@@ -85,7 +92,11 @@ public class AsignacionRecursoTipoTurnoServiceImpl implements AsignacionRecursoT
 		ApiResponse<TipoTurno> t = tipoTurnoService.obtenerTipoTurnoPorId(idTipoTurno);
 		if(r.isSuccess() && t.isSuccess()) {
 			if(r.getData().getUsuario() == t.getData().getUsuario() && r.getData().getUsuario().getId() == idUsuario) {
-				return guardarAsignacion(setearDatosPorDefecto(t.getData(), r.getData(), new AsignacionRecursoTipoTurno()));
+				
+				if(asignacionRepo.findAsignacionByRecursoAndTipoTurno(idRecurso, idTipoTurno)==null) {
+					return guardarAsignacion(setearDatosPorDefecto(t.getData(), r.getData(), new AsignacionRecursoTipoTurno()));
+				}
+				return new ApiResponse<>(true,"Asignacion ya creada.",null);
 			}
 			return new ApiResponse<>(false,"Usuario no autorizado.",null);
 		}
@@ -155,7 +166,7 @@ public class AsignacionRecursoTipoTurnoServiceImpl implements AsignacionRecursoT
 				asignacion.setRecurso(guardado.getData().getRecurso());
 				asignacion.setTipoTurno(guardado.getData().getTipoTurno());
 				asignacion.setReservas(guardado.getData().getReservas());
-				return guardarAsignacion(asignacion);//save
+				return save(asignacion);//save
 			}else {
 				return new ApiResponse<>(false,"Usuario no autorizado a editar la Asignación.",null);
 			}
@@ -381,8 +392,79 @@ public class AsignacionRecursoTipoTurnoServiceImpl implements AsignacionRecursoT
 	}
 	
 	
+	
+	
+	
+	
+	public ApiResponse<AsignacionRecursoTipoTurno> obtenerAsignacionPorIdRecursoTipoTurno(long idRecurso, long idTipoTurno){
+		AsignacionRecursoTipoTurno asig = asignacionRepo.findAsignacionByRecursoAndTipoTurno(idRecurso, idTipoTurno);
+		return asig!=null ? new ApiResponse<>(true,"",asig) : new ApiResponse(false,"No se pudo obtener la Asignación",null);
+	}
+	
 
 	
 	
+	//obtener todas las asignaciones del recurso
+	//obtener todas las asignaciones por id
+	//a todas las asignaciones que esten en asignacionesPorId y no esten en asignacionesDelRecurso entonces se deben crear
+	//a todas las asignaciones que no coincidan se setea eliminado=true
+	//a todas las asignaciones que si coincidan se setea eliminado=false
+	@Override
+	public ApiResponse<AsignacionRecursoTipoTurno> eliminarAsignacion(Long idTipoTurno, Long idRecurso, Long idUsuario) {
 
+		AsignacionRecursoTipoTurno asig = asignacionRepo.findAsignacionByRecursoAndTipoTurno(idRecurso, idTipoTurno);
+		if(asig!=null) {
+			asig.setEliminado(true);
+			System.out.println("Voy a setar eliminado=true en la relacion idrec:"+idRecurso+" idTipoTurno:"+idTipoTurno);
+			return editarAsignacion(asig,idUsuario);
+		}
+		return new ApiResponse<>(true,"",null);
+		
+	}
+	
+	
+	
+	@Override
+	public ApiResponse<AsignacionRecursoTipoTurno> habilitarAsignacion(Long idTipoTurno, Long idRecurso, Long idUsuario) {
+
+		AsignacionRecursoTipoTurno asig = asignacionRepo.findAsignacionByRecursoAndTipoTurno(idRecurso, idTipoTurno);
+		if(asig!=null) {
+			asig.setEliminado(false);
+			return editarAsignacion(asig,idUsuario);
+		}
+		return guardarAsignacion(idTipoTurno, idRecurso, idUsuario);
+		
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	@Override
+	public ApiResponse<Recurso> actualizarAsignaciones(List<Long> idTiposDeTurno, long recId,Usuario usuario){
+		String mensajeError = "";
+		ApiResponse<AsignacionRecursoTipoTurno> resp;
+		ApiResponse<List<TipoTurno>> todosLosTipoTurno = tipoTurnoService.listarTipoTurnoDeUsuario(usuario);
+		if(todosLosTipoTurno.isSuccess()) {
+			for(TipoTurno tt : todosLosTipoTurno.getData()) {
+				resp = idTiposDeTurno.contains(tt.getId()) ? habilitarAsignacion(tt.getId(), recId, usuario.getId()) 
+						: eliminarAsignacion(tt.getId(), recId, usuario.getId());
+				mensajeError = resp.isSuccess() ? mensajeError : mensajeError + resp.getMessage() + " ";
+
+			}
+			return mensajeError.length()>0 ? new ApiResponse<>(false,"Error al actualizar las asignaciones del Recurso, "+mensajeError,null)
+					: new ApiResponse<>(true,"Se guardaron correctamente los cambios.",null);
+		}else {
+			return new ApiResponse<>(false,"Error al actualizar las asignaciones del Recurso",null);
+		}
+	}
+	
+	
+	
+	
 }
