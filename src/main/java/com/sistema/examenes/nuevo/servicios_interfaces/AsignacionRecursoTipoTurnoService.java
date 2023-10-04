@@ -11,7 +11,7 @@ public interface AsignacionRecursoTipoTurnoService {
 
 	public ApiResponse<AsignacionRecursoTipoTurno> guardarAsignacion(long idTipoTurno, long idRecurso/*AsignacionRecursoTipoTurno asignacion*/, long idUsuario);
 	public ApiResponse<AsignacionRecursoTipoTurno> editarAsignacion(AsignacionRecursoTipoTurno asignacion, long idUsuario);
-	public ApiResponse<List<AsignacionRecursoTipoTurno>> listarAsignacion(Long id);
+	//public ApiResponse<List<AsignacionRecursoTipoTurno>> listarAsignacion(Long id);
 	public ApiResponse<List<AsignacionRecursoTipoTurno>> listarAsignacionPorUsuario(Long idUsuario);
 	
 	public ApiResponse<AsignacionRecursoTipoTurno> obtenerPorId(Long id);

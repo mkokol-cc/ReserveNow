@@ -55,8 +55,10 @@ public class MySecurityConfig extends WebSecurityConfigurerAdapter {
                 .cors()
                 .disable()
                 .authorizeRequests()
-                .antMatchers("/generate-token","/usuarios/","/email/reestablecer-clave/*","/email/bienvenida/*","/email/contacto/*","/email/validar-email/*","/v1/prueba","/v1/public/**","/v1.0/**").permitAll()
+                .antMatchers("/ws-endpoint/**").permitAll()
+                .antMatchers("/generate-token","/usuarios/","/email/reestablecer-clave/*","/email/bienvenida/*","/email/contacto/*","/email/validar-email/*","/v1/prueba","/v1/public/**","/v1.0/**","/ws-endpoint/**").permitAll()
                 .antMatchers(HttpMethod.OPTIONS).permitAll()
+                //.regexMatchers("*").permitAll()
                 //.regexMatchers("/v1.*").permitAll() // Permite acceso sin autorización a la URL /api/v1/comentarios
                 //.regexMatchers("/api/v1/public.*").permitAll() // Permite acceso sin autorización a la URL /api/v1/comentarios
                 .antMatchers("/api/v1/admin/**").hasAuthority("ADMIN") // Restringe el acceso a usuarios con rol ADMIN a cualquier URL que comience con /admin/

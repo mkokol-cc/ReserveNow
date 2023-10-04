@@ -23,7 +23,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.sistema.examenes.anterior.modelo.Notificacion;
 import com.sistema.examenes.anterior.modelo.Recurso;
 import com.sistema.examenes.anterior.modelo.Reservante;
 import com.sistema.examenes.anterior.modelo.TipoTurno;
@@ -118,7 +118,9 @@ public class Usuario implements UserDetails {
     @JsonIgnore
     private List<Reservante> clientes;
 
-
+    @OneToMany(mappedBy = "usuario", fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<Notificacion> notificacion;
     
     
 	public Usuario(){
