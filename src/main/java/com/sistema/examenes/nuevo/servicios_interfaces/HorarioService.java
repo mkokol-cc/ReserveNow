@@ -1,6 +1,8 @@
 package com.sistema.examenes.nuevo.servicios_interfaces;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 import com.sistema.examenes.anterior.modelo.AsignacionRecursoTipoTurno;
 import com.sistema.examenes.anterior.modelo.Dias;
@@ -18,4 +20,7 @@ public interface HorarioService {
 	
 	/*public ApiResponse<Horario> comprobarHorarioRecurso(LocalTime hora, Dias dia, Recurso recurso);*/
 	public ApiResponse<Horario> comprobarHorarioAsignacion(LocalTime hora, Dias dia, AsignacionRecursoTipoTurno asignacion);
+	
+	public ApiResponse<List<Horario>> horariosDeAsignacionParaFecha(AsignacionRecursoTipoTurno asig, Dias dia);
+	ApiResponse<List<Horario>> horariosDeRecursoParaFecha(Recurso recurso, Dias dia);
 }

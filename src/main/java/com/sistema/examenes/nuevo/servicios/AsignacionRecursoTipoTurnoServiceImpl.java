@@ -355,6 +355,12 @@ public class AsignacionRecursoTipoTurnoServiceImpl implements AsignacionRecursoT
 	}
 	
 	
+	//obtener List<HorarioEspcial> para la fecha
+	//si no lo hay obtener List<Horario> para la fecha
+	//para el caso de que haya 
+	//public List<Horario> obtenerHorarioParaFechaDeAsignacion(LocalDate fecha, AsignacionRecursoTipoTurno asignacion){}
+	
+	
 	
 	
 }

@@ -206,7 +206,7 @@ public class AdmController {
 		Reservante r = reservaStr.getReservante();
 		Usuario u = usuarioRepo.getById(getUserId());
 		r.setUsuario(u);
-		ApiResponse<Reserva> resp = reservaService.guardarReserva(reservaStr/*,getUserId()*/);
+		ApiResponse<Reserva> resp = reservaService.guardarReserva(reservaStr,getUserId());
 		if(resp.isSuccess()) {
 			return ResponseEntity.ok(resp.getData());
 		}

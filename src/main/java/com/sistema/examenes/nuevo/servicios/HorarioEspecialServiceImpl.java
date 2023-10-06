@@ -184,4 +184,23 @@ public class HorarioEspecialServiceImpl implements HorarioEspecialService{
 		return false;
 	}
 
+	@Override
+	public ApiResponse<List<HorarioEspecial>> horariosEspecialesDeAsignacionParaFecha(AsignacionRecursoTipoTurno asig, LocalDate fecha){
+		try {
+			List<HorarioEspecial> horarios = horarioEspRepo.findByFechaAndAsignacion(fecha, asig);
+			return new ApiResponse<>(true,"",horarios);
+		}catch(Exception e) {
+			return new ApiResponse<>(false,"Error al obtener los horarios especiales para la fecha "+fecha,null);
+		}
+	}
+	
+	@Override
+	public ApiResponse<List<HorarioEspecial>> horariosEspecialesDeRecursoParaFecha(Recurso recurso, LocalDate fecha){
+		try {
+			List<HorarioEspecial> horarios = horarioEspRepo.findByFechaAndRecurso(fecha, recurso);
+			return new ApiResponse<>(true,"",horarios);
+		}catch(Exception e) {
+			return new ApiResponse<>(false,"Error al obtener los horarios especiales para la fecha "+fecha,null);
+		}
+	}
 }

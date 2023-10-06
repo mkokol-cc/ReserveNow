@@ -89,7 +89,7 @@ public class PublicController {
 			Reservante r = reservaStr.getReservante();
 			Usuario u = getUserByPageId(idUserPage);
 			r.setUsuario(u);
-			ApiResponse<Reserva> resp = reservaService.guardarReserva(reservaStr/*,u.getId()*/);
+			ApiResponse<Reserva> resp = reservaService.guardarReserva(reservaStr,u.getId());
 			if(resp.isSuccess()) {
 				return ResponseEntity.ok(resp.getData());
 			}
@@ -109,8 +109,8 @@ public class PublicController {
 						respAsig.getData().getTipoTurno().getUsuario()==getUserByPageId(idUserPage)) {
 					DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 			        LocalDate date = LocalDate.parse(fecha, dateFormatter);
-					List<TurnoDTO> respTurnos = reservaService.crearTurnos(respAsig.getData(), date);
-					return ResponseEntity.ok(respTurnos);
+					//List<TurnoDTO> respTurnos = reservaService.crearTurnos(respAsig.getData(), date);
+					//return ResponseEntity.ok(respTurnos);
 				}
 				//System.out.println("Voy a devolver 401");
 				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario no autorizado.");
@@ -137,7 +137,7 @@ public class PublicController {
 			        LocalDate desde = LocalDate.parse(fechaDesde, dateFormatter);
 			        LocalDate hasta = LocalDate.parse(fechaHasta, dateFormatter);
 			        for (LocalDate fecha = desde; !fecha.isAfter(hasta); fecha = fecha.plusDays(1)) {
-			        	respTurnos.addAll(reservaService.crearTurnos(respAsig.getData(), fecha));
+			        	//respTurnos.addAll(reservaService.crearTurnos(respAsig.getData(), fecha));
 			        }
 					return ResponseEntity.ok(respTurnos);
 				}

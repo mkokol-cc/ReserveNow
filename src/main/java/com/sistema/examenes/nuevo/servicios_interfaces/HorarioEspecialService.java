@@ -2,6 +2,7 @@ package com.sistema.examenes.nuevo.servicios_interfaces;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 import com.sistema.examenes.anterior.modelo.AsignacionRecursoTipoTurno;
 import com.sistema.examenes.anterior.modelo.HorarioEspecial;
@@ -17,4 +18,8 @@ public interface HorarioEspecialService {
 	
 	/*public ApiResponse<HorarioEspecial> comprobarHorarioEspecialRecurso(LocalTime hora, LocalDate fecha, Recurso recurso);*/
 	public ApiResponse<HorarioEspecial> comprobarHorarioEspecialAsignacion(LocalTime hora, LocalDate fecha,AsignacionRecursoTipoTurno asignacion);
+	
+	public ApiResponse<List<HorarioEspecial>> horariosEspecialesDeAsignacionParaFecha(AsignacionRecursoTipoTurno asig, LocalDate fecha);
+
+	ApiResponse<List<HorarioEspecial>> horariosEspecialesDeRecursoParaFecha(Recurso recurso, LocalDate fecha);
 }

@@ -1,5 +1,6 @@
 package com.sistema.examenes.nuevo.servicios;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.HashSet;
 import java.util.List;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 import com.sistema.examenes.anterior.modelo.AsignacionRecursoTipoTurno;
 import com.sistema.examenes.anterior.modelo.Dias;
 import com.sistema.examenes.anterior.modelo.Horario;
+import com.sistema.examenes.anterior.modelo.HorarioEspecial;
 import com.sistema.examenes.anterior.modelo.Recurso;
 import com.sistema.examenes.anterior.repositorios.HorarioRepository;
 import com.sistema.examenes.nuevo.servicios_interfaces.HorarioService;
@@ -149,6 +151,25 @@ public class HorarioServiceImpl implements HorarioService{
 		    // Código a ejecutar mientras la condición sea verdadera
 		}
 		return false;
+	}
+	
+	@Override
+	public ApiResponse<List<Horario>> horariosDeAsignacionParaFecha(AsignacionRecursoTipoTurno asig, Dias dia){
+		try {
+			List<Horario> horarios = horarioRepo.findByAsignacionAndDia(asig, dia);
+			return new ApiResponse<>(true,"",horarios);
+		}catch(Exception e) {
+			return new ApiResponse<>(false,"Error al obtener los horarios para el dia "+dia.name(),null);
+		}
+	}
+	@Override
+	public ApiResponse<List<Horario>> horariosDeRecursoParaFecha(Recurso recurso, Dias dia){
+		try {
+			List<Horario> horarios = horarioRepo.findByRecursoAndDia(recurso, dia);
+			return new ApiResponse<>(true,"",horarios);
+		}catch(Exception e) {
+			return new ApiResponse<>(false,"Error al obtener los horarios para el dia "+dia.name(),null);
+		}
 	}
 	
 

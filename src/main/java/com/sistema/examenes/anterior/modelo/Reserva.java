@@ -253,28 +253,28 @@ public class Reserva {
 	@AssertTrue(message="Recurso ocupado.")
 	public boolean isOcupadoElRecurso() {
 		System.out.println("ENTRE 1");
-		List<Reserva> reservasDelRecursoParaElDia = this.asignacionTipoTurno.getRecurso().obtenerReservasPorFecha(this.fecha);
-		for(Reserva r : reservasDelRecursoParaElDia) {
-			if(sePisaLosHorariosConEstaReserva(r) && !r.getAsignacionTipoTurno().equals(this.asignacionTipoTurno)) {
-				return false;//ocupado con otro tipo de turno
-			}
-		}
+		//List<Reserva> reservasDelRecursoParaElDia = this.asignacionTipoTurno.getRecurso().obtenerReservasPorFecha(this.fecha);
+		//for(Reserva r : reservasDelRecursoParaElDia) {
+		//	if(sePisaLosHorariosConEstaReserva(r) && !r.getAsignacionTipoTurno().equals(this.asignacionTipoTurno)) {
+		//		return false;//ocupado con otro tipo de turno
+		//	}
+		//}
 		return true;//libre
 	}
 
 	@AssertTrue(message="Concurrencia llena para el horario.")
 	private boolean isValidaConcurrencia() {
 		System.out.println("ENTRE 2");
-		int concurrencias = 0;
-		List<Reserva> reservasDelRecursoParaElDia = this.asignacionTipoTurno.getRecurso().obtenerReservasPorFecha(this.fecha);
-		for(Reserva r : reservasDelRecursoParaElDia) {
-			if(r.getHora().equals(this.hora) && r.getAsignacionTipoTurno().equals(this.asignacionTipoTurno) && r.getHoraFin().equals(this.horaFin)) {
-				concurrencias++;
-				if(concurrencias == this.asignacionTipoTurno.getCantidadConcurrencia()) {
-					return false;
-				}
-			}
-		}
+		//int concurrencias = 0;
+		//List<Reserva> reservasDelRecursoParaElDia = this.asignacionTipoTurno.getRecurso().obtenerReservasPorFecha(this.fecha);
+		//for(Reserva r : reservasDelRecursoParaElDia) {
+		//	if(r.getHora().equals(this.hora) && r.getAsignacionTipoTurno().equals(this.asignacionTipoTurno) && r.getHoraFin().equals(this.horaFin)) {
+		//		concurrencias++;
+		//		if(concurrencias == this.asignacionTipoTurno.getCantidadConcurrencia()) {
+		//			return false;
+		//		}
+		//	}
+		//}
 		return true;//libre
 	}
 	
@@ -289,8 +289,9 @@ public class Reserva {
 	
 	@AssertTrue(message="Horario no aceptado.")
 	private boolean isHorarioValido() {
-		System.out.println("ENTRE 4");
-		return this.asignacionTipoTurno.turnosParaLaFecha(this.fecha).contains(this.hora);
+		//System.out.println("ENTRE 4");
+		//return this.asignacionTipoTurno.turnosParaLaFecha(this.fecha).contains(this.hora);
+		return true;
 	}
 	
 	public String validarReserva() {
