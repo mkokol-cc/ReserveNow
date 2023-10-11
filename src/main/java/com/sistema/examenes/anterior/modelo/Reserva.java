@@ -79,9 +79,31 @@ public class Reserva {
 	@NotNull(message = "Debes ingresar los datos de la persona que va a reservar.")	
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "reservante", referencedColumnName = "id", nullable = false, unique = false)
-	//@JsonManagedReference
-	@JsonBackReference
+	@JsonManagedReference
+	//@JsonBackReference
 	private Reservante reservante;
+	
+	public LocalDate getFechaCreacion() {
+		return fechaCreacion;
+	}
+
+	public void setFechaCreacion(LocalDate fechaCreacion) {
+		this.fechaCreacion = fechaCreacion;
+	}
+
+	public LocalTime getHoraCreacion() {
+		return horaCreacion;
+	}
+
+	public void setHoraCreacion(LocalTime horaCreacion) {
+		this.horaCreacion = horaCreacion;
+	}
+
+	@Column(name="fechaCreacion")
+	private LocalDate fechaCreacion;
+	
+	@Column(name="horaCreacion")
+	private LocalTime horaCreacion;
 	
 	public Reserva(){
 

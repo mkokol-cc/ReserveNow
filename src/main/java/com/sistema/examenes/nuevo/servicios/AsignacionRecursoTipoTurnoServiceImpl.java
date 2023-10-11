@@ -1,10 +1,8 @@
 package com.sistema.examenes.nuevo.servicios;
 
-import java.util.Collection;
-import java.util.HashSet;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,8 +12,6 @@ import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
 
 import com.sistema.examenes.anterior.modelo.AsignacionRecursoTipoTurno;
-import com.sistema.examenes.anterior.modelo.Horario;
-import com.sistema.examenes.anterior.modelo.HorarioEspecial;
 import com.sistema.examenes.anterior.modelo.Recurso;
 import com.sistema.examenes.anterior.modelo.Reserva;
 import com.sistema.examenes.anterior.modelo.TipoTurno;
@@ -363,4 +359,45 @@ public class AsignacionRecursoTipoTurnoServiceImpl implements AsignacionRecursoT
 	
 	
 	
+	
+	
+	//DESHABILITAR POR TIPOTURNO
+	public ApiResponse<?> eliminarAsignacionPorTipoTurno(long idUsuario, long idTipoTurno){
+		ApiResponse<List<AsignacionRecursoTipoTurno>> asigDeUsuario = listarAsignacionPorUsuario(idUsuario);
+		ApiResponse<AsignacionRecursoTipoTurno> eliminarAsig;
+		String mensajeError = "";
+		if(asigDeUsuario.isSuccess()) {
+			for(AsignacionRecursoTipoTurno a : asigDeUsuario.getData()) {
+				if(a.getTipoTurno().getId() == idTipoTurno) {
+					eliminarAsig = eliminarAsignacion(idTipoTurno,a.getRecurso().getId(),idUsuario);
+					mensajeError = eliminarAsig.isSuccess() ? mensajeError :  mensajeError + eliminarAsig.getMessage() + " ";
+				}
+			}
+			return mensajeError.length()==0 ? new ApiResponse<>(true,"",null) 
+					: new ApiResponse<>(false,mensajeError,null);
+		}
+		return new ApiResponse<>(false,"Error al obtener las asignaciones del usuario.",null);
+	}
+	
+	//DESHABILITAR POR RECURSO
+	public ApiResponse<?> eliminarAsignacionPorRecurso(long idUsuario, long idRecurso){
+		ApiResponse<List<AsignacionRecursoTipoTurno>> asigDeUsuario = listarAsignacionPorUsuario(idUsuario);
+		ApiResponse<AsignacionRecursoTipoTurno> eliminarAsig;
+		String mensajeError = "";
+		if(asigDeUsuario.isSuccess()) {
+			for(AsignacionRecursoTipoTurno a : asigDeUsuario.getData()) {
+				if(a.getRecurso().getId() == idRecurso) {
+					eliminarAsig = eliminarAsignacion(a.getTipoTurno().getId(),idRecurso,idUsuario);
+					mensajeError = eliminarAsig.isSuccess() ? mensajeError :  mensajeError + eliminarAsig.getMessage() + " ";
+				}
+			}
+			return mensajeError.length()==0 ? new ApiResponse<>(true,"",null) 
+					: new ApiResponse<>(false,mensajeError,null);
+		}
+		return new ApiResponse<>(false,"Error al obtener las asignaciones del usuario.",null);
+	}
+	
+	
+	
+
 }

@@ -1,6 +1,7 @@
 package com.sistema.examenes.nuevo.servicios;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.sistema.examenes.anterior.modelo.Notificacion;
 import com.sistema.examenes.anterior.modelo.Reserva;
@@ -9,6 +10,7 @@ import com.sistema.examenes.modelo.usuario.Usuario;
 import com.sistema.examenes.nuevo.servicios_interfaces.NotificacionService;
 import com.sistema.examenes.websocket.WebSocketService;
 
+@Service
 public class NotificacionServiceImpl implements NotificacionService{
 
     @Autowired

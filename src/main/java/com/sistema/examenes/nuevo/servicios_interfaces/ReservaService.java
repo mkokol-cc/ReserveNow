@@ -1,6 +1,7 @@
 package com.sistema.examenes.nuevo.servicios_interfaces;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 import com.sistema.examenes.anterior.modelo.AsignacionRecursoTipoTurno;
@@ -18,5 +19,8 @@ public interface ReservaService {
 	
 	
 	public ApiResponse<Reserva> nuevaReserva(Reserva r, long idAsignacion);
+	public ApiResponse<List<Reserva>> obtenerReservasInvolucradasEnRango(Long idRecurso, LocalDate fecha, LocalTime desde,
+			LocalTime hasta);
+	ApiResponse<List<Reserva>> cambiarEstadosDeListaDeIsReserva(Long idEstado, List<Long> idReserva);
 	
 }

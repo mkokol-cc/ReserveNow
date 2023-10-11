@@ -60,6 +60,7 @@ public class Reservante {
 	
 	@OneToMany(mappedBy = "reservante", fetch = FetchType.EAGER/*, cascade = CascadeType.ALL, orphanRemoval = true*/)
     //@JsonIgnore
+	//@JsonManagedReference
 	@JsonBackReference
     private Set<Reserva> reservas = new HashSet<>();
 	

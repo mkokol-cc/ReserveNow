@@ -83,6 +83,13 @@ public class EstadoServiceImpl implements EstadoService{
 			return new ApiResponse<>(false,"Error al obtener los estados",null);
 		}
 	}
+	
+	
+	@Override
+	public ApiResponse<Estado> getEstadoById(Long idEstado){
+		Estado e = estadoRepo.getById(idEstado);
+		return e!=null ? new ApiResponse<>(true,"",e) : new ApiResponse<>(false,"Error al obtener el estado",null);
+	}
 
 
 }

@@ -46,8 +46,19 @@ public class Estado {
 	@JsonIgnore
 	public List<Reserva> cambiosDeEstado;
 	
+	@Column(name = "esEstadoFinal")
+	public boolean esEstadoFinal;
+	
 	public long getId() {
 		return id;
+	}
+
+	public boolean isEsEstadoFinal() {
+		return esEstadoFinal;
+	}
+
+	public void setEsEstadoFinal(boolean esEstadoFinal) {
+		this.esEstadoFinal = esEstadoFinal;
 	}
 
 	public void setId(long id) {

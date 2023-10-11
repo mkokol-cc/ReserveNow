@@ -13,4 +13,5 @@ public interface EstadoService {
 	
 	
 	ApiResponse<List<Estado>> listarEstados();
+	ApiResponse<Estado> getEstadoById(Long idEstado);
 }
