@@ -8,14 +8,14 @@ import com.sistema.examenes.nuevo.servicios.ApiResponse;
 
 public interface RecursoService {
 	
-	public ApiResponse<Recurso> guardarRecurso(Recurso recurso);
+	public Recurso guardarRecurso(Recurso recurso) throws Exception;
 	
-	public ApiResponse<Recurso> editarRecurso(Recurso recurso);
+	public Recurso editarRecurso(Recurso recurso) throws Exception;
 	
-	public ApiResponse<List<Recurso>> listarRecurso(Usuario userId);
+	public List<Recurso> listarRecurso(Usuario userId) throws Exception;
 	
-	public ApiResponse<Recurso> obtenerRecursoPorId(long idRecurso);
+	public Recurso obtenerRecursoPorId(long idRecurso) throws Exception;
 	
-	public ApiResponse<Recurso> actualizarAsignaciones(List<Long> idTiposDeTurno, long recId,Usuario usuario);
+	public Recurso actualizarAsignaciones(List<Long> idTiposDeTurno, long recId,Usuario usuario) throws Exception;
 
 }

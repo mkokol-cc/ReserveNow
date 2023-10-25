@@ -19,7 +19,19 @@ class SistemaExamenesBackendApplicationTests {
 	
 	@Test
 	void contextLoads() {
-
+		try {
+			if(prueba()) {
+				System.out.println("true");
+			}else {
+				System.out.println("false");	
+			}
+		}catch(Error e) {//catch(Exception e)
+			System.out.println(e.getMessage());
+		}
+	}
+	
+	boolean prueba() throws Error {
+		throw new Error("ESTOY HACIENDO UN TEST :)");
 	}
 
 }

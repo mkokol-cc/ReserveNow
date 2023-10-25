@@ -12,15 +12,15 @@ import com.sistema.examenes.nuevo.servicios.ApiResponse;
 
 public interface HorarioService {
 	
-	public ApiResponse<Horario> guardarHorarioRecurso(Horario h, Recurso r);
-	public ApiResponse<Horario> guardarHorarioAsignacion(Horario h, AsignacionRecursoTipoTurno asignacion);
+	Horario guardarHorarioRecurso(Horario h, Recurso r) throws Exception;
+	Horario guardarHorarioAsignacion(Horario h, AsignacionRecursoTipoTurno asignacion) throws Exception;
 	
-	public ApiResponse<Recurso> guardarListaHorariosRecurso(Recurso r);
-	public ApiResponse<AsignacionRecursoTipoTurno> guardarListaHorariosAsignacion(AsignacionRecursoTipoTurno asignacion);
+	Recurso guardarListaHorariosRecurso(Recurso r) throws Exception;
+	AsignacionRecursoTipoTurno guardarListaHorariosAsignacion(AsignacionRecursoTipoTurno asignacion) throws Exception;
 	
 	/*public ApiResponse<Horario> comprobarHorarioRecurso(LocalTime hora, Dias dia, Recurso recurso);*/
-	public ApiResponse<Horario> comprobarHorarioAsignacion(LocalTime hora, Dias dia, AsignacionRecursoTipoTurno asignacion);
+	Horario comprobarHorarioAsignacion(LocalTime hora, Dias dia, AsignacionRecursoTipoTurno asignacion) throws Exception;
 	
-	public ApiResponse<List<Horario>> horariosDeAsignacionParaFecha(AsignacionRecursoTipoTurno asig, Dias dia);
-	ApiResponse<List<Horario>> horariosDeRecursoParaFecha(Recurso recurso, Dias dia);
+	List<Horario> horariosDeAsignacionParaFecha(AsignacionRecursoTipoTurno asig, Dias dia) throws Exception;
+	List<Horario> horariosDeRecursoParaFecha(Recurso recurso, Dias dia) throws Exception;
 }

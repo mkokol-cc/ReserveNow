@@ -61,22 +61,24 @@ public class ReservaServiceImpl implements ReservaService{
     public ReservaServiceImpl(Validator validator) {
         this.validator = validator;
     }
-    public ApiResponse<Reserva> validar(Reserva reserva) {
+    public Reserva validar(Reserva reserva) throws Exception{
         Errors errors = new BeanPropertyBindingResult(reserva, "reserva");
         ValidationUtils.invokeValidator(validator, reserva, errors);
         if (errors.hasErrors()) {
         	//System.out.println(errors.getAllErrors());
-        	return new ApiResponse<>(false,errors.getFieldError().getDefaultMessage().toString(),null);
+        	throw new Exception(errors.getFieldError().getDefaultMessage().toString());
         } else {
         	//System.out.println("---------------PASO LA VALIDACION---------------");
-        	return new ApiResponse<>(true,"".toString(),reserva);
+        	return reserva;
         	//return save(recursoDTO);
         }
     }
-    private ApiResponse<Reserva> save(Reserva reserva){
+    private Reserva save(Reserva reserva) throws Exception{
     	Reserva guardado = reservaRepo.save(reserva);
-		return (guardado!=null ? new ApiResponse<>(true,"",guardado) 
-				: new ApiResponse<>(false,"Error al guardar la Reserva",null));
+    	if(guardado!=null) {
+    		return guardado;
+    	}
+    	throw new Exception("Error al guardar la Reserva en la base de datos.");
 	}	
 	
 	
@@ -84,33 +86,23 @@ public class ReservaServiceImpl implements ReservaService{
 	
 	
 	@Override
-	public ApiResponse<Reserva> guardarReserva(Reserva reserva, long userId) {
-		
-		ApiResponse<AsignacionRecursoTipoTurno> respAsignacion = asignacionService.obtenerPorId(reserva.getAsignacionTipoTurno().getId());
-		if(respAsignacion.isSuccess() && respAsignacion.getData().getRecurso().getUsuario().getId() == userId) {
-			reserva.setAsignacionTipoTurno(respAsignacion.getData());
-			ApiResponse<Reserva> resp = validar(reserva);
-			if(resp.isSuccess()) {
-				ApiResponse<Reserva> horarioValido = esPosibleReserva(reserva);
-				if(horarioValido.isSuccess()) {
-					ApiResponse<Reservante> reservanteResp = reservanteService.guardarReservante(reserva.getReservante());
-					if(reservanteResp.isSuccess()) {
-						reserva = estadoService.estadoReservaNueva(reserva).getData();
-						reserva = resp.getData();
-						reserva.setReservante(reservanteResp.getData());
-						ApiResponse<Reserva> guardarResp = save(reserva);
-						if(guardarResp.isSuccess()) {
-							notificacionService.notificarNuevaReserva(guardarResp.getData(),guardarResp.getData().getAsignacionTipoTurno().getRecurso().getUsuario());
-						} 
-						return guardarResp;
-					}
-					return new ApiResponse<>(false,"Error al guardar la Reserva, "+reservanteResp.getMessage(),null);	
-				}
-				return new ApiResponse<>(false,"Error al guardar la Reserva, "+horarioValido.getMessage(),null);	
+	public Reserva guardarReserva(Reserva reserva, long userId) throws Exception {
+		AsignacionRecursoTipoTurno asignacion = asignacionService.obtenerPorId(reserva.getAsignacionTipoTurno().getId());
+		if(asignacion.getRecurso().getUsuario().getId() == userId) {
+			reserva.setAsignacionTipoTurno(asignacion);
+			if(esPosibleReserva(reserva)!=null) {
+				Reservante r = reservanteService.guardarReservante(reserva.getReservante());
+				reserva.setReservante(r);
+				reserva = estadoService.estadoReservaNueva(reserva);
+				Reserva guardada = save(validar(reserva));
+				notificacionService.notificarNuevaReserva(guardada,guardada.getAsignacionTipoTurno().getRecurso().getUsuario());
+				return guardada;
+			}else {
+				throw new Exception("horario invalido.");
 			}
-			return new ApiResponse<>(false,"Error al guardar la Reserva, "+resp.getMessage(),null);
+		}else{
+			throw new Exception("Usuario no autorizado");
 		}
-		return new ApiResponse<>(false,"Error al guardar la Reserva, "+respAsignacion.getMessage(),null);
 	}
 	
 
@@ -118,82 +110,62 @@ public class ReservaServiceImpl implements ReservaService{
 	//hay estados que no se pueden cambiar (son finales) Por ej todos los cancelados. (La logica de esto va a estar en el EstadoService)
 	//el editar deberia tener una logica similar al guardar, solo que se debe crear el cambio de estado en el caso de cambiar de estado
 	@Override
-	public ApiResponse<Reserva> editarReserva(Reserva r, long idUsuario) {
+	public Reserva editarReserva(Reserva r, long idUsuario) throws Exception {
 		Reserva reservaEditada;
-		ApiResponse<Reserva> response = obtenerReservaPorId(r.getId());
-		if(response.isSuccess()) {
-			if(idUsuario==response.getData().getAsignacionTipoTurno().getRecurso().getUsuario().getId()
-					&& idUsuario==response.getData().getAsignacionTipoTurno().getTipoTurno().getUsuario().getId()) {
-				reservaEditada = editarDatosPorAdministrador(response.getData(),r);
-			}else {
-				reservaEditada = editarDatosPorGuest(response.getData(),r);
-			}
-			ApiResponse<Reserva> respGuardarReserva = guardarReserva(reservaEditada,idUsuario);
-			if(respGuardarReserva.isSuccess()) {
-				//notificar al cliente
-			}
-			return respGuardarReserva;
+		Reserva reservaId = obtenerReservaPorId(r.getId());
+		if(idUsuario==reservaId.getAsignacionTipoTurno().getRecurso().getUsuario().getId()
+				&& idUsuario==reservaId.getAsignacionTipoTurno().getTipoTurno().getUsuario().getId()) {
+			reservaEditada = editarDatosPorAdministrador(reservaId,r);
+		}else {
+			reservaEditada = editarDatosPorGuest(reservaId,r);
 		}
-		return new ApiResponse<>(false,"Datos inválidos. Error al obtener la Reserva.",null);
+		Reserva guardada = save(validar(reservaEditada));
+		if(guardada!=null) {
+			//ENVIAR AVISO WPP O MAIL AL RESERVANTE
+			return guardada;
+		}
+		throw new Exception("Error al editar la Reserva");
 	}
 
 	//esta logica ya esta en el metodo GuardarReserva implementada de manera correcta.
 	//el id de la asignacion debe venir desde el body Http
 	@Override
-	public ApiResponse<Reserva> nuevaReserva(Reserva datosReserva, long userId){
-		//setear asignacion
-		ApiResponse<AsignacionRecursoTipoTurno> resp = this.asignacionService.obtenerPorId(datosReserva.getAsignacionTipoTurno().getId());
-		if(resp.isSuccess()) {
-			//los datos de la fecha y hora de creacion se hace aca porque los otros metodos tambien se usan para editar
-			datosReserva.setFechaCreacion(LocalDate.now());
-			datosReserva.setHoraCreacion(LocalTime.now());
-			datosReserva.setAsignacionTipoTurno(resp.getData());
-			return guardarReserva(datosReserva,userId);
-		}else {
-			return new ApiResponse<Reserva>(false,"Error al obtener la Asignacion Recurso Tipo Turno.",null);
-		}
-		
+	public Reserva nuevaReserva(Reserva datosReserva, long userId) throws Exception{
+		datosReserva.setFechaCreacion(LocalDate.now());
+		datosReserva.setHoraCreacion(LocalTime.now());
+		datosReserva.setAsignacionTipoTurno(this.asignacionService.obtenerPorId(datosReserva.getAsignacionTipoTurno().getId()));
+		return guardarReserva(datosReserva,userId);
 	}
 	
 	//esto no se deberia hacer, se deberia editar de igual manera para ambos
-	private Reserva editarDatosPorAdministrador(Reserva original, Reserva editada) {
+	private Reserva editarDatosPorAdministrador(Reserva original, Reserva editada) throws Exception {
 		original.setFecha(editada.getFecha());
 		original.setHora(editada.getHora());
 		original.setHoraFin(editada.getHoraFin());
 		original.setNota(editada.getNota());
 		if(!original.getEstado().equals(editada.getEstado())) {
-			ApiResponse<Reserva> response = cambiarEstado(editada, original.getEstado());
-			original = response.isSuccess() ? response.getData() : original;
+			original = cambiarEstado(editada, original.getEstado());
 		}
 		return original;
 	}
-	private Reserva editarDatosPorGuest(Reserva original, Reserva editada) {
+	private Reserva editarDatosPorGuest(Reserva original, Reserva editada) throws Exception {
 		//puede editar solo el estado y los horarios
 		original.setFecha(editada.getFecha());
 		original.setHora(editada.getHora());
 		original.setHoraFin(editada.getHoraFin());
 		if(!original.getEstado().equals(editada.getEstado())) {
-			ApiResponse<Reserva> response = cambiarEstado(editada, original.getEstado());
-			original = response.isSuccess() ? response.getData() : original;
+			original = cambiarEstado(editada, original.getEstado());
 		}
 		return original;
 	}
 	
 	
-	private ApiResponse<Reserva> obtenerReservaPorId(long id){
-		Reserva r = reservaRepo.getById(id);
-		if(r!=null) {
-			return new ApiResponse<>(true,"",r);
-		}
-		return new ApiResponse<>(false,"Error al obtener la Reserva id:"+id+".",null);
+	private Reserva obtenerReservaPorId(long id){
+		return reservaRepo.getById(id);
 	}
-	private ApiResponse<Reserva> cambiarEstado(Reserva r, Estado eAnterior) {
+	private Reserva cambiarEstado(Reserva r, Estado eAnterior) throws Exception {
 		//nuevo cambio estado y set nuevo estado
-		ApiResponse<Reserva> estadoResponse = estadoService.nuevoCambioEstadoReserva(r,eAnterior);
-		if(estadoResponse.isSuccess()) {
-			return new ApiResponse<>(true,"",estadoResponse.getData());
-		}
-		return new ApiResponse<>(false,"Cambio de Estado Invalido",null);
+		return estadoService.nuevoCambioEstadoReserva(r,eAnterior);
 	}
 	
 	
@@ -207,30 +179,26 @@ public class ReservaServiceImpl implements ReservaService{
 	
 
 	@Override
-	public ApiResponse<List<Reserva>> listarReservaPorUsuario(long idUsuario) {
-		ApiResponse<List<AsignacionRecursoTipoTurno>> asignaciones = asignacionService.listarAsignacionPorUsuario(idUsuario);
-		if(asignaciones.isSuccess()) {
-			List<Reserva> reservas = new ArrayList<>();
-			for(AsignacionRecursoTipoTurno a : asignaciones.getData()) {
-				List<Reserva> aux = reservaRepo.findByAsignacionTipoTurno(a);
-				reservas.addAll(aux);
-			}
-			return new ApiResponse<>(true,"",reservas);
+	public List<Reserva> listarReservaPorUsuario(long idUsuario) throws Exception {
+		List<Reserva> reservas = new ArrayList<>();
+		for(AsignacionRecursoTipoTurno a : asignacionService.listarAsignacionPorUsuario(idUsuario)) {
+			List<Reserva> aux = reservaRepo.findByAsignacionTipoTurno(a);
+			reservas.addAll(aux);
 		}
-		return new ApiResponse<>(false,"Hubo un Problema al obtener las Reservas",null);
+		return reservas;
 	}
 	
 	@Override
-	public ApiResponse<Reserva> eliminarReservaPorId(long r, long idUsuario) {
+	public Reserva eliminarReservaPorId(long r, long idUsuario) throws Exception {
 		Reserva reserva = reservaRepo.getById(r);
 		if(reserva!=null) {
 			if(reserva.getAsignacionTipoTurno().getRecurso().getUsuario().getId()==idUsuario) {
 				reservaRepo.delete(reserva);
-				return new ApiResponse<>(true,"",null);	
+				return null;
 			}
-			return new ApiResponse<>(false,"No se encontro la reserva",null);
+			throw new Exception("Usuario no autorizado");
 		}
-		return new ApiResponse<>(false,"Usuario no autorizado",null);
+		throw new Exception("No se encontro la reserva");
 	}
 	
 	
@@ -329,75 +297,15 @@ public class ReservaServiceImpl implements ReservaService{
 	
 	
 	@Override
-	public ApiResponse<List<TurnoDTO>> crearTurnos(Long idAsignacion, LocalDate fecha){
+	public List<TurnoDTO> crearTurnos(Long idAsignacion, LocalDate fecha) throws Exception{
 		List<TurnoDTO> turnos = new ArrayList<>();
-		ApiResponse<AsignacionRecursoTipoTurno> resp = asignacionService.obtenerPorId(idAsignacion);
-		if(resp.isSuccess()) {
-			//List<LocalTime> horarios = getTodosLosHorariosPosiblesDeAsigPorFecha(resp.getData(),fecha);
-			List<LocalTime> horarios = getTodosLosHorariosPosiblesDeRecursoPorFecha(resp.getData().getRecurso(),fecha,resp.getData());
-			for(LocalTime h : horarios) {
-				turnos.add(new TurnoDTO(fecha,h,resp.getData().getDuracionEnMinutos(),estaLibreElHorario(resp.getData(),fecha,h)));
-			}
-			return new ApiResponse<>(true,"",turnos);
-		}
-		return new ApiResponse<>(false,"Error al obtener la asignacion",null);
-		
-		
-		
-		
-		/*
-		
-		List<HorarioEspecial> horariosEspeciales = new ArrayList<>();
-		for(HorarioEspecial he : asignacion.getHorariosEspeciales()) {
-			if(he.getFecha().isEqual(fecha)) {
-				horariosEspeciales.add(he);
-			}
-		}
-		if(horariosEspeciales.size()>0) {
-			for(HorarioEspecial h : horariosEspeciales) {
-				if(!h.isCerrado()) {
-					turnos.addAll(listarTurnos(h.getDesde(), h.getHasta(), asignacion.getDuracionEnMinutos(), fecha));
-				}
-			}
-		}else {
-			Dias d = Dias.valueOf(fecha.getDayOfWeek().getDisplayName(TextStyle.FULL, new Locale("es", "ES")).toUpperCase());
-			for(Horario h : asignacion.getHorarios()) {
-				if(h.getDia().equals(d)) {
-					turnos.addAll(listarTurnos(h.getDesde(), h.getHasta(), asignacion.getDuracionEnMinutos(), fecha));	
-				}
-			}
-		}
-		return actualizarDisponibilidadDeTurnos(turnos,asignacion.getRecurso());*/
-	}
-	/*
-	
-	private List<TurnoDTO> listarTurnos(LocalTime desde, LocalTime hasta, int duracion, LocalDate fecha){
-		List<TurnoDTO> turnos = new ArrayList<>();
-		LocalTime hora = desde;
-		while(hasta.isAfter(hora)) {
-			turnos.add(new TurnoDTO(fecha,hora,duracion,false));
-			hora= hora.plusMinutes(duracion);
+		AsignacionRecursoTipoTurno asignacion = asignacionService.obtenerPorId(idAsignacion);
+		List<LocalTime> horarios = getTodosLosHorariosPosiblesDeRecursoPorFecha(asignacion.getRecurso(),fecha,asignacion);
+		for(LocalTime h : horarios) {
+			turnos.add(new TurnoDTO(fecha,h,asignacion.getDuracionEnMinutos(),estaLibreElHorario(asignacion,fecha,h)));
 		}
 		return turnos;
 	}
-	
-	private List<TurnoDTO> actualizarDisponibilidadDeTurnos(List<TurnoDTO> turnos,Recurso r){
-		List<Reserva> reservas = reservaRepo.buscarRecurso(r.getId());
-		for(Reserva reserva : reservas) {
-			for(TurnoDTO turno : turnos) {
-				if(reserva.getFecha().isEqual(turno.getFecha())){
-					if(turno.getHora().compareTo(reserva.getHoraFin()) >= 0 ||
-							reserva.getHora().compareTo(turno.getHasta()) >= 0) {
-						turno.setOcupado(false);
-					}else {
-						turno.setOcupado(true);
-					}
-				}
-			}	
-		}
-		return turnos;
-	}*/
-	
 
 	
 	
@@ -407,17 +315,15 @@ public class ReservaServiceImpl implements ReservaService{
 	//SI EL HORARIO ES EL MISMO Y LA CANTIDAD DE LAS RESERVAS CON ESTADO RESERVADO ES MENOR A CONCURRENCIA ENTONCES NO ESTA OCUPADO
 	//SI EL HORARIO ES EL MISMO Y LA CANTIDAD DE LAS RESERVAS CON ESTADO RESERVADO ES MAYOR A CONCURRENCIA ENTONCES NO ESTA OCUPADO
 	//SI EL HORARIO NO ES EL MISMO Y ESTA EN EL RANGO ENTONCES HAY UNA RESERVA REGISTRADA CON UN HORARIO MAL - ENTONCES CANCELAR RESERVA Y AVISAR
-	private ApiResponse<Reserva> esPosibleReserva(Reserva r){
-		ApiResponse<AsignacionRecursoTipoTurno> resp = asignacionService.obtenerPorId(r.getAsignacionTipoTurno().getId());
-		if(resp.isSuccess()) {
-			//if( getTodosLosHorariosPosiblesDeAsigPorFecha(resp.getData(),r.getFecha()).contains(r.getHora()) ){
-			if( getTodosLosHorariosPosiblesDeRecursoPorFecha(resp.getData().getRecurso(),r.getFecha(),resp.getData()).contains(r.getHora()) ){
-				return estaLibreElHorario(resp.getData(),r.getFecha(),r.getHora()) ? new ApiResponse<>(true,"",r) 
-						: new ApiResponse<>(false,"Horario Ocupado, por favor seleccione otro horario.",null);
+	private Reserva esPosibleReserva(Reserva r) throws Exception{
+		AsignacionRecursoTipoTurno asig = asignacionService.obtenerPorId(r.getAsignacionTipoTurno().getId());
+		if( getTodosLosHorariosPosiblesDeRecursoPorFecha(asig.getRecurso(),r.getFecha(),asig).contains(r.getHora()) ){
+			if( estaLibreElHorario(asig,r.getFecha(),r.getHora()) ) {
+				return r;
 			}
-			return new ApiResponse<>(false,"El horario no es valido, por favor selecciona un horario valido.",null);
+			throw new Exception("Horario Ocupado, por favor seleccione otro horario.");
 		}
-		return new ApiResponse<>(false,"Error al obtener la asignacion.",null);
+		throw new Exception("El horario no es valido, por favor selecciona un horario valido.");
 	}
 	
 	
@@ -430,22 +336,22 @@ public class ReservaServiceImpl implements ReservaService{
 	
 	//ESTE METODO NO SE USA DE MOMENTO, YA QUE LOS HORARIOS DE LAS ASIGNACIONES SON IGUALES QUE DE LOS RECURSOS
 	//NO SE VA A ACONTEMPLAR LA LOGICA DE SETEAR HORARIO POR ASIGNACION EN LUGAR DE POR RECURSO
-	private List<LocalTime> getTodosLosHorariosPosiblesDeAsigPorFecha(AsignacionRecursoTipoTurno a, LocalDate fecha){
+	private List<LocalTime> getTodosLosHorariosPosiblesDeAsigPorFecha(AsignacionRecursoTipoTurno a, LocalDate fecha) throws Exception{
 		List<LocalTime> horariosPosibles = new ArrayList<>();
 		//horarioEspRepo get horarios por asig y fecha
-		ApiResponse<List<HorarioEspecial>> horariosEsp = horarioEspecialService.horariosEspecialesDeAsignacionParaFecha(a, fecha);
+		List<HorarioEspecial> horariosEsp = horarioEspecialService.horariosEspecialesDeAsignacionParaFecha(a, fecha);
 		//si no hay -> horarioRepo get horarios por asig y dia
-		ApiResponse<List<Horario>> horarios = horarioService.horariosDeAsignacionParaFecha(a, localDateToDia(fecha));
+		List<Horario> horarios = horarioService.horariosDeAsignacionParaFecha(a, localDateToDia(fecha));
 		//para cualquiera de los dos, para cada horario obtenido getHorariosDisponibles
-		if(horariosEsp.isSuccess() && !horariosEsp.getData().isEmpty()) {
-			for(HorarioEspecial he : horariosEsp.getData()) {
+		if(!horariosEsp.isEmpty()) {
+			for(HorarioEspecial he : horariosEsp) {
 				if(he.isCerrado()) {
 					return null;
 				}
 				horariosPosibles.addAll(getHorariosDisponibles(he.getDesde(),he.getHasta(),(long)a.getDuracionEnMinutos()));
 			}
-		}else if(horarios.isSuccess() && !horarios.getData().isEmpty()) {
-			for(Horario h : horarios.getData()) {
+		}else if(!horarios.isEmpty()) {
+			for(Horario h : horarios) {
 				horariosPosibles.addAll(getHorariosDisponibles(h.getDesde(),h.getHasta(),(long)a.getDuracionEnMinutos()));
 			}
 		}
@@ -453,22 +359,22 @@ public class ReservaServiceImpl implements ReservaService{
 		return horariosPosibles;
 	}
 	
-	private List<LocalTime> getTodosLosHorariosPosiblesDeRecursoPorFecha(Recurso recurso, LocalDate fecha, AsignacionRecursoTipoTurno asignacionElegida){
+	private List<LocalTime> getTodosLosHorariosPosiblesDeRecursoPorFecha(Recurso recurso, LocalDate fecha, AsignacionRecursoTipoTurno asignacionElegida) throws Exception{
 		List<LocalTime> horariosPosibles = new ArrayList<>();
 		//horarioEspRepo get horarios por asig y fecha
-		ApiResponse<List<HorarioEspecial>> horariosEsp = horarioEspecialService.horariosEspecialesDeRecursoParaFecha(recurso,fecha);
+		List<HorarioEspecial> horariosEsp = horarioEspecialService.horariosEspecialesDeRecursoParaFecha(recurso,fecha);
 		//si no hay -> horarioRepo get horarios por asig y dia
-		ApiResponse<List<Horario>> horarios = horarioService.horariosDeRecursoParaFecha(recurso, localDateToDia(fecha));
+		List<Horario> horarios = horarioService.horariosDeRecursoParaFecha(recurso, localDateToDia(fecha));
 		//para cualquiera de los dos, para cada horario obtenido getHorariosDisponibles
-		if(horariosEsp.isSuccess() && !horariosEsp.getData().isEmpty()) {
-			for(HorarioEspecial he : horariosEsp.getData()) {
+		if(!horariosEsp.isEmpty()) {
+			for(HorarioEspecial he : horariosEsp) {
 				if(he.isCerrado()) {
 					return null;
 				}
 				horariosPosibles.addAll(getHorariosDisponibles(he.getDesde(),he.getHasta(),(long)asignacionElegida.getDuracionEnMinutos()));
 			}
-		}else if(horarios.isSuccess() && !horarios.getData().isEmpty()) {
-			for(Horario h : horarios.getData()) {
+		}else if(!horarios.isEmpty()) {
+			for(Horario h : horarios) {
 				horariosPosibles.addAll(getHorariosDisponibles(h.getDesde(),h.getHasta(),(long)asignacionElegida.getDuracionEnMinutos()));
 			}
 		}
@@ -508,11 +414,11 @@ public class ReservaServiceImpl implements ReservaService{
 	//OBTENER RESERVAS NO FINALIZADAS POR ASIGNACION
 	//paramentro Rango Inhabilitado, si esta cerrado para la fecha el rango es de 00:00 a 23:59
 	@Override
-	public ApiResponse<List<Reserva>> obtenerReservasInvolucradasEnRango(Long idRecurso,/*long asignacionId,*/LocalDate fecha, LocalTime desde, LocalTime hasta){
+	public List<Reserva> obtenerReservasInvolucradasEnRango(Long idRecurso,/*long asignacionId,*/LocalDate fecha, LocalTime desde, LocalTime hasta){
 		//List<Reserva> reservas = reservaRepo.buscarPorFechaRangoHorarioAsignacion(fecha,desde,hasta,asignacionId);
 		List<Reserva> reservas = reservaRepo.buscarPorFechaRangoHorarioRecurso(fecha,desde,hasta,idRecurso);
 		List<Reserva> resFiltradas = obtenerSoloEstadosNoFinales(reservas);
-		return new ApiResponse<>(true,"",resFiltradas);
+		return resFiltradas;
 	}
 	
 	public ApiResponse<List<Reserva>> obtenerReservasInvolucradasPorAsignacion(AsignacionRecursoTipoTurno asig,LocalDate fecha, LocalTime desde, LocalTime hasta){
@@ -531,34 +437,34 @@ public class ReservaServiceImpl implements ReservaService{
 		return resFiltradas;
 	}
 	
-	public ApiResponse<List<Reserva>> cambiarEstadoA(Estado e, List<Reserva> reservas){
-		ApiResponse<Reserva> reservaConNuevoCambioEstado;
+	public List<Reserva> cambiarEstadoA(Estado e, List<Reserva> reservas) throws Exception{
+		//ApiResponse<Reserva> reservaConNuevoCambioEstado;
 		String error = "";
 		for(Reserva r : reservas) {
 			Estado estadoAnterior = r.getEstado();
 			r.setEstado(e);
-			reservaConNuevoCambioEstado = estadoService.nuevoCambioEstadoReserva(r, estadoAnterior);
-			error = reservaConNuevoCambioEstado.isSuccess() ? error : error + "Error en reserva "+ 
-			r.getId() + ", " + reservaConNuevoCambioEstado.getMessage() + " ";
-			if(reservaConNuevoCambioEstado.isSuccess()) {
-				ApiResponse<Reserva> resp = save(r);
-				error = resp.isSuccess() ? error : error + "Error en reserva "+ 
-						r.getId() + ", " + resp.getMessage() + " ";
+			try {
+				r = estadoService.nuevoCambioEstadoReserva(r, estadoAnterior);
+				save(r);
+			}catch(Exception ex) {
+				error += "Reserva id "+r.getId()+" "+ex.getMessage();
 			}
 		}
-		return error.length()>0 ? new ApiResponse<>(false,error,null) :  new ApiResponse<>(true,"",null);
+		if(error.equals("")) {
+			return null;
+		}
+		throw new Exception(error);
 	}
 	
 	
 	@Override
-	public ApiResponse<List<Reserva>> cambiarEstadosDeListaDeIsReserva(Long idEstado, List<Long> idReserva){
+	public List<Reserva> cambiarEstadosDeListaDeIdsReserva(Long idEstado, List<Long> idReserva) throws Exception{
 		List<Reserva> reservas = new ArrayList<>();
 		for(Long id : idReserva) {
 			reservas.add(reservaRepo.getById(id));
 		}
-		ApiResponse<Estado> respEstado = estadoService.getEstadoById(idEstado);
-		return respEstado.isSuccess() ? cambiarEstadoA(respEstado.getData(),reservas) 
-				: new ApiResponse<>(false,respEstado.getMessage(),null);
+		cambiarEstadoA(estadoService.getEstadoById(idEstado),reservas);
+		return null;
 	}
 	
 	

@@ -7,11 +7,11 @@ import com.sistema.examenes.anterior.modelo.Reserva;
 import com.sistema.examenes.nuevo.servicios.ApiResponse;
 
 public interface EstadoService {
-	ApiResponse<Reserva> nuevoCambioEstadoReserva(Reserva reserva,Estado anterior);
-	ApiResponse<Reserva> estadoReservaNueva(Reserva reserva);
-	ApiResponse<Estado> getEstadoByNombre(String nombre);
+	Reserva nuevoCambioEstadoReserva(Reserva reserva,Estado anterior) throws Exception;
+	Reserva estadoReservaNueva(Reserva reserva) throws Exception;
+	Estado getEstadoByNombre(String nombre) throws Exception;
 	
 	
-	ApiResponse<List<Estado>> listarEstados();
-	ApiResponse<Estado> getEstadoById(Long idEstado);
+	List<Estado> listarEstados() throws Exception;
+	Estado getEstadoById(Long idEstado) throws Exception;
 }

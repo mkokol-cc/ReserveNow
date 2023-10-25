@@ -28,104 +28,57 @@ public class TipoTurnoServiceImpl implements TipoTurnoService{
     }
     
     
-    public ApiResponse<TipoTurno> validar(TipoTurno tipoTurno) {
+    public TipoTurno validar(TipoTurno tipoTurno) throws Exception {
         Errors errors = new BeanPropertyBindingResult(tipoTurno, "tipoTurno");
         ValidationUtils.invokeValidator(validator, tipoTurno, errors);
         if (errors.hasErrors()) {
         	//System.out.println(errors.getAllErrors());
-        	return new ApiResponse<>(false,errors.getFieldError().getDefaultMessage().toString(),null);
+        	throw new Exception(errors.getFieldError().getDefaultMessage().toString());
         } else {
         	//System.out.println("---------------EXITO---------------");
-        	return new ApiResponse<>(true,"".toString(),tipoTurno);
+        	return tipoTurno;
         	//return save(recursoDTO);
         }
     }
     
-    private ApiResponse<TipoTurno> save(TipoTurno t){
+    private TipoTurno save(TipoTurno t) throws Exception {
     	TipoTurno guardado = tipoTurnoRepo.save(t);
-		return (guardado!=null ? new ApiResponse<>(true,"",guardado) 
-				: new ApiResponse<>(false,"Error al guardar el Tipo de Turno",null));
+    	if(guardado!=null) {
+    		return guardado;
+    	}
+    	throw new Exception("Error al guardar el Tipo de Turno");
 	}
      
     
     
 
 	@Override
-	public ApiResponse<TipoTurno> guardarTipoTurno(TipoTurno tipoTurno) {
-		ApiResponse<TipoTurno> resp = validar(tipoTurno);
-		if(resp.isSuccess()) {
-			return save(resp.getData());
-		}else {
-			return new ApiResponse<>(false,"Error al guardar el Tipo de Turno, "+resp.getMessage(),null);
-		}/*
-		
-		
-		try {
-			if(tipoTurno.sonValidosLosDatos() && tipoTurno.tieneLosDatosMinimos()) {
-				TipoTurno t = tipoTurnoRepo.save(tipoTurno);
-				if(t!=null) {
-					return new ApiResponse<>(true,"",t);
-				}
-				return new ApiResponse<>(false,"Error al guardar el Tipo de Turno",null);
-			}
-			return new ApiResponse<>(false,"Datos inválidos",null);
-		}catch(Exception e) {
-			return new ApiResponse<>(false,e.getMessage(),null);
-		}*/
+	public TipoTurno guardarTipoTurno(TipoTurno tipoTurno) throws Exception {
+		return save(validar(tipoTurno));
 	}
 
 	@Override
-	public ApiResponse<TipoTurno> editarTipoTurno(TipoTurno tipoTurno) {
-		ApiResponse<TipoTurno> guardado = obtenerTipoTurnoPorId(tipoTurno.getId());
-		if(guardado.isSuccess()) {
-			//si el usuario es el mismo que el usuario nuevo entonces validar y guardar
-			if(guardado.getData().getUsuario() == tipoTurno.getUsuario()) {
-				tipoTurno.setRecursosTipoTurno(guardado.getData().getRecursosTipoTurno());
-				return guardarTipoTurno(tipoTurno);//save
-			}else {
-				return new ApiResponse<>(false,"Usuario no autorizado a editar el Tipo de Turno.",null);
-			}
-		}else {
-			return guardado;
+	public TipoTurno editarTipoTurno(TipoTurno tipoTurno) throws Exception {
+		TipoTurno guardado = obtenerTipoTurnoPorId(tipoTurno.getId());
+		if(guardado.getUsuario() == tipoTurno.getUsuario()) {
+			tipoTurno.setRecursosTipoTurno(guardado.getRecursosTipoTurno());
+			return guardarTipoTurno(tipoTurno);//save
 		}
-		
-		/*
-		try {
-			ApiResponse<TipoTurno> response = obtenerTipoTurnoPorId(tipoTurno.getId());
-			if(response.isSuccess()) {
-				return (response.getData().getUsuario().getId()==idUsuario ? guardarTipoTurno(tipoTurno) 
-						: new ApiResponse<>(false,"Usuario no autorizado",null));
-			}
-			return response;
-		}catch(Exception e) {
-			return new ApiResponse<>(false,e.getMessage(),null);
-		}*/
+		throw new Exception("Usuario no autorizado a editar el Tipo de Turno.");
 	}
 
 	@Override
-	public ApiResponse<List<TipoTurno>> listarTipoTurnoDeUsuario(Usuario usuario) {
-		try {
-			List<TipoTurno> t = tipoTurnoRepo.findByUsuario(usuario);
-			if(t.size()>0) {
-				return new ApiResponse<>(true,"",t);
-			}
-			return new ApiResponse<>(false,"Error al obtener los Tipos de Turno del usuario",null);
-		}catch(Exception e) {
-			return new ApiResponse<>(false,e.getMessage(),null);
-		}
+	public List<TipoTurno> listarTipoTurnoDeUsuario(Usuario usuario) {
+		return tipoTurnoRepo.findByUsuario(usuario);
 	}
 
 	@Override
-	public ApiResponse<TipoTurno> obtenerTipoTurnoPorId(long idTipoTurno) {
-		try {
-			TipoTurno t = tipoTurnoRepo.getById(idTipoTurno);
-			if(t!=null) {
-				return new ApiResponse<>(true,"",t);
-			}
-			return new ApiResponse<>(false,"Error al obtener el Tipo de Turno",null);
-		}catch(Exception e) {
-			return new ApiResponse<>(false,e.getMessage(),null);
+	public TipoTurno obtenerTipoTurnoPorId(long idTipoTurno) throws Exception {
+		TipoTurno t = tipoTurnoRepo.getById(idTipoTurno);
+		if(t!=null) {
+			return t;
 		}
+		throw new Exception("Error al obtener el Tipo de Turno");
 	}
 	
 	

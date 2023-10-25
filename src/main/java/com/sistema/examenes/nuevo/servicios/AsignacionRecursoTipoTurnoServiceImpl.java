@@ -47,58 +47,44 @@ public class AsignacionRecursoTipoTurnoServiceImpl implements AsignacionRecursoT
     public AsignacionRecursoTipoTurnoServiceImpl(Validator validator) {
         this.validator = validator;
     }
-    public ApiResponse<AsignacionRecursoTipoTurno> validar(AsignacionRecursoTipoTurno asignacion) {
+    public AsignacionRecursoTipoTurno validar(AsignacionRecursoTipoTurno asignacion) throws Exception {
         Errors errors = new BeanPropertyBindingResult(asignacion, "asignacion");
         ValidationUtils.invokeValidator(validator, asignacion, errors);
         if (errors.hasErrors()) {
-        	//System.out.println(errors.getAllErrors());
-        	return new ApiResponse<>(false,errors.getFieldError().getDefaultMessage().toString(),null);
+        	throw new Exception(errors.getFieldError().getDefaultMessage().toString());
         } else {
-        	//System.out.println("---------------EXITO---------------");
-        	return new ApiResponse<>(true,"".toString(),asignacion);
-        	//return save(recursoDTO);
+        	return asignacion;
         }
     }
-    private ApiResponse<AsignacionRecursoTipoTurno> save(AsignacionRecursoTipoTurno asig){
+    private AsignacionRecursoTipoTurno save(AsignacionRecursoTipoTurno asig) throws Exception {
     	AsignacionRecursoTipoTurno guardado = asignacionRepo.save(asig);
-		return (guardado!=null ? new ApiResponse<>(true,"",guardado) 
-				: new ApiResponse<>(false,"Error al guardar el Tipo de Turno",null));
+        if (guardado == null) {
+            throw new Exception("Error al guardar la Asignacion de Recurso a Tipo de Turno");
+        }
+        return guardado;
 	}
     
     
-    private ApiResponse<AsignacionRecursoTipoTurno> guardarAsignacion(AsignacionRecursoTipoTurno asignacion){
+    private AsignacionRecursoTipoTurno guardarAsignacion(AsignacionRecursoTipoTurno asignacion) throws Exception{
     	if(asignacionRepo.existeAsignacion(asignacion.getRecurso(), asignacion.getTipoTurno())!=0) {
     		asignacion.setEliminado(false);
     	}
-    	ApiResponse<AsignacionRecursoTipoTurno> resp = validar(asignacion);
-		if(resp.isSuccess()) {
-			return save(resp.getData());
-		}else {
-			return new ApiResponse<>(false,"Error al guardar la Asignación, "+resp.getMessage(),null);
-		}
+    	return save(validar(asignacion));//validar y luego save
     }
     
     
 	
 	@Override
-	public ApiResponse<AsignacionRecursoTipoTurno> guardarAsignacion(long idTipoTurno, long idRecurso/*AsignacionRecursoTipoTurno asignacion*/, long idUsuario) {
+	public AsignacionRecursoTipoTurno guardarAsignacion(long idTipoTurno, long idRecurso, long idUsuario) throws Exception {
 		//obtener el recurso por id
-		ApiResponse<Recurso> r = recursoService.obtenerRecursoPorId(idRecurso);
+		Recurso r = recursoService.obtenerRecursoPorId(idRecurso);
 		//obtener el tipoturno por id
-		ApiResponse<TipoTurno> t = tipoTurnoService.obtenerTipoTurnoPorId(idTipoTurno);
-		if(r.isSuccess() && t.isSuccess()) {
-			if(r.getData().getUsuario() == t.getData().getUsuario() && r.getData().getUsuario().getId() == idUsuario) {
-				
-				if(asignacionRepo.findAsignacionByRecursoAndTipoTurno(idRecurso, idTipoTurno)==null) {
-					return guardarAsignacion(setearDatosPorDefecto(t.getData(), r.getData(), new AsignacionRecursoTipoTurno()));
-				}
-				return new ApiResponse<>(true,"Asignacion ya creada.",null);
-			}
-			return new ApiResponse<>(false,"Usuario no autorizado.",null);
+		TipoTurno t = tipoTurnoService.obtenerTipoTurnoPorId(idTipoTurno);
+		if(r.getUsuario() == t.getUsuario() && r.getUsuario().getId() == idUsuario) {
+			AsignacionRecursoTipoTurno asigExistente = asignacionRepo.findAsignacionByRecursoAndTipoTurno(idRecurso, idTipoTurno);
+			return asigExistente==null ? guardarAsignacion(setearDatosPorDefecto(t, r, new AsignacionRecursoTipoTurno())) : asigExistente;
 		}
-		return new ApiResponse<>(false,"Error al obtener los datos del Recurso y Tipo de Turno.",null);
-		
-		
+		throw new Exception("Usuario no autorizado.");
 	}
 	
 	
@@ -118,44 +104,28 @@ public class AsignacionRecursoTipoTurnoServiceImpl implements AsignacionRecursoT
 	
 
 	@Override
-	public ApiResponse<AsignacionRecursoTipoTurno> editarAsignacion(AsignacionRecursoTipoTurno asignacion, long idUsuario) {
-		
-		
-		ApiResponse<AsignacionRecursoTipoTurno> guardado = obtenerPorId(asignacion.getId());
-		if(guardado.isSuccess()) {
-			//si el usuario es el mismo que el usuario nuevo entonces validar y guardar
-			if(guardado.getData().getRecurso().getUsuario().getId() == idUsuario 
-					&& guardado.getData().getTipoTurno().getUsuario().getId() == idUsuario) {
-				asignacion.setRecurso(guardado.getData().getRecurso());
-				asignacion.setTipoTurno(guardado.getData().getTipoTurno());
-				asignacion.setReservas(guardado.getData().getReservas());
-				return save(asignacion);//save
-			}else {
-				return new ApiResponse<>(false,"Usuario no autorizado a editar la Asignación.",null);
-			}
+	public AsignacionRecursoTipoTurno editarAsignacion(AsignacionRecursoTipoTurno asignacion, long idUsuario) throws Exception {
+		AsignacionRecursoTipoTurno guardado = obtenerPorId(asignacion.getId());
+		if(guardado.getRecurso().getUsuario().getId() == idUsuario 
+				&& guardado.getTipoTurno().getUsuario().getId() == idUsuario) {
+			asignacion.setRecurso(guardado.getRecurso());
+			asignacion.setTipoTurno(guardado.getTipoTurno());
+			asignacion.setReservas(guardado.getReservas());
+			return save(asignacion);//save
 		}else {
-			return guardado;
+			throw new Exception("Usuario no autorizado a editar la Asignación.");
 		}
 	}
 
 
 	@Override
-	public ApiResponse<List<AsignacionRecursoTipoTurno>> listarAsignacionPorUsuario(Long idUsuario) {
-		try {
-			List<AsignacionRecursoTipoTurno> lista = asignacionRepo.findByRecursoUsuarioId(idUsuario);
-			return new ApiResponse<>(true,"",lista);
-		}catch(Exception e) {
-			return new ApiResponse<>(false,e.getMessage(),null);
-		}
+	public List<AsignacionRecursoTipoTurno> listarAsignacionPorUsuario(Long idUsuario) {
+		return asignacionRepo.findByRecursoUsuarioId(idUsuario);
 	}
 
 	@Override
-	public ApiResponse<AsignacionRecursoTipoTurno> obtenerPorId(Long id) {
-		AsignacionRecursoTipoTurno asig = asignacionRepo.getById(id);
-		if(asig!=null) {
-			return new ApiResponse<>(true,"",asig);
-		}
-		return new ApiResponse<>(false,"No se pudo obtener la asignacion",asig);
+	public AsignacionRecursoTipoTurno obtenerPorId(Long id) {
+		return asignacionRepo.getById(id);
 	}
 	/*
 	
@@ -282,9 +252,8 @@ public class AsignacionRecursoTipoTurnoServiceImpl implements AsignacionRecursoT
 	
 	
 	
-	public ApiResponse<AsignacionRecursoTipoTurno> obtenerAsignacionPorIdRecursoTipoTurno(long idRecurso, long idTipoTurno){
-		AsignacionRecursoTipoTurno asig = asignacionRepo.findAsignacionByRecursoAndTipoTurno(idRecurso, idTipoTurno);
-		return asig!=null ? new ApiResponse<>(true,"",asig) : new ApiResponse(false,"No se pudo obtener la Asignación",null);
+	public AsignacionRecursoTipoTurno obtenerAsignacionPorIdRecursoTipoTurno(long idRecurso, long idTipoTurno){
+		return asignacionRepo.findAsignacionByRecursoAndTipoTurno(idRecurso, idTipoTurno);
 	}
 	
 
@@ -296,7 +265,7 @@ public class AsignacionRecursoTipoTurnoServiceImpl implements AsignacionRecursoT
 	//a todas las asignaciones que no coincidan se setea eliminado=true
 	//a todas las asignaciones que si coincidan se setea eliminado=false
 	@Override
-	public ApiResponse<AsignacionRecursoTipoTurno> eliminarAsignacion(Long idTipoTurno, Long idRecurso, Long idUsuario) {
+	public AsignacionRecursoTipoTurno eliminarAsignacion(Long idTipoTurno, Long idRecurso, Long idUsuario) throws Exception {
 
 		AsignacionRecursoTipoTurno asig = asignacionRepo.findAsignacionByRecursoAndTipoTurno(idRecurso, idTipoTurno);
 		if(asig!=null) {
@@ -304,14 +273,14 @@ public class AsignacionRecursoTipoTurnoServiceImpl implements AsignacionRecursoT
 			System.out.println("Voy a setar eliminado=true en la relacion idrec:"+idRecurso+" idTipoTurno:"+idTipoTurno);
 			return editarAsignacion(asig,idUsuario);
 		}
-		return new ApiResponse<>(true,"",null);
+		return new AsignacionRecursoTipoTurno();
 		
 	}
 	
 	
 	
 	@Override
-	public ApiResponse<AsignacionRecursoTipoTurno> habilitarAsignacion(Long idTipoTurno, Long idRecurso, Long idUsuario) {
+	public AsignacionRecursoTipoTurno habilitarAsignacion(Long idTipoTurno, Long idRecurso, Long idUsuario) throws Exception {
 
 		AsignacionRecursoTipoTurno asig = asignacionRepo.findAsignacionByRecursoAndTipoTurno(idRecurso, idTipoTurno);
 		if(asig!=null) {
@@ -332,22 +301,23 @@ public class AsignacionRecursoTipoTurnoServiceImpl implements AsignacionRecursoT
 	
 	
 	@Override
-	public ApiResponse<Recurso> actualizarAsignaciones(List<Long> idTiposDeTurno, long recId,Usuario usuario){
+	public Recurso actualizarAsignaciones(List<Long> idTiposDeTurno, long recId,Usuario usuario) throws Exception{
 		String mensajeError = "";
-		ApiResponse<AsignacionRecursoTipoTurno> resp;
-		ApiResponse<List<TipoTurno>> todosLosTipoTurno = tipoTurnoService.listarTipoTurnoDeUsuario(usuario);
-		if(todosLosTipoTurno.isSuccess()) {
-			for(TipoTurno tt : todosLosTipoTurno.getData()) {
-				resp = idTiposDeTurno.contains(tt.getId()) ? habilitarAsignacion(tt.getId(), recId, usuario.getId()) 
-						: eliminarAsignacion(tt.getId(), recId, usuario.getId());
-				mensajeError = resp.isSuccess() ? mensajeError : mensajeError + resp.getMessage() + " ";
-
+		for(TipoTurno tt : tipoTurnoService.listarTipoTurnoDeUsuario(usuario)) {
+			try {
+				if(idTiposDeTurno.contains(tt.getId())) {
+					habilitarAsignacion(tt.getId(), recId, usuario.getId());
+				}else {
+					eliminarAsignacion(tt.getId(), recId, usuario.getId());
+				}
+			}catch(Exception e) {
+				mensajeError += e.getMessage() + " ";
 			}
-			return mensajeError.length()>0 ? new ApiResponse<>(false,"Error al actualizar las asignaciones del Recurso, "+mensajeError,null)
-					: new ApiResponse<>(true,"Se guardaron correctamente los cambios.",null);
-		}else {
-			return new ApiResponse<>(false,"Error al actualizar las asignaciones del Recurso",null);
 		}
+		if(mensajeError.equals("")) {
+			return null;
+		}
+		throw new Exception(mensajeError);
 	}
 	
 	
@@ -362,39 +332,39 @@ public class AsignacionRecursoTipoTurnoServiceImpl implements AsignacionRecursoT
 	
 	
 	//DESHABILITAR POR TIPOTURNO
-	public ApiResponse<?> eliminarAsignacionPorTipoTurno(long idUsuario, long idTipoTurno){
-		ApiResponse<List<AsignacionRecursoTipoTurno>> asigDeUsuario = listarAsignacionPorUsuario(idUsuario);
-		ApiResponse<AsignacionRecursoTipoTurno> eliminarAsig;
+	public ApiResponse<?> eliminarAsignacionPorTipoTurno(long idUsuario, long idTipoTurno) throws Exception {
 		String mensajeError = "";
-		if(asigDeUsuario.isSuccess()) {
-			for(AsignacionRecursoTipoTurno a : asigDeUsuario.getData()) {
-				if(a.getTipoTurno().getId() == idTipoTurno) {
-					eliminarAsig = eliminarAsignacion(idTipoTurno,a.getRecurso().getId(),idUsuario);
-					mensajeError = eliminarAsig.isSuccess() ? mensajeError :  mensajeError + eliminarAsig.getMessage() + " ";
+		for(AsignacionRecursoTipoTurno a : listarAsignacionPorUsuario(idUsuario)) {
+			if(a.getTipoTurno().getId() == idTipoTurno) {
+				try {
+					eliminarAsignacion(idTipoTurno,a.getRecurso().getId(),idUsuario);
+				}catch(Exception e) {
+					mensajeError += e.getMessage();
 				}
 			}
-			return mensajeError.length()==0 ? new ApiResponse<>(true,"",null) 
-					: new ApiResponse<>(false,mensajeError,null);
 		}
-		return new ApiResponse<>(false,"Error al obtener las asignaciones del usuario.",null);
+		if(mensajeError.equals("")) {
+			return null;
+		}
+		throw new Exception(mensajeError);
 	}
 	
 	//DESHABILITAR POR RECURSO
-	public ApiResponse<?> eliminarAsignacionPorRecurso(long idUsuario, long idRecurso){
-		ApiResponse<List<AsignacionRecursoTipoTurno>> asigDeUsuario = listarAsignacionPorUsuario(idUsuario);
-		ApiResponse<AsignacionRecursoTipoTurno> eliminarAsig;
+	public ApiResponse<?> eliminarAsignacionPorRecurso(long idUsuario, long idRecurso) throws Exception{
 		String mensajeError = "";
-		if(asigDeUsuario.isSuccess()) {
-			for(AsignacionRecursoTipoTurno a : asigDeUsuario.getData()) {
-				if(a.getRecurso().getId() == idRecurso) {
-					eliminarAsig = eliminarAsignacion(a.getTipoTurno().getId(),idRecurso,idUsuario);
-					mensajeError = eliminarAsig.isSuccess() ? mensajeError :  mensajeError + eliminarAsig.getMessage() + " ";
+		for(AsignacionRecursoTipoTurno a : listarAsignacionPorUsuario(idUsuario)) {
+			if(a.getRecurso().getId() == idRecurso) {
+				try {
+					eliminarAsignacion(a.getTipoTurno().getId(),idRecurso,idUsuario);
+				}catch(Exception e) {
+					mensajeError += e.getMessage();
 				}
 			}
-			return mensajeError.length()==0 ? new ApiResponse<>(true,"",null) 
-					: new ApiResponse<>(false,mensajeError,null);
 		}
-		return new ApiResponse<>(false,"Error al obtener las asignaciones del usuario.",null);
+		if(mensajeError.equals("")) {
+			return null;
+		}
+		throw new Exception(mensajeError);
 	}
 	
 	

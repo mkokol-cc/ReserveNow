@@ -11,16 +11,16 @@ import com.sistema.examenes.nuevo.servicios.ApiResponse;
 
 public interface ReservaService {
 
-	public ApiResponse<Reserva> guardarReserva(Reserva r, long idUsuario);
-	public ApiResponse<Reserva> editarReserva(Reserva r, long idUsuario);
-	public ApiResponse<List<Reserva>> listarReservaPorUsuario(long idUsuario);
-	public ApiResponse<Reserva> eliminarReservaPorId(long idReserva,long idUsuario);
-	ApiResponse<List<TurnoDTO>> crearTurnos(Long idAsignacion, LocalDate fecha);
+	Reserva guardarReserva(Reserva r, long idUsuario) throws Exception;
+	Reserva editarReserva(Reserva r, long idUsuario) throws Exception;
+	List<Reserva> listarReservaPorUsuario(long idUsuario) throws Exception;
+	Reserva eliminarReservaPorId(long idReserva,long idUsuario) throws Exception;
+	List<TurnoDTO> crearTurnos(Long idAsignacion, LocalDate fecha) throws Exception;
 	
 	
-	public ApiResponse<Reserva> nuevaReserva(Reserva r, long idAsignacion);
-	public ApiResponse<List<Reserva>> obtenerReservasInvolucradasEnRango(Long idRecurso, LocalDate fecha, LocalTime desde,
-			LocalTime hasta);
-	ApiResponse<List<Reserva>> cambiarEstadosDeListaDeIsReserva(Long idEstado, List<Long> idReserva);
+	Reserva nuevaReserva(Reserva r, long idAsignacion) throws Exception;
+	List<Reserva> obtenerReservasInvolucradasEnRango(Long idRecurso, LocalDate fecha, LocalTime desde,
+			LocalTime hasta) throws Exception;
+	List<Reserva> cambiarEstadosDeListaDeIdsReserva(Long idEstado, List<Long> idReserva) throws Exception;
 	
 }

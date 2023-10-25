@@ -26,19 +26,21 @@ public class ReservanteServiceImpl implements ReservanteService{
     public ReservanteServiceImpl(Validator validator) {
         this.validator = validator;
     }
-    public ApiResponse<Reservante> validar(Reservante reservante) {
+    public Reservante validar(Reservante reservante) throws Exception {
         Errors errors = new BeanPropertyBindingResult(reservante, "reservante");
         ValidationUtils.invokeValidator(validator, reservante, errors);
         if (errors.hasErrors()) {
-        	return new ApiResponse<>(false,errors.getFieldError().getDefaultMessage().toString(),null);
+        	throw new Exception(errors.getFieldError().getDefaultMessage().toString());
         } else {
-        	return new ApiResponse<>(true,"".toString(),reservante);
+        	return reservante;
         }
     }
-    private ApiResponse<Reservante> save(Reservante reservante){
+    private Reservante save(Reservante reservante) throws Exception{
     	Reservante guardado = reservanteRepo.save(reservante);
-		return (guardado!=null ? new ApiResponse<>(true,"",guardado) 
-				: new ApiResponse<>(false,"Error al guardar la Reserva",null));
+		if(guardado!=null) {
+			return guardado;
+		}
+		throw new Exception("Error al guardar el Reservante en la base de datos");
 	}	
 	
 	
@@ -47,62 +49,34 @@ public class ReservanteServiceImpl implements ReservanteService{
 	
 	
 	@Override
-	public ApiResponse<Reservante> guardarReservante(Reservante reservante) {
-		ApiResponse<Reservante> response = obtenerPorTelefonoYUsuario(reservante);
-		if(!response.isSuccess()) {
-			ApiResponse<Reservante> resp = validar(reservante);
-			if(resp.isSuccess()) {
-				return save(resp.getData());
-			}
-			return new ApiResponse<>(false,"Error al guardar el reservante, "+resp.getMessage(),null);	
+	public Reservante guardarReservante(Reservante reservante) throws Exception {
+		Reservante reservanteGuardado = obtenerPorTelefonoYUsuario(reservante);
+		if(reservanteGuardado==null) {
+			return save(validar(reservante));
 		}
-		return new ApiResponse<>(true,"El reservante ya esta guardado.",response.getData());
-		/*
-		try {
-			ApiResponse<Reservante> existente = obtenerPorTelefonoYUsuario(reservante);// reservanteRepo.findByTelefono(reservaStr.getReservante().getTelefono()); 
-			if(existente.isSuccess()) {
-				return new ApiResponse<>(true,"",existente.getData());//reservanteRepo.save(reservaStr.getReservante());
-			}else {
-				Reservante nuevoReservante  = reservanteRepo.save(reservante);
-				return new ApiResponse<>(true,"",nuevoReservante);
-			}	
-		}catch(Exception e){
-			return new ApiResponse<>(false,e.getMessage(),null);
-		}*/
+		return reservanteGuardado;
 	}
 
 	@Override
-	public ApiResponse<Reservante> obtenerPorTelefonoYUsuario(Reservante reservante) {
-		try {
-			Reservante r = reservanteRepo.findByTelefonoAndUsuario(reservante.getTelefono(), reservante.getUsuario());
-			if(r!=null) {
-				return new ApiResponse<>(true,"",r);
-			}
-			return new ApiResponse<>(false,"No se obtuvo el Reservante",r);	
-		}catch(Exception e){
-			return new ApiResponse<>(false,e.getMessage(),null);
-		}
+	public Reservante obtenerPorTelefonoYUsuario(Reservante reservante) {
+		Reservante r = reservanteRepo.findByTelefonoAndUsuario(reservante.getTelefono(), reservante.getUsuario());
+		return r;
 	}
 
 	@Override
-	public ApiResponse<Reservante> editarReservante(Reservante reservante, long idUsuario) {
+	public Reservante editarReservante(Reservante reservante, long idUsuario) throws Exception {
 		Reservante r = reservanteRepo.getById(reservante.getId());
 		if(r.getUsuario().getId()==idUsuario) {
 			reservante.setReservas(r.getReservas());
 			reservante.setUsuario(r.getUsuario());
 			return guardarReservante(reservante);
 		}
-		return new ApiResponse<>(false,"Usuario no autorizado",null);	
+		throw new Exception("Usuario no autorizado");	
 	}
 
 	@Override
-	public ApiResponse<List<Reservante>> listarReservanteDeUsuario(Usuario usuario) {
-		try {
-			List<Reservante> reservantes = reservanteRepo.findByUsuario(usuario);
-			return new ApiResponse<>(true,"",reservantes);
-		}catch(Exception e){
-			return new ApiResponse<>(false,e.getMessage(),null);
-		}
+	public List<Reservante> listarReservanteDeUsuario(Usuario usuario) {
+		return reservanteRepo.findByUsuario(usuario);
 	}
 
 }

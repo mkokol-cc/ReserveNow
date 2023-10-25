@@ -26,69 +26,50 @@ public class EstadoServiceImpl implements EstadoService{
 	private CambioEstadoRepository cambioEstadoRepo;
 	
 	@Override
-	public ApiResponse<Reserva> nuevoCambioEstadoReserva(Reserva r, Estado anterior) {
-		
-		try {
-			CambioEstado c = new CambioEstado();
-			c.setEstadoAnterior(anterior);
-			c.setEstadoNuevo(r.getEstado());
-			c.setFecha(LocalDate.now());
-			c.setHora(LocalTime.now());
-			c.setReserva(r);
-			CambioEstado guardado = cambioEstadoRepo.save(c);
-			List<CambioEstado> cambios = r.getCambioEstado();
-			cambios.add(guardado);
-			r.setCambioEstado(cambios);
-			return new ApiResponse<>(true,"",r);
-		}catch(Exception e) {
-			return new ApiResponse<>(false,e.getMessage(),null);
-		}	
+	public Reserva nuevoCambioEstadoReserva(Reserva r, Estado anterior) {
+		CambioEstado c = new CambioEstado();
+		c.setEstadoAnterior(anterior);
+		c.setEstadoNuevo(r.getEstado());
+		c.setFecha(LocalDate.now());
+		c.setHora(LocalTime.now());
+		c.setReserva(r);
+		CambioEstado guardado = cambioEstadoRepo.save(c);
+		List<CambioEstado> cambios = r.getCambioEstado();
+		cambios.add(guardado);
+		r.setCambioEstado(cambios);
+		return r;
 	}
 	
 
 	@Override
-	public ApiResponse<Reserva> estadoReservaNueva(Reserva r) {
+	public Reserva estadoReservaNueva(Reserva r) {
 		if(r.getAsignacionTipoTurno().getSeniaCtvos()>0) {
 			r.setEstado(estadoRepo.getById((long)1));// id del estado RESERVADO - CON SEÑA
-			return new ApiResponse<>(true,"",r);
+			return r;
 		}
 		r.setEstado(estadoRepo.getById((long)2));// id del estado RESERVADO - SIN SEÑA
-		return new ApiResponse<>(true,"",r);
+		return r;
 	}
 	
 	@Override 
-	public ApiResponse<Estado> getEstadoByNombre(String nombre){
-		try {
-			Estado e = estadoRepo.findByNombre(nombre);
-			if(e==null) {
-				return new ApiResponse<>(false,"No se encontro ningun estado con el nombre "+nombre,null);
-			}
-			return new ApiResponse<>(true,"",e);
-		}catch(Exception e) {
-			return new ApiResponse<>(false,"Error al obtener un estado con ese nombre",null);
+	public Estado getEstadoByNombre(String nombre) throws Exception{
+		Estado e = estadoRepo.findByNombre(nombre);
+		if(e!=null) {
+			return e;
 		}
-		
+		throw new Exception("No se encontro un estado con el nombre "+nombre+".");
 	}
 
 
 	@Override
-	public ApiResponse<List<Estado>> listarEstados() {
-		try {
-			List<Estado> e = estadoRepo.findAll();
-			if(e.isEmpty()) {
-				return new ApiResponse<>(false,"No se encontro ningun estado",null);
-			}
-			return new ApiResponse<>(true,"",e);
-		}catch(Exception e) {
-			return new ApiResponse<>(false,"Error al obtener los estados",null);
-		}
+	public List<Estado> listarEstados() {
+		return estadoRepo.findAll();
 	}
 	
 	
 	@Override
-	public ApiResponse<Estado> getEstadoById(Long idEstado){
-		Estado e = estadoRepo.getById(idEstado);
-		return e!=null ? new ApiResponse<>(true,"",e) : new ApiResponse<>(false,"Error al obtener el estado",null);
+	public Estado getEstadoById(Long idEstado){
+		return estadoRepo.getById(idEstado);
 	}
 
 

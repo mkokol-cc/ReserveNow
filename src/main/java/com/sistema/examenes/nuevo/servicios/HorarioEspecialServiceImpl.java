@@ -50,15 +50,15 @@ public class HorarioEspecialServiceImpl implements HorarioEspecialService{
 	}*/
 
 	@Override
-	public ApiResponse<HorarioEspecial> comprobarHorarioEspecialAsignacion(LocalTime hora, LocalDate fecha,
-			AsignacionRecursoTipoTurno asignacion) {
+	public HorarioEspecial comprobarHorarioEspecialAsignacion(LocalTime hora, LocalDate fecha,
+			AsignacionRecursoTipoTurno asignacion) throws Exception {
 		List<HorarioEspecial> horariosEspeciales = horarioEspRepo.findByFechaAndAsignacion(fecha,asignacion);
 		//si hay horarios especiales de la asignacion para ese dia:
 		if(horariosEspeciales.size()>0) {
 			HorarioEspecial horarioEspCompatible = null;
 			for(HorarioEspecial he : horariosEspeciales) {
 				if(he.isCerrado()) {
-					return new ApiResponse<>(false,"Fecha Cerrada: "+he.getMotivo(),he);
+					throw new Exception("Fecha Cerrada: "+he.getMotivo());
 				}else{
 					//LocalTime horaMasDuracion = hora.plusMinutes((long)asignacion.getDuracionEnMinutos());
 					if(comprobarHorario(he.getDesde(),he.getHasta(),asignacion.getDuracionEnMinutos(),hora)) {
@@ -67,104 +67,91 @@ public class HorarioEspecialServiceImpl implements HorarioEspecialService{
 				}
 			}
 			if(horarioEspCompatible!=null) {
-				return new ApiResponse<>(true,"Horario Valido, Motivo horario Especial: "+horarioEspCompatible.getMotivo(),horarioEspCompatible);
+				return horarioEspCompatible;
 			}
-			return new ApiResponse<>(false,"Hay Horario Especial Para el dia "+fecha+" y la hora no es valida para ese dia",null);
-		}else {
-			return new ApiResponse<>(true,"No hay ningun horario especial que se oponga",null);	
+			throw new Exception("Hay Horario Especial Para el dia "+fecha+" y la hora no es valida para ese dia");
 		}
+		return new HorarioEspecial();
 	}
 
 	@Override
-	public ApiResponse<HorarioEspecial> guardarHorarioEspecial(HorarioEspecial h) {
-		try {
-			//comprobar si el horario es correcto
-			//- si el la hora desde es < hasta
-			//- si la duracion del asignacion entre en el horario desde y hasta
-			if(h.isCerrado() || !h.getDesde().isAfter(h.getHasta())) {
-				HorarioEspecial horario = horarioEspRepo.save(h);
-				return new ApiResponse<>(true,"",horario);
-			}
-			return new ApiResponse<>(false,"Horario Especial: "+h.getFecha()+" de "+h.getDesde()+" a "+h.getHasta()+" invalido.",null);
-		}catch(Exception e) {
-			return new ApiResponse<>(false,e.getMessage(),null);
+	public HorarioEspecial guardarHorarioEspecial(HorarioEspecial h) throws Exception {
+		//comprobar si el horario es correcto
+		//- si el la hora desde es < hasta
+		//- si la duracion del asignacion entre en el horario desde y hasta
+		if(h.isCerrado() || !h.getDesde().isAfter(h.getHasta())) {
+			HorarioEspecial horario = horarioEspRepo.save(h);
+			return horario;
 		}
+		throw new Exception("Horario Especial: "+h.getFecha()+" de "+h.getDesde()+" a "+h.getHasta()+" invalido.");
 	}
 	
 	
 	
 
-	public ApiResponse<HorarioEspecial> guardarHorarioEspecialRecurso(HorarioEspecial h, Recurso r) {
-		try {
-			//comprobar si el horario es correcto
-			//- si el la hora desde es < hasta
-			//- si la duracion del asignacion entre en el horario desde y hasta
-			if(h.isCerrado() || !h.getDesde().isAfter(h.getHasta())) {
-				h.setRecurso(r);
-				HorarioEspecial horario = horarioEspRepo.save(h);
-				return new ApiResponse<>(true,"",horario);
-			}
-			return new ApiResponse<>(false,"Horario Especial: "+h.getFecha()+" de "+h.getDesde()+" a "+h.getHasta()+" invalido.",null);
-		}catch(Exception e) {
-			return new ApiResponse<>(false,e.getMessage(),null);
+	public HorarioEspecial guardarHorarioEspecialRecurso(HorarioEspecial h, Recurso r) throws Exception {
+		//comprobar si el horario es correcto
+		//- si el la hora desde es < hasta
+		//- si la duracion del asignacion entre en el horario desde y hasta
+		if(h.isCerrado() || !h.getDesde().isAfter(h.getHasta())) {
+			h.setRecurso(r);
+			HorarioEspecial horario = horarioEspRepo.save(h);
+			return horario;
 		}
+		throw new Exception("Horario Especial: "+h.getFecha()+" de "+h.getDesde()+" a "+h.getHasta()+" invalido.");
 	}
 
-	public ApiResponse<HorarioEspecial> guardarHorarioEspecialAsignacion(HorarioEspecial h, AsignacionRecursoTipoTurno a) {
-		try {
-			//comprobar si el horario es correcto
-			//- si el la hora desde es < hasta
-			//- si la duracion del asignacion entre en el horario desde y hasta
-			//LocalTime duracion = h.getDesde().plusMinutes((long)a.getDuracionEnMinutos());
-			if(h.isCerrado() || !h.getDesde().plusMinutes((long)a.getDuracionEnMinutos()).isAfter(h.getHasta())) {
-				h.setAsignacion(a);
-				HorarioEspecial horario = horarioEspRepo.save(h);
-				return new ApiResponse<>(true,"",horario);
-			}
-			return new ApiResponse<>(false,"Horario Especial: "+h.getFecha()+" de "+h.getDesde()+" a "+h.getHasta()+" invalido.",null);
-		}catch(Exception e) {
-			return new ApiResponse<>(false,e.getMessage(),null);
+	public HorarioEspecial guardarHorarioEspecialAsignacion(HorarioEspecial h, AsignacionRecursoTipoTurno a) throws Exception {
+		//comprobar si el horario es correcto
+		//- si el la hora desde es < hasta
+		//- si la duracion del asignacion entre en el horario desde y hasta
+		//LocalTime duracion = h.getDesde().plusMinutes((long)a.getDuracionEnMinutos());
+		if(h.isCerrado() || !h.getDesde().plusMinutes((long)a.getDuracionEnMinutos()).isAfter(h.getHasta())) {
+			h.setAsignacion(a);
+			HorarioEspecial horario = horarioEspRepo.save(h);
+			return horario;
 		}
+		throw new Exception("Horario Especial: "+h.getFecha()+" de "+h.getDesde()+" a "+h.getHasta()+" invalido.");
 	}
 	
 	
 
 	@Override
-	public ApiResponse<Recurso> guardarListaHorarioEspecialRecurso(Recurso recurso) {
-		try {
-			Set<HorarioEspecial> horarios = new HashSet<>();
-			horarioEspRepo.deleteByRecurso(recurso);
-			for(HorarioEspecial h : recurso.getHorariosEspeciales()) {
-				ApiResponse<HorarioEspecial> resp = guardarHorarioEspecialRecurso(h,recurso);
-				if(!resp.isSuccess()) {
-					return new ApiResponse<>(false,"Error al guardar los Horarios: "+resp.getMessage(),null);
-				}
-				horarios.add(resp.getData());
+	public Recurso guardarListaHorarioEspecialRecurso(Recurso recurso) throws Exception {
+		String mensajeError = "";
+		Set<HorarioEspecial> horarios = new HashSet<>();
+		horarioEspRepo.deleteByRecurso(recurso);
+		for(HorarioEspecial h : recurso.getHorariosEspeciales()) {
+			try {
+				horarios.add(guardarHorarioEspecialRecurso(h,recurso));
+			}catch(Exception e) {
+				mensajeError += "Horario: "+h.getFecha()+" de "+h.getDesde()+" a "+h.getHasta()+", "+e.getMessage()+". ";
 			}
+		}
+		if(mensajeError.equals("")) {
 			recurso.setHorariosEspeciales(horarios);
-			return new ApiResponse<>(true,"",recurso);
-		}catch(Exception e) {
-			return new ApiResponse<>(false,e.getMessage(),null);
+			return recurso;
 		}
+		throw new Exception(mensajeError);
 	}
 
 	@Override
-	public ApiResponse<AsignacionRecursoTipoTurno> guardarListaHorarioEspecialAsignacion(AsignacionRecursoTipoTurno a) {
-		try {
-			Set<HorarioEspecial> horarios = new HashSet<>();
-			horarioEspRepo.deleteByAsignacion(a);
-			for(HorarioEspecial h : a.getHorariosEspeciales()) {
-				ApiResponse<HorarioEspecial> resp = guardarHorarioEspecialAsignacion(h,a);
-				if(!resp.isSuccess()) {
-					return new ApiResponse<>(false,"Error al guardar los Horarios: "+resp.getMessage(),null);
-				}
-				horarios.add(resp.getData());
+	public AsignacionRecursoTipoTurno guardarListaHorarioEspecialAsignacion(AsignacionRecursoTipoTurno a) throws Exception {
+		String mensajeError = "";
+		Set<HorarioEspecial> horarios = new HashSet<>();
+		horarioEspRepo.deleteByAsignacion(a);
+		for(HorarioEspecial h : a.getHorariosEspeciales()) {
+			try {
+				horarios.add(guardarHorarioEspecialAsignacion(h,a));
+			}catch(Exception e) {
+				mensajeError += "Horario: "+h.getFecha()+" de "+h.getDesde()+" a "+h.getHasta()+", "+e.getMessage()+". ";
 			}
-			a.setHorariosEspeciales(horarios);
-			return new ApiResponse<>(true,"",a);
-		}catch(Exception e) {
-			return new ApiResponse<>(false,e.getMessage(),null);
 		}
+		if(mensajeError.equals("")) {
+			a.setHorariosEspeciales(horarios);
+			return a;
+		}
+		throw new Exception(mensajeError);
 	}
 	
 	
@@ -185,22 +172,14 @@ public class HorarioEspecialServiceImpl implements HorarioEspecialService{
 	}
 
 	@Override
-	public ApiResponse<List<HorarioEspecial>> horariosEspecialesDeAsignacionParaFecha(AsignacionRecursoTipoTurno asig, LocalDate fecha){
-		try {
-			List<HorarioEspecial> horarios = horarioEspRepo.findByFechaAndAsignacion(fecha, asig);
-			return new ApiResponse<>(true,"",horarios);
-		}catch(Exception e) {
-			return new ApiResponse<>(false,"Error al obtener los horarios especiales para la fecha "+fecha,null);
-		}
+	public List<HorarioEspecial> horariosEspecialesDeAsignacionParaFecha(AsignacionRecursoTipoTurno asig, LocalDate fecha){
+		List<HorarioEspecial> horarios = horarioEspRepo.findByFechaAndAsignacion(fecha, asig);
+		return horarios;
 	}
 	
 	@Override
-	public ApiResponse<List<HorarioEspecial>> horariosEspecialesDeRecursoParaFecha(Recurso recurso, LocalDate fecha){
-		try {
-			List<HorarioEspecial> horarios = horarioEspRepo.findByFechaAndRecurso(fecha, recurso);
-			return new ApiResponse<>(true,"",horarios);
-		}catch(Exception e) {
-			return new ApiResponse<>(false,"Error al obtener los horarios especiales para la fecha "+fecha,null);
-		}
+	public List<HorarioEspecial> horariosEspecialesDeRecursoParaFecha(Recurso recurso, LocalDate fecha){
+		List<HorarioEspecial> horarios = horarioEspRepo.findByFechaAndRecurso(fecha, recurso);
+		return horarios;
 	}
 }

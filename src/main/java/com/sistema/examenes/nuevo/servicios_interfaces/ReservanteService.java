@@ -8,8 +8,8 @@ import com.sistema.examenes.nuevo.servicios.ApiResponse;
 
 public interface ReservanteService {
 	
-	public ApiResponse<Reservante> guardarReservante(Reservante reservante);
-	public ApiResponse<Reservante> editarReservante(Reservante reservante, long idUsuario);
-	public ApiResponse<Reservante> obtenerPorTelefonoYUsuario(Reservante reservante);
-	public ApiResponse<List<Reservante>> listarReservanteDeUsuario(Usuario idUsuario);
+	Reservante guardarReservante(Reservante reservante) throws Exception;
+	Reservante editarReservante(Reservante reservante, long idUsuario) throws Exception;
+	Reservante obtenerPorTelefonoYUsuario(Reservante reservante) throws Exception;
+	List<Reservante> listarReservanteDeUsuario(Usuario idUsuario) throws Exception;
 }

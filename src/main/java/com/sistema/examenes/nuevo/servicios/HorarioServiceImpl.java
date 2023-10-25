@@ -42,8 +42,8 @@ public class HorarioServiceImpl implements HorarioService{
 	}*/
 
 	@Override
-	public ApiResponse<Horario> comprobarHorarioAsignacion(LocalTime hora, Dias dia,
-			AsignacionRecursoTipoTurno asignacion) {
+	public Horario comprobarHorarioAsignacion(LocalTime hora, Dias dia,
+			AsignacionRecursoTipoTurno asignacion) throws Exception {
 		//comprobar si no hay horarios para el mismo dia que se pisen
 		List<Horario> horarios = horarioRepo.obtenerPorHoraYAsignacion(dia, hora, asignacion);
 		if(horarios.size()>0) {
@@ -51,91 +51,87 @@ public class HorarioServiceImpl implements HorarioService{
 				//LocalTime horaMasDuracion = hora.plusMinutes((long)asignacion.getDuracionEnMinutos());
 				if(comprobarHorario(h.getDesde(),h.getHasta(),asignacion.getDuracionEnMinutos(),hora)/*!horaMasDuracion.isAfter(h.getHasta())*/) {
 					//si horarios.size()>1 entonces hay horarios para la misma fecha que se pisan
-					return new ApiResponse<>(true,"Horario Valido",h);
+					return h;
 				}
 			}
 		}
 		// TODO Auto-generated method stub
-		return new ApiResponse<>(false,"Horario Invalido para el dia "+dia.name()+" a las "+hora,null);
+		throw new Exception("Horario Invalido para el dia "+dia.name()+" a las "+hora);
 	}
 
 	@Override
-	public ApiResponse<Horario> guardarHorarioRecurso(Horario h, Recurso r) {
-		try {
-			//comprobar si el horario es correcto
-			//- si el la hora desde es < hasta
-			//- si la duracion del asignacion entre en el horario desde y hasta
-			if(!h.getDesde()/*.plusMinutes((long)asignacion.getDuracionEnMinutos())*/.isAfter(h.getHasta())) {
-				if(horarioRepo.obtenerPorHoraYRecurso(h.getDia(), h.getDesde(), r).isEmpty() && 
-						horarioRepo.obtenerPorHoraYRecurso(h.getDia(), h.getHasta(), r).isEmpty()) {
-					h.setRecurso(r);
-					Horario horario = horarioRepo.save(h);
-					return new ApiResponse<>(true,"",horario);	
+	public Horario guardarHorarioRecurso(Horario h, Recurso r) throws Exception {
+		//comprobar si el horario es correcto
+		//- si el la hora desde es < hasta
+		//- si la duracion del asignacion entre en el horario desde y hasta
+		if(!h.getDesde().isAfter(h.getHasta())) {
+			if(horarioRepo.obtenerPorHoraYRecurso(h.getDia(), h.getDesde(), r).isEmpty() && 
+					horarioRepo.obtenerPorHoraYRecurso(h.getDia(), h.getHasta(), r).isEmpty()) {
+				h.setRecurso(r);
+				Horario horario = horarioRepo.save(h);
+				if(horario!=null) {
+					return horario;
 				}
-				return new ApiResponse<>(false,"Hay horarios que interfieren entre sí",null);
+				throw new Exception("Error al guardar el horario en la base de datos");	
 			}
-			return new ApiResponse<>(false,"Horario: "+h.getDia()+" de "+h.getDesde()+" a "+h.getHasta()+" invalido.",null);
-		}catch(Exception e) {
-			return new ApiResponse<>(false,e.getMessage(),null);
+			throw new Exception("Hay horarios que interfieren entre sí");
 		}
+		throw new Exception("Horario: "+h.getDia()+" de "+h.getDesde()+" a "+h.getHasta()+" invalido.");
 	}
 
 	@Override
-	public ApiResponse<Horario> guardarHorarioAsignacion(Horario h, AsignacionRecursoTipoTurno asignacion) {
-		try {
-			//comprobar si el horario es correcto
-			//- si el la hora desde es < hasta
-			//- si la duracion del asignacion entre en el horario desde y hasta
-			if(!h.getDesde().plusMinutes((long)asignacion.getDuracionEnMinutos()).isAfter(h.getHasta())) {
-				if(horarioRepo.obtenerPorHoraYAsignacion(h.getDia(), h.getDesde(), asignacion).isEmpty() && 
-						horarioRepo.obtenerPorHoraYAsignacion(h.getDia(), h.getHasta(), asignacion).isEmpty()) {
-					h.setAsignacion(asignacion);
-					Horario horario = horarioRepo.save(h);
-					return new ApiResponse<>(true,"",horario);	
+	public Horario guardarHorarioAsignacion(Horario h, AsignacionRecursoTipoTurno asignacion) throws Exception {
+		if(!h.getDesde().plusMinutes((long)asignacion.getDuracionEnMinutos()).isAfter(h.getHasta())) {
+			if(horarioRepo.obtenerPorHoraYAsignacion(h.getDia(), h.getDesde(), asignacion).isEmpty() && 
+					horarioRepo.obtenerPorHoraYAsignacion(h.getDia(), h.getHasta(), asignacion).isEmpty()) {
+				h.setAsignacion(asignacion);
+				Horario horario = horarioRepo.save(h);
+				if(horario!=null) {
+					return horario;
 				}
-				return new ApiResponse<>(false,"Hay horarios que interfieren entre sí",null);
+				throw new Exception("Error al guardar el horario en la base de datos");	
 			}
-			return new ApiResponse<>(false,"Horario: "+h.getDia()+" de "+h.getDesde()+" a "+h.getHasta()+" invalido.",null);
-		}catch(Exception e) {
-			return new ApiResponse<>(false,e.getMessage(),null);
+			throw new Exception("Hay horarios que interfieren entre sí");
 		}
+		throw new Exception("Horario: "+h.getDia()+" de "+h.getDesde()+" a "+h.getHasta()+" invalido.");
 	}
 	
 	@Override
-	public ApiResponse<Recurso> guardarListaHorariosRecurso(Recurso r){
-		try {
-			Set<Horario> horarios = new HashSet<>();
-			horarioRepo.deleteByRecurso(r);
-			for(Horario h : r.getHorarios()) {
-				ApiResponse<Horario> resp = guardarHorarioRecurso(h,r);
-				if(!resp.isSuccess()) {
-					return new ApiResponse<>(false,"Error al guardar los Horarios: "+resp.getMessage(),null);
-				}
-				horarios.add(resp.getData());
+	public Recurso guardarListaHorariosRecurso(Recurso r) throws Exception {
+		String mensajeError = "";
+		Set<Horario> horarios = new HashSet<>();
+		horarioRepo.deleteByRecurso(r);
+		for(Horario h : r.getHorarios()) {
+			try {
+				horarios.add(guardarHorarioRecurso(h,r));
+			}catch(Exception e) {
+				mensajeError += "Horario: "+h.getDia()+" de "+h.getDesde()+" a "+h.getHasta()+", "+e.getMessage()+". ";
 			}
-			r.setHorarios(horarios);
-			return new ApiResponse<>(true,"",r);
-		}catch(Exception e) {
-			return new ApiResponse<>(false,e.getMessage(),null);
 		}
+		if(mensajeError.equals("")) {
+			r.setHorarios(horarios);
+			return r;
+		}
+		throw new Exception(mensajeError);
+		
 	}
 	@Override
-	public ApiResponse<AsignacionRecursoTipoTurno> guardarListaHorariosAsignacion(AsignacionRecursoTipoTurno a){
-		try {
-			Set<Horario> horarios = new HashSet<>();
-			horarioRepo.deleteByAsignacion(a);
-			for(Horario h : a.getHorarios()) {
-				ApiResponse<Horario> resp = guardarHorarioAsignacion(h,a);
-				if(!resp.isSuccess()) {
-					return new ApiResponse<>(false,"Error al guardar los Horarios: "+resp.getMessage(),null);
-				}
-				horarios.add(resp.getData());
+	public AsignacionRecursoTipoTurno guardarListaHorariosAsignacion(AsignacionRecursoTipoTurno a) throws Exception {
+		String mensajeError = "";
+		Set<Horario> horarios = new HashSet<>();
+		horarioRepo.deleteByAsignacion(a);
+		for(Horario h : a.getHorarios()) {
+			try {
+				horarios.add(guardarHorarioAsignacion(h,a));
+			}catch(Exception e) {
+				mensajeError += "Horario: "+h.getDia()+" de "+h.getDesde()+" a "+h.getHasta()+", "+e.getMessage()+". ";
 			}
-			a.setHorarios(horarios);
-			return new ApiResponse<>(true,"",a);
-		}catch(Exception e) {
-			return new ApiResponse<>(false,e.getMessage(),null);
 		}
+		if(mensajeError.equals("")) {
+			a.setHorarios(horarios);
+			return a;
+		}
+		throw new Exception(mensajeError);
 	}
 	
 	
@@ -154,22 +150,14 @@ public class HorarioServiceImpl implements HorarioService{
 	}
 	
 	@Override
-	public ApiResponse<List<Horario>> horariosDeAsignacionParaFecha(AsignacionRecursoTipoTurno asig, Dias dia){
-		try {
-			List<Horario> horarios = horarioRepo.findByAsignacionAndDia(asig, dia);
-			return new ApiResponse<>(true,"",horarios);
-		}catch(Exception e) {
-			return new ApiResponse<>(false,"Error al obtener los horarios para el dia "+dia.name(),null);
-		}
+	public List<Horario> horariosDeAsignacionParaFecha(AsignacionRecursoTipoTurno asig, Dias dia){
+		List<Horario> horarios = horarioRepo.findByAsignacionAndDia(asig, dia);
+		return horarios;
 	}
 	@Override
-	public ApiResponse<List<Horario>> horariosDeRecursoParaFecha(Recurso recurso, Dias dia){
-		try {
-			List<Horario> horarios = horarioRepo.findByRecursoAndDia(recurso, dia);
-			return new ApiResponse<>(true,"",horarios);
-		}catch(Exception e) {
-			return new ApiResponse<>(false,"Error al obtener los horarios para el dia "+dia.name(),null);
-		}
+	public List<Horario> horariosDeRecursoParaFecha(Recurso recurso, Dias dia){
+		List<Horario> horarios = horarioRepo.findByRecursoAndDia(recurso, dia);
+		return horarios;
 	}
 	
 

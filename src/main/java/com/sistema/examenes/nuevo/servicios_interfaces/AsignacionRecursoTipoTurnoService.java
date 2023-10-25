@@ -9,19 +9,19 @@ import com.sistema.examenes.nuevo.servicios.ApiResponse;
 
 public interface AsignacionRecursoTipoTurnoService {
 
-	public ApiResponse<AsignacionRecursoTipoTurno> guardarAsignacion(long idTipoTurno, long idRecurso/*AsignacionRecursoTipoTurno asignacion*/, long idUsuario);
-	public ApiResponse<AsignacionRecursoTipoTurno> editarAsignacion(AsignacionRecursoTipoTurno asignacion, long idUsuario);
+	AsignacionRecursoTipoTurno guardarAsignacion(long idTipoTurno, long idRecurso/*AsignacionRecursoTipoTurno asignacion*/, long idUsuario) throws Exception;
+	AsignacionRecursoTipoTurno editarAsignacion(AsignacionRecursoTipoTurno asignacion, long idUsuario) throws Exception;
 	//public ApiResponse<List<AsignacionRecursoTipoTurno>> listarAsignacion(Long id);
-	public ApiResponse<List<AsignacionRecursoTipoTurno>> listarAsignacionPorUsuario(Long idUsuario);
+	List<AsignacionRecursoTipoTurno> listarAsignacionPorUsuario(Long idUsuario) throws Exception;
 	
-	public ApiResponse<AsignacionRecursoTipoTurno> obtenerPorId(Long id);
-	
-	
-	public ApiResponse<AsignacionRecursoTipoTurno> eliminarAsignacion(Long idTipoTurno, Long idRecurso, Long idUsuario);
+	AsignacionRecursoTipoTurno obtenerPorId(Long id) throws Exception;
 	
 	
-	public ApiResponse<Recurso> actualizarAsignaciones(List<Long> idTiposDeTurno, long recId,Usuario usuario);
-	public ApiResponse<AsignacionRecursoTipoTurno> habilitarAsignacion(Long idTipoTurno, Long idRecurso, Long idUsuario);
+	AsignacionRecursoTipoTurno eliminarAsignacion(Long idTipoTurno, Long idRecurso, Long idUsuario) throws Exception;
+	
+	
+	Recurso actualizarAsignaciones(List<Long> idTiposDeTurno, long recId,Usuario usuario) throws Exception;
+	AsignacionRecursoTipoTurno habilitarAsignacion(Long idTipoTurno, Long idRecurso, Long idUsuario) throws Exception;
 	
 	//public ApiResponse<?> comprobarHorario();
 	

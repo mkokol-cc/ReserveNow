@@ -8,9 +8,9 @@ import com.sistema.examenes.nuevo.servicios.ApiResponse;
 
 public interface TipoTurnoService {
 
-	public ApiResponse<TipoTurno> guardarTipoTurno(TipoTurno tipoTurno);
-	public ApiResponse<TipoTurno> editarTipoTurno(TipoTurno tipoTurno);
-	public ApiResponse<List<TipoTurno>> listarTipoTurnoDeUsuario(Usuario userId);
+	TipoTurno guardarTipoTurno(TipoTurno tipoTurno) throws Exception;
+	TipoTurno editarTipoTurno(TipoTurno tipoTurno) throws Exception;
+	List<TipoTurno> listarTipoTurnoDeUsuario(Usuario userId) throws Exception;
 	
-	public ApiResponse<TipoTurno> obtenerTipoTurnoPorId(long idTipoTurno);
+	TipoTurno obtenerTipoTurnoPorId(long idTipoTurno) throws Exception;
 }
