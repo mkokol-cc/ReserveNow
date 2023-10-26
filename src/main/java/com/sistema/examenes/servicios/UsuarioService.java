@@ -10,4 +10,10 @@ public interface UsuarioService {
     public Usuario obtenerUsuario(String username);
 
     public void eliminarUsuario(Long usuarioId);
+    
+    public Usuario obtenerUsuarioPorPageId(String url);
+    
+    public Long getIdUsuarioActual();
+    
+    public Usuario obtenerUsuarioActual();
 }

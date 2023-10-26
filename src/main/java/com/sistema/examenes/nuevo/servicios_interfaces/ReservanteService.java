@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.sistema.examenes.anterior.modelo.Reservante;
 import com.sistema.examenes.modelo.usuario.Usuario;
-import com.sistema.examenes.nuevo.servicios.ApiResponse;
 
 public interface ReservanteService {
 	

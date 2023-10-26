@@ -9,10 +9,12 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
 
-import com.sistema.examenes.anterior.modelo.Recurso;
+import com.sistema.examenes.anterior.modelo.AsignacionRecursoTipoTurno;
+import com.sistema.examenes.anterior.modelo.Estado;
 import com.sistema.examenes.anterior.modelo.TipoTurno;
 import com.sistema.examenes.anterior.repositorios.TipoTurnoRepository;
 import com.sistema.examenes.modelo.usuario.Usuario;
+import com.sistema.examenes.nuevo.servicios_interfaces.AsignacionRecursoTipoTurnoService;
 import com.sistema.examenes.nuevo.servicios_interfaces.TipoTurnoService;
 
 @Service
@@ -20,6 +22,8 @@ public class TipoTurnoServiceImpl implements TipoTurnoService{
 	
 	@Autowired
 	private TipoTurnoRepository tipoTurnoRepo;
+	@Autowired
+	private AsignacionRecursoTipoTurnoService asignacionService;
 	
 	private final Validator validator;
 	
@@ -32,12 +36,9 @@ public class TipoTurnoServiceImpl implements TipoTurnoService{
         Errors errors = new BeanPropertyBindingResult(tipoTurno, "tipoTurno");
         ValidationUtils.invokeValidator(validator, tipoTurno, errors);
         if (errors.hasErrors()) {
-        	//System.out.println(errors.getAllErrors());
         	throw new Exception(errors.getFieldError().getDefaultMessage().toString());
         } else {
-        	//System.out.println("---------------EXITO---------------");
         	return tipoTurno;
-        	//return save(recursoDTO);
         }
     }
     
@@ -79,6 +80,27 @@ public class TipoTurnoServiceImpl implements TipoTurnoService{
 			return t;
 		}
 		throw new Exception("Error al obtener el Tipo de Turno");
+	}
+	
+	
+	
+	
+	@Override
+	public void eliminarTipoTurno(Long idTipoTurno,Usuario u) throws Exception {
+		String mensajeError="";
+		TipoTurno t = tipoTurnoRepo.getById(idTipoTurno);
+		for(AsignacionRecursoTipoTurno asig : t.getRecursosTipoTurno()) {
+			try {
+				asignacionService.eliminarAsignacion(asig, u);
+			}catch(Exception ex) {
+				mensajeError+=ex.getMessage();
+			}
+		}
+		t.setEliminado(true);
+		editarTipoTurno(t);
+		if(!mensajeError.equals("")) {
+			throw new Exception(mensajeError);
+		}
 	}
 	
 	

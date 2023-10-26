@@ -1,8 +1,6 @@
 package com.sistema.examenes.nuevo.servicios;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -12,8 +10,6 @@ import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
 
 import com.sistema.examenes.anterior.modelo.AsignacionRecursoTipoTurno;
-import com.sistema.examenes.anterior.modelo.Horario;
-import com.sistema.examenes.anterior.modelo.HorarioEspecial;
 import com.sistema.examenes.anterior.modelo.Recurso;
 import com.sistema.examenes.anterior.modelo.TipoTurno;
 import com.sistema.examenes.anterior.repositorios.RecursoRepository;
@@ -22,6 +18,7 @@ import com.sistema.examenes.nuevo.servicios_interfaces.AsignacionRecursoTipoTurn
 import com.sistema.examenes.nuevo.servicios_interfaces.HorarioEspecialService;
 import com.sistema.examenes.nuevo.servicios_interfaces.HorarioService;
 import com.sistema.examenes.nuevo.servicios_interfaces.RecursoService;
+import com.sistema.examenes.nuevo.servicios_interfaces.ReservaService;
 import com.sistema.examenes.nuevo.servicios_interfaces.TipoTurnoService;
 
 @Service
@@ -29,6 +26,9 @@ public class RecursoServiceImpl implements RecursoService{
 
 	@Autowired
 	private RecursoRepository recursoRepo;
+	
+	@Autowired
+	private ReservaService reservaService;
 	
 	@Autowired
 	private HorarioService horarioService;
@@ -39,10 +39,10 @@ public class RecursoServiceImpl implements RecursoService{
 	@Autowired
 	private TipoTurnoService tipoTurnoService;
 	
-	/*
 	@Autowired
 	private AsignacionRecursoTipoTurnoService asignacionService;
-	*/
+
+	
 	private final Validator validator;
 	
     public RecursoServiceImpl(Validator validator) {
@@ -65,10 +65,7 @@ public class RecursoServiceImpl implements RecursoService{
 	private Recurso save(Recurso r) throws Exception{
 		Recurso guardado = recursoRepo.save(r);
 		if(guardado!=null) {
-			guardado.setHorarios(r.getHorarios());
-			setHorarios(guardado);
-			guardado.setHorariosEspeciales(r.getHorariosEspeciales());
-			setHorariosEspeciales(guardado);
+			guardarHorariosRecurso(r);
 			return guardado;
 		}else {
 			throw new Exception("Error al guardar el Recurso");
@@ -110,6 +107,7 @@ public class RecursoServiceImpl implements RecursoService{
 	private Recurso guardarHorariosRecurso(Recurso r) throws Exception{
 		r=setHorarios(r);
 		r=setHorariosEspeciales(r);
+		reservaService.eliminarReservasMalRegistradas(reservaService.obtenerReservasEnEstadoNoFinal(r));
 		return r;
 	}
 	
@@ -155,5 +153,27 @@ public class RecursoServiceImpl implements RecursoService{
 			throw new Exception(mensajeError);
 		}
 		return null;//falta de implementar
+	}
+	
+	
+	
+	
+	
+	@Override
+	public void eliminarRecurso(Long idRecurso, Usuario u) throws Exception {
+		String mensajeError="";
+		Recurso r = recursoRepo.getById(idRecurso);
+		for(AsignacionRecursoTipoTurno asig : r.getRecursosTipoTurno()) {
+			try {
+				asignacionService.eliminarAsignacion(asig, u);
+			}catch(Exception ex) {
+				mensajeError+=ex.getMessage();
+			}
+		}
+		r.setEliminado(true);
+		editarRecurso(r);
+		if(!mensajeError.equals("")) {
+			throw new Exception(mensajeError);
+		}
 	}
 }

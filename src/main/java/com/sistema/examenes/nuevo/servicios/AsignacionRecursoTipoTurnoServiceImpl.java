@@ -1,7 +1,5 @@
 package com.sistema.examenes.nuevo.servicios;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +10,7 @@ import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
 
 import com.sistema.examenes.anterior.modelo.AsignacionRecursoTipoTurno;
+import com.sistema.examenes.anterior.modelo.Estado;
 import com.sistema.examenes.anterior.modelo.Recurso;
 import com.sistema.examenes.anterior.modelo.Reserva;
 import com.sistema.examenes.anterior.modelo.TipoTurno;
@@ -21,6 +20,7 @@ import com.sistema.examenes.nuevo.servicios_interfaces.AsignacionRecursoTipoTurn
 import com.sistema.examenes.nuevo.servicios_interfaces.HorarioEspecialService;
 import com.sistema.examenes.nuevo.servicios_interfaces.HorarioService;
 import com.sistema.examenes.nuevo.servicios_interfaces.RecursoService;
+import com.sistema.examenes.nuevo.servicios_interfaces.ReservaService;
 import com.sistema.examenes.nuevo.servicios_interfaces.TipoTurnoService;
 
 @Service
@@ -40,6 +40,9 @@ public class AsignacionRecursoTipoTurnoServiceImpl implements AsignacionRecursoT
 	
 	@Autowired
 	private HorarioEspecialService horarioEspService;
+	
+	@Autowired
+	private ReservaService reservaService;
 	
 	
 	private final Validator validator;
@@ -111,7 +114,7 @@ public class AsignacionRecursoTipoTurnoServiceImpl implements AsignacionRecursoT
 			asignacion.setRecurso(guardado.getRecurso());
 			asignacion.setTipoTurno(guardado.getTipoTurno());
 			asignacion.setReservas(guardado.getReservas());
-			return save(asignacion);//save
+			return save(validar(asignacion));//validar y luego save
 		}else {
 			throw new Exception("Usuario no autorizado a editar la Asignación.");
 		}
@@ -332,7 +335,7 @@ public class AsignacionRecursoTipoTurnoServiceImpl implements AsignacionRecursoT
 	
 	
 	//DESHABILITAR POR TIPOTURNO
-	public ApiResponse<?> eliminarAsignacionPorTipoTurno(long idUsuario, long idTipoTurno) throws Exception {
+	public void eliminarAsignacionPorTipoTurno(long idUsuario, long idTipoTurno) throws Exception {
 		String mensajeError = "";
 		for(AsignacionRecursoTipoTurno a : listarAsignacionPorUsuario(idUsuario)) {
 			if(a.getTipoTurno().getId() == idTipoTurno) {
@@ -343,14 +346,13 @@ public class AsignacionRecursoTipoTurnoServiceImpl implements AsignacionRecursoT
 				}
 			}
 		}
-		if(mensajeError.equals("")) {
-			return null;
+		if(!mensajeError.equals("")) {
+			throw new Exception(mensajeError);
 		}
-		throw new Exception(mensajeError);
 	}
 	
 	//DESHABILITAR POR RECURSO
-	public ApiResponse<?> eliminarAsignacionPorRecurso(long idUsuario, long idRecurso) throws Exception{
+	public void eliminarAsignacionPorRecurso(long idUsuario, long idRecurso) throws Exception{
 		String mensajeError = "";
 		for(AsignacionRecursoTipoTurno a : listarAsignacionPorUsuario(idUsuario)) {
 			if(a.getRecurso().getId() == idRecurso) {
@@ -361,13 +363,41 @@ public class AsignacionRecursoTipoTurnoServiceImpl implements AsignacionRecursoT
 				}
 			}
 		}
-		if(mensajeError.equals("")) {
-			return null;
+		if(!mensajeError.equals("")) {
+			throw new Exception(mensajeError);
 		}
-		throw new Exception(mensajeError);
 	}
 	
 	
 	
+	
+	
+	//se elimino una asignacion
+	@Override
+	public void eliminarAsignacion(AsignacionRecursoTipoTurno asig, Usuario u) throws Exception {
+		String mensajeError = "";
+		tienePermisosElUsuario(asig,u);
+		asig.setEliminado(true);
+		editarAsignacion(asig,u.getId());
+		for(Reserva r : reservaService.obtenerReservasEnEstadoNoFinal(asig)) {
+			try {
+				reservaService.eliminarReservaPorId(r.getId(), u.getId());
+				//reservaService.editarReserva(r, u.getId());	
+			}catch(Exception ex) {
+				mensajeError += "Reserva "+r.getId()+":"+ex.getMessage();
+			}
+		}
+		if(mensajeError.equals("")) {
+			throw new Exception(mensajeError);
+		}
+	}
+	
+
+	private boolean tienePermisosElUsuario(AsignacionRecursoTipoTurno asig, Usuario u) throws Exception {
+		if(asig.getTipoTurno().getUsuario().getId()==u.getId() && asig.getRecurso().getUsuario().getId()==u.getId()) {
+			return true;
+		}
+		throw new Exception("Usuario no autorizado");
+	}
 
 }

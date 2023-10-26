@@ -98,37 +98,17 @@ public class AdmController {
 		
 		try {
 			recursoStr.setUsuario(usuarioRepo.getById(getUserId()));
-			ApiResponse<Recurso> resp = recursoService.guardarRecurso(recursoStr);
-			if(resp.isSuccess()) {
+			Recurso recursoGuradado = recursoService.guardarRecurso(recursoStr);
+			if(recursoGuradado!=null) {
 				return new ResponseEntity<>("Se guardó correctamente el Recurso.", HttpStatus.CREATED);	
 			}
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, resp.getMessage());
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error al guardar el recurso");
 		}catch(Exception e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
-		/*
-		ApiResponse<Recurso> resp = recursoService.guardarRecurso(recursoStr);
 		
-		
-		
-		if(resp.isSuccess()) {
-			return new ResponseEntity<>("Se guardó correctamente el Recurso.", HttpStatus.CREATED);	
-		}
-		throw new ResponseStatusException(HttpStatus.BAD_REQUEST, resp.getMessage());
-		*/
 	}
-	/*
-	@PutMapping("/recurso/edit")
-	@Transactional
-	public ResponseEntity<?> editarRecurso(@Valid @RequestBody Recurso recursoStr) throws JsonProcessingException {
-		
-		ApiResponse<Recurso> resp = recursoService.editarRecurso(recursoStr, getUserId());
-		if(resp.isSuccess()) {
-			return new ResponseEntity<>("Se actualizó correctamente el Recurso.", HttpStatus.OK);
-		}
-		throw new ResponseStatusException(HttpStatus.BAD_REQUEST, resp.getMessage());
-		
-	}*/
+	
 	
 	@GetMapping("/recurso")
 	public ResponseEntity</*List<Recurso>*/?> listarRecursos(){

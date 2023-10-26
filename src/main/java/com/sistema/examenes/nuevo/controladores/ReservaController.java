@@ -8,9 +8,6 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,18 +22,17 @@ import com.sistema.examenes.anterior.modelo.Reserva;
 import com.sistema.examenes.anterior.modelo.Reservante;
 import com.sistema.examenes.modelo.usuario.Usuario;
 import com.sistema.examenes.nuevo.dto.TurnoDTO;
-import com.sistema.examenes.nuevo.servicios.ApiResponse;
 import com.sistema.examenes.nuevo.servicios_interfaces.ReservaService;
-import com.sistema.examenes.repositorios.UsuarioRepository;
+import com.sistema.examenes.servicios.UsuarioService;
 import com.sistema.examenes.websocket.WebSocketService;
 
 @RestController
-@RequestMapping("/v1.0")
+@RequestMapping("/final")
 @CrossOrigin("*")
 public class ReservaController {
 
 	@Autowired
-	private UsuarioRepository usuarioRepo;
+	private UsuarioService usuarioService;
 	
 	@Autowired
 	private ReservaService reservaService;
@@ -51,13 +47,10 @@ public class ReservaController {
     	try {
     		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
     		LocalDate fechaLocalDate = LocalDate.parse(fecha, formatter);
-			ApiResponse<List<TurnoDTO>> resp = reservaService.crearTurnos(idAsignacion, fechaLocalDate);
-			if(resp.isSuccess()) {
-				return ResponseEntity.ok(resp.getData());
-			}
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp.getMessage());
+    		List<TurnoDTO> listaTurnos = reservaService.crearTurnos(idAsignacion, fechaLocalDate);
+    		return ResponseEntity.ok(listaTurnos);
 		}catch(Exception e) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: "+e.getMessage());
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
 		}
     }
     
@@ -67,15 +60,12 @@ public class ReservaController {
     public ResponseEntity<?> guardarNuevaReservaPorGuest(@PathVariable String idUserPage,@RequestBody Reserva reservaStr) {
     	try {
 			Reservante r = reservaStr.getReservante();
-			Usuario u = getUserByPageId(idUserPage);
+			Usuario u = usuarioService.obtenerUsuarioActual();
 			r.setUsuario(u);
-			ApiResponse<Reserva> resp = reservaService.guardarReserva(reservaStr,u.getId());
-			if(resp.isSuccess()) {
-				return ResponseEntity.ok(resp.getData());
-			}
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp.getMessage());
+			Reserva reservaGuardada = reservaService.guardarReserva(reservaStr,u.getId());
+			return ResponseEntity.ok(reservaGuardada);
 		}catch(Exception e){
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: "+e.getMessage());
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
 		}
     }
     
@@ -83,13 +73,10 @@ public class ReservaController {
     @PutMapping("public/reserva")
     public ResponseEntity<?> editarReservaPorGuest(@RequestBody Reserva reservaStr) {
     	try {
-			ApiResponse<Reserva> resp = reservaService.editarReserva(reservaStr, (Long) null);
-			if(resp.isSuccess()) {
-				return ResponseEntity.ok(resp.getData());
-			}
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp.getMessage());
+    		Reserva reservaEditada = reservaService.editarReserva(reservaStr, (Long) null);
+			return ResponseEntity.ok(reservaEditada);
 		}catch(Exception e){
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: "+e.getMessage());
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
 		}
     }
     
@@ -97,16 +84,14 @@ public class ReservaController {
     @PutMapping("reserva")
     public ResponseEntity<?> editarReservaPorAdministrador(@RequestBody Reserva reservaStr) {
     	try {
-    		if(getUserId() != 0) {
-    			ApiResponse<Reserva> resp = reservaService.editarReserva(reservaStr, getUserId());
-    			if(resp.isSuccess()) {
-    				return ResponseEntity.ok(resp.getData());
-    			}
-    			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp.getMessage());
+    		Long idUsuario = usuarioService.getIdUsuarioActual();
+    		if(idUsuario != 0) {
+    			Reserva reservaEditada = reservaService.editarReserva(reservaStr, idUsuario);
+    			return ResponseEntity.ok(reservaEditada);
     		}
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Acceso invalido. Por favor vuelve a iniciar sesión.");
 		}catch(Exception e){
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: "+e.getMessage());
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
 		}
     }
     
@@ -121,31 +106,25 @@ public class ReservaController {
     	try {
     		DateTimeFormatter formatterDate = DateTimeFormatter.ofPattern("dd-MM-yyyy");
     		DateTimeFormatter formatterTime = DateTimeFormatter.ofPattern("HH:mm");
-    		if(getUserId() != 0) {
-    			ApiResponse<List<Reserva>> resp = reservaService.obtenerReservasInvolucradasEnRango(idRecurso,LocalDate.parse(fecha, formatterDate),
+    		if(usuarioService.getIdUsuarioActual() != 0) {
+    			List<Reserva> reservasInvolucradas = reservaService.obtenerReservasInvolucradasEnRango(idRecurso,LocalDate.parse(fecha, formatterDate),
     					LocalTime.parse(desde, formatterTime),LocalTime.parse(hasta, formatterTime));
-    			if(resp.isSuccess()) {
-    				return ResponseEntity.ok(resp.getData());
-    			}
-    			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp.getMessage());
+    			return ResponseEntity.ok(reservasInvolucradas);
     		}
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Acceso invalido. Por favor vuelve a iniciar sesión.");
 		}catch(Exception e){
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: "+e.getMessage());
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
 		}
     	
     }
     
-    //
+    
     @PostMapping("reserva/estado/{idEstado}")
     public ResponseEntity<?> cambiarEstadoDeReservas(@PathVariable Long idEstado,@RequestBody List<Long> idReservas){
     	try {
-    		if(getUserId() != 0) {
-    			ApiResponse<List<Reserva>> resp = reservaService.cambiarEstadosDeListaDeIsReserva(idEstado, idReservas);
-    			if(resp.isSuccess()) {
-    				return ResponseEntity.ok(resp.getData());
-    			}
-    			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp.getMessage());
+    		if(usuarioService.getIdUsuarioActual() != 0) {
+    			List<Reserva> reservaEditada = reservaService.cambiarEstadosDeListaDeIdsReserva(idEstado, idReservas);
+    			return ResponseEntity.ok(reservaEditada);
     		}
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Acceso invalido. Por favor vuelve a iniciar sesión.");
 		}catch(Exception e){
@@ -156,13 +135,15 @@ public class ReservaController {
     
     @PostMapping("notificacion/{idUsuario}")
     public void enviarNotificacion(@PathVariable long idUsuario) {
+    	/*
     	Usuario u = usuarioRepo.getById(idUsuario);
     	System.out.println("ENTRE");
     	if(u != null) {
     		notificarFrontend(u);
     	}else {
     		System.out.println("ERROR AL OBTENER EL USUARIO");
-    	}
+    	}*/
+    	//return null;
     	//messagingTemplate.convertAndSendToUser(String.valueOf(u.getId()), "/topic/notificaciones", new Notificacion("Nueva Reserva!","Se ha guardado un nuevo registro.",u));
     }
     
@@ -178,30 +159,5 @@ public class ReservaController {
     	//webSocket.sendMessage(entityTopic);
     	webSocket.sendNotificacion(entityTopic, n);
     }
-	private Usuario getUserByPageId(String url){
-		try {
-			Usuario u = usuarioRepo.findByDbUrl(url);
-			return u;
-		}catch(Exception e) {
-			return null;
-		}
-	}
-	private Long getUserId() {
-        // Obtener la autenticación actual
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        // Obtener los detalles del usuario autenticado
-        if (authentication != null && authentication.getPrincipal() instanceof UserDetails) {
-            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            String username = userDetails.getUsername();
-            // Aquí puedes realizar las operaciones necesarias con el usuario autenticado
-            try {
-            	return usuarioRepo.findByEmail(username).getId();
-            }catch(Exception e) {
-            	return (long) 0;
-            }
-        }
-        // Si no se encuentra un usuario autenticado, puedes manejarlo según tus necesidades
-        return (long) 0;
-    }
-    
+
 }

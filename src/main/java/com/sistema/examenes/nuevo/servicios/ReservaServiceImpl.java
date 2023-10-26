@@ -6,6 +6,7 @@ import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,7 @@ import com.sistema.examenes.anterior.modelo.HorarioEspecial;
 import com.sistema.examenes.anterior.modelo.Recurso;
 import com.sistema.examenes.anterior.modelo.Reserva;
 import com.sistema.examenes.anterior.modelo.Reservante;
+import com.sistema.examenes.anterior.modelo.TipoTurno;
 import com.sistema.examenes.anterior.repositorios.ReservaRepository;
 import com.sistema.examenes.nuevo.dto.TurnoDTO;
 import com.sistema.examenes.nuevo.servicios_interfaces.AsignacionRecursoTipoTurnoService;
@@ -193,105 +195,12 @@ public class ReservaServiceImpl implements ReservaService{
 		Reserva reserva = reservaRepo.getById(r);
 		if(reserva!=null) {
 			if(reserva.getAsignacionTipoTurno().getRecurso().getUsuario().getId()==idUsuario) {
-				reservaRepo.delete(reserva);
-				return null;
+				return save(estadoService.eliminarReserva(reserva));
 			}
 			throw new Exception("Usuario no autorizado");
 		}
 		throw new Exception("No se encontro la reserva");
 	}
-	
-	
-	/*
-	private ApiResponse<Reserva> setDatosObligatorios(Reserva r, long idUsuario) {
-    	ApiResponse<Reservante> resReservante = reservanteService.guardarReservante(r.getReservante());
-    	ApiResponse<AsignacionRecursoTipoTurno> resAsig = asignacionService.obtenerPorId(r.getAsignacionTipoTurno().getId());
-    	ApiResponse<Reserva> setEstadoResponse = estadoService.estadoReservaNueva(r);
-    	if(resReservante.isSuccess()) {
-    		r.setReservante(resReservante.getData());
-    		if(resAsig.isSuccess()) {
-    			if(resAsig.getData().getRecurso().getUsuario().getId()!=idUsuario || resAsig.getData().getTipoTurno().getUsuario().getId()!=idUsuario) {
-    				return new ApiResponse<>(false,"Usuario no autorizado",null);
-    			}
-    			r.setAsignacionTipoTurno(resAsig.getData());
-    			r.setHoraFin(r.getHora().plusMinutes(resAsig.getData().getDuracionEnMinutos()));
-    			if(setEstadoResponse.isSuccess()) {
-    				return new ApiResponse<>(true,"",setEstadoResponse.getData());	
-    			}
-    			return new ApiResponse<>(false,setEstadoResponse.getMessage(),null);
-    		}
-    		return new ApiResponse<>(false,resAsig.getMessage(),null);
-    	}
-    	return new ApiResponse<>(false,resReservante.getMessage(),null);
-	}
-	
-	
-	
-	
-	private ApiResponse<Reserva> setHorariosReserva(Reserva r) {
-		if((r.getFecha().isEqual(LocalDate.now()) && !r.getHora().isAfter(LocalTime.now())) ||
-				r.getFecha().isBefore(LocalDate.now())) {
-			return new ApiResponse<>(false,"Fecha y Hora anterior a la actual",null);
-		}
-		ApiResponse<Reserva> ocupadoResponse = estaOcupado(r);
-		if(ocupadoResponse.isSuccess()) {
-			ApiResponse<Reserva> respuestaHorarioEsp = comprobarHoraPorHorarioEspecial(r);
-			if(respuestaHorarioEsp.isSuccess()) {
-				if(respuestaHorarioEsp.getData()==null) {
-					//comprobar horario comun
-					return comprobarHoraPorHorarioComun(r);
-				}
-			}
-			return respuestaHorarioEsp;
-		}else {
-			return ocupadoResponse;
-		}
-	}
-	
-	private ApiResponse<Reserva> comprobarHoraPorHorarioEspecial(Reserva r){
-    	ApiResponse<HorarioEspecial> he = horarioEspecialService.comprobarHorarioEspecialAsignacion(r.getHora(),r.getFecha(), r.getAsignacionTipoTurno());
-    	//si hay un he is succes y getData devuelve un objeto no null entonces hay un HE en el que la hora es valida
-    	//si hay un he is succes y getData devuelve un objeto null entonces no hay HE para esa fecha
-    	if(he.isSuccess()) {
-    		if(he.getData()!=null) {
-    			return new ApiResponse<>(true,"horario valido",r);
-    		}
-    		return new ApiResponse<>(true,"No hay horario especial para esa fecha",null);
-    	}else{
-    		//--responder que no es posible, ya que para esa fecha hay un horario especial que lo impide
-    		return new ApiResponse<>(false,"horario invalido: "+he.getMessage(),r);
-    	}
-	}
-	
-	private ApiResponse<Reserva> comprobarHoraPorHorarioComun(Reserva r){
-		Dias d = Dias.valueOf(r.getFecha().getDayOfWeek().getDisplayName(TextStyle.FULL, new Locale("es", "ES")).toUpperCase()); 
-		ApiResponse<Horario> h = horarioService.comprobarHorarioAsignacion(r.getHora(),d, r.getAsignacionTipoTurno());
-		//posibles retornos TRUE si la hora es valida y FALSE si no
-		if(h.isSuccess()) {
-			return new ApiResponse<>(true,"Horario Valido",r);
-		}
-		return new ApiResponse<>(false,"Horario Invalido",null);
-	}
-
-	private ApiResponse<Reserva> estaOcupado(Reserva r) {
-		try {
-			LocalTime desde = r.getHora();
-			LocalTime hasta = desde.plusMinutes((long)r.getAsignacionTipoTurno().getDuracionEnMinutos());
-			if(reservaRepo.buscarPorFechaRangoHorarioRecurso(
-					r.getFecha(),
-					desde,
-					hasta,
-					r.getAsignacionTipoTurno().getRecurso().getId()).size()>0) {
-				return new ApiResponse<>(false,"El Recurso "+r.getAsignacionTipoTurno().getRecurso().getNombre()+
-						" esta entre las "+desde+" y "+hasta,null);
-			}
-			return new ApiResponse<>(true,"",null);
-		}catch(Exception e) {
-			return new ApiResponse<>(false,"Error: "+e.getMessage(),null);
-		}
-	}*/
-
-	
 	
 	
 	
@@ -421,10 +330,10 @@ public class ReservaServiceImpl implements ReservaService{
 		return resFiltradas;
 	}
 	
-	public ApiResponse<List<Reserva>> obtenerReservasInvolucradasPorAsignacion(AsignacionRecursoTipoTurno asig,LocalDate fecha, LocalTime desde, LocalTime hasta){
+	public List<Reserva> obtenerReservasInvolucradasPorAsignacion(AsignacionRecursoTipoTurno asig,LocalDate fecha, LocalTime desde, LocalTime hasta){
 		List<Reserva> reservas = reservaRepo.findByAsignacionTipoTurno(asig);
 		List<Reserva> resFiltradas = obtenerSoloEstadosNoFinales(reservas);
-		return new ApiResponse<>(true,"",resFiltradas);
+		return resFiltradas;
 	}
 	
 	private List<Reserva> obtenerSoloEstadosNoFinales(List<Reserva> reservas){
@@ -482,4 +391,95 @@ public class ReservaServiceImpl implements ReservaService{
 		//System.out.println(r.getTelefono() + " Enviar Mensaje: "+mensaje);
 		//return true;)
 	//}
+	
+
+	
+	
+	//si se elimina un Recurso entonces Se debe eliminar todas sus Asignaciones
+	
+	
+	
+	@Override
+	public List<Reserva> obtenerReservasEnEstadoNoFinal(LocalDate fecha, LocalTime desde, LocalTime hasta){
+		return reservaRepo.buscarPorFechaYRangoHorario(fecha, desde, hasta).stream()
+	            .filter(reserva -> !reserva.getEstado().isEsEstadoFinal())
+	            .collect(Collectors.toList());
+	};
+	@Override
+	public List<Reserva> obtenerReservasEnEstadoNoFinal(AsignacionRecursoTipoTurno asignacion){
+		return reservaRepo.findByAsignacionTipoTurno(asignacion).stream()
+	            .filter(reserva -> !reserva.getEstado().isEsEstadoFinal())
+	            .collect(Collectors.toList());
+	};
+	@Override
+	public List<Reserva> obtenerReservasEnEstadoNoFinal(Recurso r){
+		return reservaRepo.findByRecurso(r.getId()).stream()
+	            .filter(reserva -> !reserva.getEstado().isEsEstadoFinal())
+	            .collect(Collectors.toList());
+	};
+	@Override
+	public List<Reserva> obtenerReservasEnEstadoNoFinal(TipoTurno t){
+		return reservaRepo.findByTipoTurno(t.getId()).stream()
+	            .filter(reserva -> !reserva.getEstado().isEsEstadoFinal())
+	            .collect(Collectors.toList());
+	};
+	
+	
+	
+	@Override
+	public void eliminarReservasMalRegistradas(List<Reserva> reservas) throws Exception {
+		for(Reserva r: reservas) {
+			if(!controlarReserva(r)) {
+				eliminarReservaPorId(r.getId(),r.getAsignacionTipoTurno().getRecurso().getUsuario().getId());
+			}
+		}
+	}
+	
+	private boolean controlarReserva(Reserva r) throws Exception {
+		//comprobar horario especial y comun
+		if(!cumpleConHorariosDelRecurso(r) || !cumpleConHorariosEspecialesDelRecurso(r)
+				|| !r.getReservante().isHabilitado() || r.getAsignacionTipoTurno().isEliminado()
+				|| r.getAsignacionTipoTurno().getRecurso().isEliminado() 
+				|| r.getAsignacionTipoTurno().getTipoTurno().isEliminado()) {
+			return false;
+		}else {
+			return true;
+		}
+		//corroborar eliminado
+	}
+	
+	private boolean cumpleConHorariosDelRecurso(Reserva r) throws Exception {
+		boolean cumple = false;
+		List<Horario> horariosComunes = horarioService.horariosDeRecursoParaFecha(r.getAsignacionTipoTurno().getRecurso(),localDateToDia(r.getFecha()));
+		for(Horario h : horariosComunes) {
+			LocalTime horarioDesde = h.getDesde();
+			while(horarioDesde.isBefore(h.getHasta())) {
+				if(horarioDesde.equals(r.getHora())) {
+					cumple = true;
+					break;
+				}
+				horarioDesde.plusMinutes((long)r.getAsignacionTipoTurno().getDuracionEnMinutos());
+			}
+		}
+		return cumple;
+	}
+	private boolean cumpleConHorariosEspecialesDelRecurso(Reserva r) throws Exception {
+		boolean cumple = false;
+		List<HorarioEspecial> horariosEspeciales = horarioEspecialService.horariosEspecialesDeRecursoParaFecha(r.getAsignacionTipoTurno().getRecurso(),r.getFecha());
+		for(HorarioEspecial h : horariosEspeciales) {
+			if(!h.isCerrado()) {
+				LocalTime horarioDesde = h.getDesde();
+				while(horarioDesde.isBefore(h.getHasta())) {
+					if(horarioDesde.equals(r.getHora())) {
+						cumple = true;
+						break;
+					}
+					horarioDesde.plusMinutes((long)r.getAsignacionTipoTurno().getDuracionEnMinutos());
+				}	
+			}else {
+				return false;
+			}
+		}
+		return horariosEspeciales.isEmpty() ? true : cumple;
+	}
 }

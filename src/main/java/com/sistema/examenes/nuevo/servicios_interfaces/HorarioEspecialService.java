@@ -7,7 +7,6 @@ import java.util.List;
 import com.sistema.examenes.anterior.modelo.AsignacionRecursoTipoTurno;
 import com.sistema.examenes.anterior.modelo.HorarioEspecial;
 import com.sistema.examenes.anterior.modelo.Recurso;
-import com.sistema.examenes.nuevo.servicios.ApiResponse;
 
 public interface HorarioEspecialService {
 

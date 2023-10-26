@@ -21,12 +21,15 @@ public interface ReservaRepository extends JpaRepository<Reserva,Long>{
 	//List<Reserva> findByUsuarioId(Long idUsuario);
 	List<Reserva> findByAsignacionTipoTurno(AsignacionRecursoTipoTurno asignacionTipoTurno);
 	
+	@Query("SELECT r FROM Reserva r WHERE r.asignacionTipoTurno.recurso.id = :recursoId")
+	List<Reserva> findByRecurso(@Param("recursoId") Long recursoId);
+	
+	@Query("SELECT r FROM Reserva r WHERE r.asignacionTipoTurno.tipoTurno.id = :tipoTurnoId")
+	List<Reserva> findByTipoTurno(@Param("tipoTurnoId") Long recursoId);
+	
 	List<Reserva> findByAsignacionTipoTurnoAndFecha(AsignacionRecursoTipoTurno asignacionTipoTurno, LocalDate fecha);
 	
 	List<Reserva> findByAsignacionTipoTurnoAndFechaAndHora(AsignacionRecursoTipoTurno asignacionTipoTurno, LocalDate fecha, LocalTime hora);
-	
-	@Query("SELECT r.reservante, COUNT(r) FROM Reserva r GROUP BY r.reservante")
-	Map<Reservante, Long> countReservasByReservante();
 	
 	@Query("SELECT r FROM Reserva r WHERE r.fecha = :fecha AND r.hora = :hora AND r.asignacionTipoTurno.recurso.id = :recursoId")
     List<Reserva> buscarPorFechaHoraRecurso(@Param("fecha") LocalDate fecha, @Param("hora") LocalTime hora, @Param("recursoId") Long recursoId);
@@ -53,6 +56,13 @@ public interface ReservaRepository extends JpaRepository<Reserva,Long>{
 	        @Param("horaDesde") LocalTime horaDesde,
 	        @Param("horaHasta") LocalTime horaHasta,
 	        @Param("asignacionId") Long asignacionId
+	);
+	
+	@Query("SELECT r FROM Reserva r WHERE r.fecha = :fecha AND NOT (:horaDesde >= r.horaFin OR :horaHasta <= r.hora)")
+	List<Reserva> buscarPorFechaYRangoHorario(
+	        @Param("fecha") LocalDate fecha,
+	        @Param("horaDesde") LocalTime horaDesde,
+	        @Param("horaHasta") LocalTime horaHasta
 	);
 
 }

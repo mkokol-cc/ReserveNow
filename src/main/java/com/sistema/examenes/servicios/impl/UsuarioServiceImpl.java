@@ -1,6 +1,9 @@
 package com.sistema.examenes.servicios.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import com.sistema.examenes.modelo.usuario.Usuario;
@@ -43,5 +46,56 @@ public class UsuarioServiceImpl implements UsuarioService {
     public void eliminarUsuario(Long usuarioId) {
         usuarioRepository.deleteById(usuarioId);
     }
+
+	@Override
+	public Usuario obtenerUsuarioPorPageId(String url) {
+		try {
+			Usuario u = usuarioRepository.findByDbUrl(url);
+			return u;
+		}catch(Exception e) {
+			return null;
+		}
+	}
+
+	@Override
+	public Long getIdUsuarioActual() {
+		// Obtener la autenticación actual
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        // Obtener los detalles del usuario autenticado
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetails) {
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            String username = userDetails.getUsername();
+            // Aquí puedes realizar las operaciones necesarias con el usuario autenticado
+            try {
+            	return usuarioRepository.findByEmail(username).getId();
+            }catch(Exception e) {
+            	return (long) 0;
+            }
+        }
+        // Si no se encuentra un usuario autenticado, puedes manejarlo según tus necesidades
+        return (long) 0;
+	}
+
+	@Override
+	public Usuario obtenerUsuarioActual() {
+		// Obtener la autenticación actual
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        // Obtener los detalles del usuario autenticado
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetails) {
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            String username = userDetails.getUsername();
+
+            // Aquí puedes realizar las operaciones necesarias con el usuario autenticado
+            try {
+            	return usuarioRepository.findByEmail(username);
+            }catch(Exception e) {
+            	return null;
+            }
+        }
+
+        // Si no se encuentra un usuario autenticado, puedes manejarlo según tus necesidades
+        return null;
+	}
 
 }

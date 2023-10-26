@@ -3,9 +3,9 @@ package com.sistema.examenes.nuevo.servicios_interfaces;
 import java.util.List;
 
 import com.sistema.examenes.anterior.modelo.AsignacionRecursoTipoTurno;
+import com.sistema.examenes.anterior.modelo.Estado;
 import com.sistema.examenes.anterior.modelo.Recurso;
 import com.sistema.examenes.modelo.usuario.Usuario;
-import com.sistema.examenes.nuevo.servicios.ApiResponse;
 
 public interface AsignacionRecursoTipoTurnoService {
 
@@ -18,6 +18,8 @@ public interface AsignacionRecursoTipoTurnoService {
 	
 	
 	AsignacionRecursoTipoTurno eliminarAsignacion(Long idTipoTurno, Long idRecurso, Long idUsuario) throws Exception;
+	
+	void eliminarAsignacion(AsignacionRecursoTipoTurno asig, Usuario u) throws Exception;
 	
 	
 	Recurso actualizarAsignaciones(List<Long> idTiposDeTurno, long recId,Usuario usuario) throws Exception;

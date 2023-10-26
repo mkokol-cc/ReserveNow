@@ -5,9 +5,10 @@ import java.time.LocalTime;
 import java.util.List;
 
 import com.sistema.examenes.anterior.modelo.AsignacionRecursoTipoTurno;
+import com.sistema.examenes.anterior.modelo.Recurso;
 import com.sistema.examenes.anterior.modelo.Reserva;
+import com.sistema.examenes.anterior.modelo.TipoTurno;
 import com.sistema.examenes.nuevo.dto.TurnoDTO;
-import com.sistema.examenes.nuevo.servicios.ApiResponse;
 
 public interface ReservaService {
 
@@ -23,4 +24,12 @@ public interface ReservaService {
 			LocalTime hasta) throws Exception;
 	List<Reserva> cambiarEstadosDeListaDeIdsReserva(Long idEstado, List<Long> idReserva) throws Exception;
 	
+	
+	public List<Reserva> obtenerReservasEnEstadoNoFinal(LocalDate fecha, LocalTime desde, LocalTime hasta);
+	public List<Reserva> obtenerReservasEnEstadoNoFinal(AsignacionRecursoTipoTurno asignacion);
+	public List<Reserva> obtenerReservasEnEstadoNoFinal(Recurso r);
+	public List<Reserva> obtenerReservasEnEstadoNoFinal(TipoTurno t);
+	
+	
+	void eliminarReservasMalRegistradas(List<Reserva> reservas) throws Exception;
 }

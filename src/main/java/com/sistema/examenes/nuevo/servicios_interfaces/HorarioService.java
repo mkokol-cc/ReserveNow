@@ -1,6 +1,5 @@
 package com.sistema.examenes.nuevo.servicios_interfaces;
 
-import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -8,7 +7,6 @@ import com.sistema.examenes.anterior.modelo.AsignacionRecursoTipoTurno;
 import com.sistema.examenes.anterior.modelo.Dias;
 import com.sistema.examenes.anterior.modelo.Horario;
 import com.sistema.examenes.anterior.modelo.Recurso;
-import com.sistema.examenes.nuevo.servicios.ApiResponse;
 
 public interface HorarioService {
 	

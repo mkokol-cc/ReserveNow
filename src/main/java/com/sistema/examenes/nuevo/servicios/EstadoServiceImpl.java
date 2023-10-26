@@ -37,6 +37,7 @@ public class EstadoServiceImpl implements EstadoService{
 		List<CambioEstado> cambios = r.getCambioEstado();
 		cambios.add(guardado);
 		r.setCambioEstado(cambios);
+		//NOTIFICAR AL DUEÑO DE LA RESERVA
 		return r;
 	}
 	
@@ -70,6 +71,15 @@ public class EstadoServiceImpl implements EstadoService{
 	@Override
 	public Estado getEstadoById(Long idEstado){
 		return estadoRepo.getById(idEstado);
+	}
+
+
+	@Override
+	public Reserva eliminarReserva(Reserva reserva) throws Exception {
+		//seteamos el estado id ... "Eliminado"
+		Estado anterior = reserva.getEstado();
+		reserva.setEstado(getEstadoById(6L));
+		return nuevoCambioEstadoReserva(reserva,anterior);
 	}
 
 
