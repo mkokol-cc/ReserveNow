@@ -24,7 +24,7 @@ import com.sistema.examenes.nuevo.servicios_interfaces.RecursoService;
 import com.sistema.examenes.servicios.UsuarioService;
 
 @RestController
-@RequestMapping("/final")
+@RequestMapping("/v1.1")
 @CrossOrigin("*")
 public class RecursoController {
 	
@@ -35,7 +35,7 @@ public class RecursoController {
 	private UsuarioService usuarioService;
 
 	//CRUD RECURSO
-	@PostMapping("/recurso/add")
+	@PostMapping("/recurso")
 	public ResponseEntity<?> guardarRecurso(@Valid @RequestBody Recurso recursoStr) throws JsonProcessingException {
 		try {
 			recursoStr.setUsuario(usuarioService.obtenerUsuarioActual());
@@ -46,8 +46,8 @@ public class RecursoController {
 		}
 	}
 	
-	@PutMapping("/recurso/edit")
-	public ResponseEntity<?> editarRecurso(/*@Valid */@RequestBody Recurso recursoStr) throws JsonProcessingException {
+	@PutMapping("/recurso")
+	public ResponseEntity<?> editarRecurso(@RequestBody Recurso recursoStr) throws JsonProcessingException {
 		try {
 			recursoStr.setUsuario(usuarioService.obtenerUsuarioActual());
 			Recurso recursoEditado = recursoService.editarRecurso(recursoStr);

@@ -32,4 +32,5 @@ public interface ReservaService {
 	
 	
 	void eliminarReservasMalRegistradas(List<Reserva> reservas) throws Exception;
+	void eliminarReserva(Reserva r) throws Exception;
 }

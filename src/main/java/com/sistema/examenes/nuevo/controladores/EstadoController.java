@@ -15,7 +15,7 @@ import com.sistema.examenes.anterior.modelo.Estado;
 import com.sistema.examenes.nuevo.servicios_interfaces.EstadoService;
 
 @RestController
-@RequestMapping("/final")
+@RequestMapping("/v1.1")
 @CrossOrigin("*")
 public class EstadoController {
 

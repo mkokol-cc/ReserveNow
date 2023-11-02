@@ -37,7 +37,6 @@ import com.sistema.examenes.anterior.repositorios.ReservaRepository;
 import com.sistema.examenes.anterior.repositorios.ReservanteRepository;
 import com.sistema.examenes.anterior.repositorios.TipoTurnoRepository;
 import com.sistema.examenes.modelo.usuario.Usuario;
-import com.sistema.examenes.nuevo.servicios.ApiResponse;
 import com.sistema.examenes.nuevo.servicios_interfaces.AsignacionRecursoTipoTurnoService;
 import com.sistema.examenes.nuevo.servicios_interfaces.RecursoService;
 import com.sistema.examenes.nuevo.servicios_interfaces.ReservaService;
@@ -49,6 +48,7 @@ import com.sistema.examenes.repositorios.UsuarioRepository;
 @RequestMapping("/v1")
 @CrossOrigin("*")
 public class AdmController {
+	/*
 	@Autowired
 	private RecursoRepository recursoRepo;
 	
@@ -111,7 +111,7 @@ public class AdmController {
 	
 	
 	@GetMapping("/recurso")
-	public ResponseEntity</*List<Recurso>*/?> listarRecursos(){
+	public ResponseEntity<?> listarRecursos(){
 		ApiResponse<List<Recurso>> resp = recursoService.listarRecurso(usuarioRepo.getById(getUserId()));
 		if(resp.isSuccess()) {
 			return ResponseEntity.ok(resp.getData());
@@ -122,7 +122,7 @@ public class AdmController {
 	
 	//CRUD TIPO TURNO
 	@PostMapping("/tipo-turno/add")
-	public ResponseEntity</*TipoTurno*/?> guardarTipoTurno(@Valid @RequestBody TipoTurno tipoTurnoStr) throws JsonProcessingException {
+	public ResponseEntity<?> guardarTipoTurno(@Valid @RequestBody TipoTurno tipoTurnoStr) throws JsonProcessingException {
 		ApiResponse<TipoTurno> resp = tipoTurnoService.guardarTipoTurno(tipoTurnoStr);
 		if(resp.isSuccess()) {
 			return new ResponseEntity<>("Se guardó correctamente el Tipo de Turno.", HttpStatus.CREATED);	
@@ -136,12 +136,12 @@ public class AdmController {
 		if(resp.isSuccess()) {
 			return new ResponseEntity<>("Se editó correctamente el Tipo de Turno.", HttpStatus.CREATED);	
 		}
-		throw new ResponseStatusException(HttpStatus.BAD_REQUEST, resp.getMessage());*/
+		throw new ResponseStatusException(HttpStatus.BAD_REQUEST, resp.getMessage());*//*
 		return null;
 	}
 	
 	@GetMapping("/tipo-turno")
-	public ResponseEntity<?/*List<TipoTurno>*/> listarTipoTurno(){
+	public ResponseEntity<?> listarTipoTurno(){
 		ApiResponse<List<TipoTurno>> resp = tipoTurnoService.listarTipoTurnoDeUsuario(usuarioRepo.getById(getUserId()));
 		if(resp.isSuccess()) {
 			return ResponseEntity.ok(resp.getData());
@@ -215,12 +215,12 @@ public class AdmController {
 			return ResponseEntity.ok(reservaRepo.save(reservaStr));
 		}else{
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario No Autorizado");
-		}*/
+		}*//*
 	}
 	
 	@GetMapping("/reservas")
 	@Transactional
-	public ResponseEntity</*List<Reserva>*/?> listarReservas() throws JsonProcessingException {
+	public ResponseEntity<?> listarReservas() throws JsonProcessingException {
 		
 		try {
 			ApiResponse<List<Reserva>> resp = reservaService.listarReservaPorUsuario(getUserId());
@@ -240,10 +240,11 @@ public class AdmController {
 				listaFinal.addAll(a.getReservas());
 			}
 		}
-		return ResponseEntity.ok(listaFinal);*/
+		return ResponseEntity.ok(listaFinal);*//*
 	}
 	
-	/* ESTA POR SI SE QUIERE HACER PUBLICA
+	// ESTA POR SI SE QUIERE HACER PUBLICA
+	/*
 	@GetMapping("/reservas/{idUsuario}")
 	public ResponseEntity<List<Reserva>> listarReservas(@PathVariable Long idUsuario) throws JsonProcessingException {
 		List<Reserva> listaFinal = new ArrayList<>();
@@ -256,7 +257,7 @@ public class AdmController {
 		}
 		return ResponseEntity.ok(listaFinal);
 	}
-	*/
+	*//*
 	
 	@DeleteMapping("/reservas/{idReserva}/delete")//solo lo puede hacer el administrador
 	public ResponseEntity<?> borrarReservas(@PathVariable Long idReserva) throws JsonProcessingException {
@@ -281,7 +282,7 @@ public class AdmController {
 			}else {
 				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario No Autorizado");
 			}
-		}*/
+		}*//*
 	}
 	
 	//CRUD CONFIGURACION
@@ -289,7 +290,7 @@ public class AdmController {
 	
 	//"CRUD" RESERVANTE
 	@GetMapping("/clientes")
-	public ResponseEntity</*List<Reservante>*/?> listarClientes() throws JsonProcessingException {
+	public ResponseEntity<?> listarClientes() throws JsonProcessingException {
 		
 		try {
 			ApiResponse<List<Reservante>> resp = reservanteService.listarReservanteDeUsuario(usuarioRepo.getById(getUserId()));
@@ -304,7 +305,7 @@ public class AdmController {
 		/*
 		//buscarReservantePorCliente
 		List<Reservante> listaClientes = reservanteRepo.findByUsuario(usuarioRepo.getById(getUserId()));
-		return ResponseEntity.ok(listaClientes);*/
+		return ResponseEntity.ok(listaClientes);*//*
 	}
 	
 	@PutMapping("/clientes/{idCliente}/edit")
@@ -327,7 +328,7 @@ public class AdmController {
 			return ResponseEntity.ok(reservanteRepo.save(reservanteStr));	
 		}else {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario No Autorizado");
-		}*/
+		}*//*
 	}
 
 	
@@ -355,5 +356,5 @@ public class AdmController {
 
         // Si no se encuentra un usuario autenticado, puedes manejarlo según tus necesidades
         return (long) 0;
-    }
+    }*/
 }

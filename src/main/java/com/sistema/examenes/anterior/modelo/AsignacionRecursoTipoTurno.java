@@ -4,10 +4,13 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.TextStyle;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -328,5 +331,91 @@ public class AsignacionRecursoTipoTurno {
 			}
 		}
 	}*/
+	
+	
+	
+	
+	public Map<LocalTime, Boolean> getHorariosDisponibles(LocalDate fecha){		
+		List<Reserva> reservas = this.getRecurso().obtenerReservasPorFecha(fecha);
+		List<Horario> horarios = this.getRecurso().getHorariosPorFecha(fecha);
+		List<HorarioEspecial> horariosEspeciales = this.getRecurso().getHorariosEspecialesPorFecha(fecha);
+		if(horariosEspeciales.isEmpty()) {
+			return armarMapTurnosDisponiblesPorHorarios(horarios,reservas);
+		}
+		return armarMapTurnosDisponiblesPorHorariosEspeciales(horariosEspeciales,reservas);
+	}
+	
+	private Map<LocalTime, Boolean> armarMapTurnosDisponiblesPorHorarios(List<Horario> horarios, List<Reserva> reservas){
+		Map<LocalTime, Boolean> turnos = new HashMap<>();
+		for(Horario h : horarios) {
+			turnos.putAll(armarMapTurnosDisponibles(h.getDesde(),h.getHasta(),reservas));
+		}
+		return turnos;
+	}
+	private Map<LocalTime, Boolean> armarMapTurnosDisponiblesPorHorariosEspeciales(List<HorarioEspecial> horarios, List<Reserva> reservas){
+		Map<LocalTime, Boolean> turnos = new HashMap<>();
+		for(HorarioEspecial h : horarios) {
+			if(h.isCerrado()) {
+				return null;
+			}
+			turnos.putAll(armarMapTurnosDisponibles(h.getDesde(),h.getHasta(),reservas));
+		}
+		return turnos;
+	}
+	
+	private Map<LocalTime, Boolean> armarMapTurnosDisponibles(LocalTime desde, LocalTime hasta, List<Reserva> reservas){
+		Map<LocalTime, Boolean> turnos = new HashMap<>();
+		while(desde.isBefore(hasta)) {
+			LocalTime finTurno = desde.plusMinutes(this.getDuracionEnMinutos());
+			turnos.put(desde, comprobarDisponibilidadTurno(reservas, desde, finTurno));
+			desde = finTurno;
+		}
+		return turnos;
+	}
+	
+	private Boolean comprobarDisponibilidadTurno(List<Reserva> reservas, LocalTime horaInicio, LocalTime horaFin) {
+		Boolean estaLibre = reservas.stream().filter(r -> (!r.getHora().isBefore(horaInicio) && r.getHora().isBefore(horaFin)) 
+				|| (!r.getHoraFin().isAfter(horaFin) && r.getHora().isAfter(horaInicio))).collect(Collectors.toList()).isEmpty();
+		return estaLibre;
+	}
+	
+	
+	
+	public List<LocalTime> getHorariosTurnos(LocalDate fecha){
+		List<Horario> horarios = this.getRecurso().getHorariosPorFecha(fecha);
+		List<HorarioEspecial> horariosEspeciales = this.getRecurso().getHorariosEspecialesPorFecha(fecha);
+		if(horariosEspeciales.isEmpty()) {
+			return getHorariosTurnosPorHorariosComunes(horarios);
+		}
+		return getHorariosTurnosPorHorariosEspeciales(horariosEspeciales);
+	}
+	
+	
+	private List<LocalTime> getHorariosTurnosPorHorariosComunes(List<Horario> horariosComunes){
+		List<LocalTime> horarios = new ArrayList<>();
+		for(Horario h : horariosComunes) {
+			horarios.addAll(getHorariosTurnos(h.getDesde(),h.getHasta()));
+		}
+		return horarios;
+	}
+	private List<LocalTime> getHorariosTurnosPorHorariosEspeciales(List<HorarioEspecial> horariosEspeciales){
+		List<LocalTime> horarios = new ArrayList<>();
+		for(HorarioEspecial h : horariosEspeciales) {
+			if(h.isCerrado()) {
+				return null;
+			}
+			horarios.addAll(getHorariosTurnos(h.getDesde(),h.getHasta()));
+		}
+		return horarios;
+	}
+	private List<LocalTime> getHorariosTurnos(LocalTime desde, LocalTime hasta){
+		List<LocalTime> horarios = new ArrayList<>();
+		while(desde.isBefore(hasta)) {
+			LocalTime finTurno = desde.plusMinutes(this.getDuracionEnMinutos());
+			horarios.add(finTurno);
+			desde = finTurno;
+		}
+		return horarios;
+	}
 
 }

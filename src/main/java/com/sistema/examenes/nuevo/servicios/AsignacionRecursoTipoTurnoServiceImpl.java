@@ -1,6 +1,9 @@
 package com.sistema.examenes.nuevo.servicios;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -10,7 +13,6 @@ import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
 
 import com.sistema.examenes.anterior.modelo.AsignacionRecursoTipoTurno;
-import com.sistema.examenes.anterior.modelo.Estado;
 import com.sistema.examenes.anterior.modelo.Recurso;
 import com.sistema.examenes.anterior.modelo.Reserva;
 import com.sistema.examenes.anterior.modelo.TipoTurno;
@@ -398,6 +400,13 @@ public class AsignacionRecursoTipoTurnoServiceImpl implements AsignacionRecursoT
 			return true;
 		}
 		throw new Exception("Usuario no autorizado");
+	}
+	
+	
+	@Override
+	public Map<LocalTime,Boolean> getHorariosDisponibles(Long idAsignacion, LocalDate fecha){
+		AsignacionRecursoTipoTurno asig = obtenerPorId(idAsignacion);
+		return asig.getHorariosDisponibles(fecha);
 	}
 
 }

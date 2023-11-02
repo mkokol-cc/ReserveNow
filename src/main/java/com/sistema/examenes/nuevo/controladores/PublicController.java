@@ -1,11 +1,10 @@
 package com.sistema.examenes.nuevo.controladores;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
-
-import javax.validation.Valid;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -13,37 +12,58 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.sistema.examenes.anterior.modelo.AsignacionRecursoTipoTurno;
-import com.sistema.examenes.anterior.modelo.Estado;
-import com.sistema.examenes.anterior.modelo.Reserva;
-import com.sistema.examenes.anterior.modelo.Reservante;
-import com.sistema.examenes.modelo.usuario.Usuario;
 import com.sistema.examenes.nuevo.dto.TurnoDTO;
-import com.sistema.examenes.nuevo.servicios.ApiResponse;
 import com.sistema.examenes.nuevo.servicios_interfaces.AsignacionRecursoTipoTurnoService;
-import com.sistema.examenes.nuevo.servicios_interfaces.EstadoService;
 import com.sistema.examenes.nuevo.servicios_interfaces.ReservaService;
-import com.sistema.examenes.repositorios.UsuarioRepository;
 
 
 
 @RestController
-@RequestMapping("/v1/public")
+@RequestMapping("/v1.11/public")
 @CrossOrigin("*")
 public class PublicController {
 	
 	@Autowired
-	UsuarioRepository usuarioRepo;
+	private ReservaService reservaService;
+	@Autowired
+	private AsignacionRecursoTipoTurnoService asignacionService;
+	
+	@GetMapping("/horarios/{idAsignacion}/{fecha}")
+	public ResponseEntity<?> getHorariosDisponibles(@PathVariable Long idAsignacion,@PathVariable String fecha) {
+		try {
+    		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+    		LocalDate fechaLocalDate = LocalDate.parse(fecha, formatter);
+    		List<TurnoDTO> listaTurnos = reservaService.crearTurnos(idAsignacion, fechaLocalDate);
+    		return ResponseEntity.ok(listaTurnos);
+		}catch(Exception e) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+		}
+	}
+	@GetMapping("/horarios2/{idAsignacion}/{fecha}")
+	public ResponseEntity<?> getHorariosDisponiblesPorAsignacion(@PathVariable Long idAsignacion,@PathVariable String fecha) {
+		try {
+    		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+    		LocalDate fechaLocalDate = LocalDate.parse(fecha, formatter);
+    		Map<LocalTime,Boolean> listaTurnos = asignacionService.getHorariosDisponibles(idAsignacion, fechaLocalDate);
+    		return ResponseEntity.ok(listaTurnos);
+		}catch(Exception e) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+		}
+	}
+	
+	
+	
+	
 	/*
 	@Autowired
+	UsuarioRepository usuarioRepo;
+	
+	@Autowired
 	RecursoService recursoService;	
-	*/
+	
 	@Autowired
 	AsignacionRecursoTipoTurnoService asignacionService;	
 	
@@ -160,5 +180,5 @@ public class PublicController {
 		}catch(Exception e) {
 			return null;
 		}
-	}
+	}*/
 }

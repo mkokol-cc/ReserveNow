@@ -345,4 +345,13 @@ public class Reserva {
 	}
 	//public boolean estaEn
 	
+	
+	public boolean estaEnHorario() {
+		if(this.getEstado().isEsEstadoFinal()) {
+			return true;
+		}
+		List<LocalTime> horarios = this.getAsignacionTipoTurno().getHorariosTurnos(fecha);
+		return horarios.contains(this.getHora()) && horarios.contains(this.getHoraFin());
+	}
+	
 }//end Reserva

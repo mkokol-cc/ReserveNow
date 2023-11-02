@@ -11,6 +11,7 @@ import org.springframework.validation.Validator;
 
 import com.sistema.examenes.anterior.modelo.AsignacionRecursoTipoTurno;
 import com.sistema.examenes.anterior.modelo.Recurso;
+import com.sistema.examenes.anterior.modelo.Reserva;
 import com.sistema.examenes.anterior.modelo.TipoTurno;
 import com.sistema.examenes.anterior.repositorios.RecursoRepository;
 import com.sistema.examenes.modelo.usuario.Usuario;
@@ -92,6 +93,13 @@ public class RecursoServiceImpl implements RecursoService{
 		//obtener por id
 		Recurso recursoOriginal = obtenerRecursoPorId(recurso.getId());
 		if(recursoOriginal.getUsuario() == recurso.getUsuario()) {
+			Recurso guardado = guardarRecurso(recurso);//save
+			List<Reserva> reservas = guardado.obtenerReservas();
+			for(Reserva r : reservas) {
+				if(!r.estaEnHorario()) {
+					reservaService.eliminarReserva(r);
+				}
+			}
 			return guardarRecurso(recurso);//save
 		}else {
 			throw new Exception("Usuario no autorizado a editar el Recurso.");

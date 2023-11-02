@@ -1,6 +1,9 @@
 package com.sistema.examenes.nuevo.servicios_interfaces;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
+import java.util.Map;
 
 import com.sistema.examenes.anterior.modelo.AsignacionRecursoTipoTurno;
 import com.sistema.examenes.anterior.modelo.Estado;
@@ -24,6 +27,8 @@ public interface AsignacionRecursoTipoTurnoService {
 	
 	Recurso actualizarAsignaciones(List<Long> idTiposDeTurno, long recId,Usuario usuario) throws Exception;
 	AsignacionRecursoTipoTurno habilitarAsignacion(Long idTipoTurno, Long idRecurso, Long idUsuario) throws Exception;
+	
+	Map<LocalTime, Boolean> getHorariosDisponibles(Long idAsignacion, LocalDate fecha);
 	
 	//public ApiResponse<?> comprobarHorario();
 	

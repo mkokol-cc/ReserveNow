@@ -30,7 +30,6 @@ import com.sistema.examenes.anterior.modelo.Reserva;
 import com.sistema.examenes.anterior.modelo.Reservante;
 import com.sistema.examenes.anterior.modelo.TipoTurno;
 import com.sistema.examenes.modelo.usuario.Usuario;
-import com.sistema.examenes.nuevo.servicios.ApiResponse;
 import com.sistema.examenes.nuevo.servicios_interfaces.AsignacionRecursoTipoTurnoService;
 import com.sistema.examenes.nuevo.servicios_interfaces.RecursoService;
 import com.sistema.examenes.nuevo.servicios_interfaces.ReservaService;
@@ -43,7 +42,7 @@ import com.sistema.examenes.repositorios.UsuarioRepository;
 @RequestMapping("/v1.0")
 @CrossOrigin("*")
 public class PruebaController {
-	
+		/*
 		@Autowired
 		ReservaService reservaService;
 		@Autowired
@@ -60,14 +59,14 @@ public class PruebaController {
 		
 		//CRUD RECURSO
 		@PostMapping("/recurso/add")
-		public ResponseEntity<?> guardarRecurso(/*@Valid */@RequestBody Recurso recursoStr) throws JsonProcessingException {
+		public ResponseEntity<?> guardarRecurso(@RequestBody Recurso recursoStr) throws JsonProcessingException {
 			try {
 				recursoStr.setUsuario(getUser());
-				ApiResponse<Recurso> resp = recursoService.guardarRecurso(recursoStr);
-				if(resp.isSuccess()) {
+				Recurso resp = recursoService.guardarRecurso(recursoStr);
+				if(resp!=null) {
 					return new ResponseEntity<>("Se guardó correctamente el Recurso.", HttpStatus.CREATED);	
 				}
-				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp.getMessage());
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al guardar el recurso");
 			}catch(Exception e) {
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error inesperado: "+e.getMessage());
 			}
@@ -75,7 +74,7 @@ public class PruebaController {
 
 		@PutMapping("/recurso/edit")
 		@Transactional
-		public ResponseEntity<?> editarRecurso(/*@Valid */@RequestBody Recurso recursoStr) throws JsonProcessingException {
+		public ResponseEntity<?> editarRecurso(@RequestBody Recurso recursoStr) throws JsonProcessingException {
 			try {
 				recursoStr.setUsuario(getUser());
 				ApiResponse<Recurso> resp = recursoService.editarRecurso(recursoStr);
@@ -90,7 +89,7 @@ public class PruebaController {
 		}
 		
 		@GetMapping("/recurso")
-		public ResponseEntity</*List<Recurso>*/?> listarRecursos(){
+		public ResponseEntity<?> listarRecursos(){
 			try {
 				//recursoStr.setUsuario(getUser());
 				ApiResponse<List<Recurso>> resp = recursoService.listarRecurso(getUser());
@@ -107,7 +106,7 @@ public class PruebaController {
 		
 		//CRUD TIPO TURNO
 		@PostMapping("/tipo-turno/add")
-		public ResponseEntity</*TipoTurno*/?> guardarTipoTurno(/*@Valid*/ @RequestBody TipoTurno tipoTurnoStr) throws JsonProcessingException {
+		public ResponseEntity<?> guardarTipoTurno(@RequestBody TipoTurno tipoTurnoStr) throws JsonProcessingException {
 			try {
 				tipoTurnoStr.setUsuario(getUser());
 				ApiResponse<TipoTurno> resp = tipoTurnoService.guardarTipoTurno(tipoTurnoStr);
@@ -122,7 +121,7 @@ public class PruebaController {
 		}
 
 		@PutMapping("/tipo-turno/edit")
-		public ResponseEntity<?> editarTipoTurno(/*@Valid*/@RequestBody TipoTurno tipoTurnoStr) throws JsonProcessingException {
+		public ResponseEntity<?> editarTipoTurno(@RequestBody TipoTurno tipoTurnoStr) throws JsonProcessingException {
 			try {
 				tipoTurnoStr.setUsuario(getUser());
 				ApiResponse<TipoTurno> resp = tipoTurnoService.editarTipoTurno(tipoTurnoStr);
@@ -137,7 +136,7 @@ public class PruebaController {
 		}
 		
 		@GetMapping("/tipo-turno")
-		public ResponseEntity<?/*List<TipoTurno>*/> listarTipoTurno(){
+		public ResponseEntity<?> listarTipoTurno(){
 			try {
 				ApiResponse<List<TipoTurno>> resp = tipoTurnoService.listarTipoTurnoDeUsuario(getUser());
 				if(resp.isSuccess()) {
@@ -180,7 +179,7 @@ public class PruebaController {
 		
 		@PutMapping("/asignacion/edit")
 		@Transactional
-		public ResponseEntity<?> editarAsignacion(/*@Valid */@RequestBody AsignacionRecursoTipoTurno asigStr) throws JsonProcessingException {
+		public ResponseEntity<?> editarAsignacion(@RequestBody AsignacionRecursoTipoTurno asigStr) throws JsonProcessingException {
 			try {
 				ApiResponse<AsignacionRecursoTipoTurno> resp = asignacionService.editarAsignacion(asigStr,getUserId());
 				if(resp.isSuccess()) {
@@ -209,7 +208,7 @@ public class PruebaController {
 		
 		//CRUD RESERVAS
 		@PostMapping("/reservas/{idAsignacion}/add")
-		public ResponseEntity<?> registrarReserva(@PathVariable Long idAsignacion,/*@Valid*/ @RequestBody Reserva reservaStr) throws JsonProcessingException {
+		public ResponseEntity<?> registrarReserva(@PathVariable Long idAsignacion,@RequestBody Reserva reservaStr) throws JsonProcessingException {
 			try {
 				ApiResponse<Reserva> resp = reservaService.nuevaReserva(reservaStr,idAsignacion);
 				if(resp.isSuccess()) {
@@ -219,11 +218,6 @@ public class PruebaController {
 			}catch(Exception e) {
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error inesperado: "+e.getMessage());
 			}
-			/*
-			
-			ApiResponse<Reserva> resp = reservaService.nuevaReserva(reservaStr, idAsignacion);
-			return addReserva(resp.getData()) ? new ResponseEntity<>("BIEN", HttpStatus.CREATED) : 
-				new ResponseEntity<>("MAL", HttpStatus.CREATED);*/
 			//return new ResponseEntity<>(resp.getMessage(), HttpStatus.CREATED);
 		}
 		
@@ -232,7 +226,7 @@ public class PruebaController {
 		}
 		
 		@PutMapping("/reservas/{idReserva}/edit")
-		public ResponseEntity<?> editarReserva(@PathVariable Long idReserva,/*@Valid*/ @RequestBody Reserva reservaStr) throws JsonProcessingException {
+		public ResponseEntity<?> editarReserva(@PathVariable Long idReserva,@RequestBody Reserva reservaStr) throws JsonProcessingException {
 			try {
 				ApiResponse<Reserva> resp = reservaService.editarReserva(reservaStr,getUserId());
 				if(resp.isSuccess()) {
@@ -247,7 +241,7 @@ public class PruebaController {
 		
 		@GetMapping("/reservas")
 		@Transactional
-		public ResponseEntity</*List<Reserva>*/?> listarReservas() throws JsonProcessingException {
+		public ResponseEntity<?> listarReservas() throws JsonProcessingException {
 			try {
 				ApiResponse<List<Reserva>> resp = reservaService.listarReservaPorUsuario(getUserId());
 				if(resp.isSuccess()) {
@@ -279,7 +273,7 @@ public class PruebaController {
 		
 		//"CRUD" RESERVANTE
 		@GetMapping("/clientes")
-		public ResponseEntity</*List<Reservante>*/?> listarClientes() throws JsonProcessingException {
+		public ResponseEntity<?> listarClientes() throws JsonProcessingException {
 			try {
 				ApiResponse<List<Reservante>> resp = reservanteService.listarReservanteDeUsuario(getUser());
 				if(resp.isSuccess()) {
@@ -354,5 +348,5 @@ public class PruebaController {
 	        return null;
 	    }
 		
-		
+		*/
 }

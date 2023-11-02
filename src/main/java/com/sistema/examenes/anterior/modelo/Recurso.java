@@ -1,10 +1,14 @@
 package com.sistema.examenes.anterior.modelo;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -182,7 +186,13 @@ public class Recurso {
 	
 	
 	
-	
+	public List<Reserva> obtenerReservas(){
+		List<Reserva> reservas = new ArrayList<>();
+		for(AsignacionRecursoTipoTurno a : this.recursosTipoTurno) {
+			reservas.addAll(a.getReservas());
+		}
+		return reservas;
+	}
 	
 
 	
@@ -193,4 +203,18 @@ public class Recurso {
 		}
 		return reservas;
 	}
+	
+	public List<HorarioEspecial> getHorariosEspecialesPorFecha(LocalDate fecha){
+		List<HorarioEspecial> he = this.getHorariosEspeciales().stream()
+				.filter(hesp -> hesp.getFecha().equals(fecha)).collect(Collectors.toList());
+		return he;
+	}
+	public List<Horario> getHorariosPorFecha(LocalDate fecha){
+		List<Horario> h = this.getHorarios().stream()
+				.filter(horario -> horario.getDia().equals(Dias.getByDate(fecha))).collect(Collectors.toList());
+		return h;
+	}
+	
+	
+	
 }//end Recurso

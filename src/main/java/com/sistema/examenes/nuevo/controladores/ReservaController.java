@@ -27,7 +27,7 @@ import com.sistema.examenes.servicios.UsuarioService;
 import com.sistema.examenes.websocket.WebSocketService;
 
 @RestController
-@RequestMapping("/final")
+@RequestMapping("/v1.1")
 @CrossOrigin("*")
 public class ReservaController {
 
@@ -54,6 +54,17 @@ public class ReservaController {
 		}
     }
     
+	@GetMapping("reserva")
+	public ResponseEntity<?> listarReservas(){
+		try {
+			List<Reserva> reservas = reservaService.listarReservaPorUsuario(usuarioService.getIdUsuarioActual());
+			System.out.println("La cantidad de reservas es "+reservas.size());
+			return ResponseEntity.ok(reservas);
+		}catch(Exception e) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Excepcion:"+e.getMessage());
+		}
+	}
+    
     
     //nueva Reserva
     @PostMapping("public/{idUserPage}/reserva")
@@ -70,6 +81,7 @@ public class ReservaController {
     }
     
     //editarReserva ADMINISTRADOR
+    /*
     @PutMapping("public/reserva")
     public ResponseEntity<?> editarReservaPorGuest(@RequestBody Reserva reservaStr) {
     	try {
@@ -79,6 +91,7 @@ public class ReservaController {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
 		}
     }
+    */
     
     //editarReserva GUEST
     @PutMapping("reserva")

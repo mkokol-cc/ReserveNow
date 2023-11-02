@@ -482,4 +482,10 @@ public class ReservaServiceImpl implements ReservaService{
 		}
 		return horariosEspeciales.isEmpty() ? true : cumple;
 	}
+	
+	
+	@Override
+	public void eliminarReserva(Reserva r) throws Exception {
+		save(estadoService.eliminarReserva(r));
+	}
 }
