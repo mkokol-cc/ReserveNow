@@ -1,5 +1,6 @@
 package com.sistema.examenes.anterior.modelo;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -217,6 +218,29 @@ public class TipoTurno {
 	private boolean validarSenia() {
 		return (this.seniaCtvos == null && this.seniaCtvos >= 0);
 	}
+	
+	
+	public TipoTurno editarTipoTurno(TipoTurno nuevosDatos) {
+		this.setNombre(nuevosDatos.getNombre());
+		this.setDescripcion(nuevosDatos.getDescripcion());
+		this.setDuracionEnMinutos(nuevosDatos.getDuracionEnMinutos());
+		this.setEliminado(nuevosDatos.isEliminado());
+		this.setPrecioEstimadoDesdeCtvos(nuevosDatos.getPrecioEstimadoDesdeCtvos());
+		this.setPrecioEstimadoHastaCtvos(nuevosDatos.getPrecioEstimadoHastaCtvos());
+		this.setSeniaCtvos(nuevosDatos.getSeniaCtvos());
+		//return guardado;
+		return this;
+	}
+
+	public List<Reserva> obtenerReservas() {
+		List<Reserva> reservas = new ArrayList<>();
+		for(AsignacionRecursoTipoTurno a : this.getRecursosTipoTurno()) {
+			reservas.addAll(a.getReservas());
+		}
+		return reservas;
+	}
+
+
 	
 	
 }//end TipoTurno

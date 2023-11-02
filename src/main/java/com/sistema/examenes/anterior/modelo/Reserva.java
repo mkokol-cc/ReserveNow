@@ -353,5 +353,14 @@ public class Reserva {
 		List<LocalTime> horarios = this.getAsignacionTipoTurno().getHorariosTurnos(fecha);
 		return horarios.contains(this.getHora()) && horarios.contains(this.getHoraFin());
 	}
+
+	public Reserva editarReserva(Reserva r) {
+		this.estado = r.getEstado();
+		this.fecha = r.getFecha();
+		this.hora = r.getHora();
+		this.horaFin = r.getHoraFin();
+		this.nota = r.getNota();
+		return this;
+	}
 	
 }//end Reserva

@@ -217,4 +217,15 @@ public class Recurso {
 	
 	
 	
+	
+	
+	public Recurso editarRecurso(Recurso r) {
+		this.setDescripcion(r.getDescripcion());
+		this.setEliminado(r.isEliminado());
+		this.setHorarios(r.getHorarios());
+		this.setHorariosEspeciales(r.getHorariosEspeciales());
+		this.setNombre(r.getNombre());
+		return this;
+	}
+	
 }//end Recurso

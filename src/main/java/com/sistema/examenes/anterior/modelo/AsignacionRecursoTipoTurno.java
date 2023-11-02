@@ -104,6 +104,23 @@ public class AsignacionRecursoTipoTurno {
 	@Column(name = "precioEstimadoHastaCtvos",nullable=true)
 	private Integer precioEstimadoHastaCtvos;
 
+	public AsignacionRecursoTipoTurno(Recurso r, TipoTurno t) {
+		this.cantidadConcurrencia = 1;
+		this.duracionEnMinutos = t.getDuracionEnMinutos();
+		this.eliminado = false;
+		//this.horarios
+		//this.horariosEspeciales
+		this.precioEstimadoDesdeCtvos = t.getPrecioEstimadoDesdeCtvos();
+		this.precioEstimadoHastaCtvos = t.getPrecioEstimadoHastaCtvos();
+		this.recurso = r;
+		this.seniaCtvos = t.getSeniaCtvos();
+		this.tipoTurno = t;
+	}
+	
+	public AsignacionRecursoTipoTurno() {
+		// TODO Auto-generated constructor stub
+	}
+
 	public Long getId() {
 		return id;
 	}
@@ -416,6 +433,18 @@ public class AsignacionRecursoTipoTurno {
 			desde = finTurno;
 		}
 		return horarios;
+	}
+
+	public AsignacionRecursoTipoTurno editarAsignacionRecursoTipoTurno(AsignacionRecursoTipoTurno asig) {
+		this.cantidadConcurrencia = asig.getCantidadConcurrencia();
+		this.duracionEnMinutos = asig.getDuracionEnMinutos();
+		//this.eliminado = asig.isEliminado();
+		//this.horarios
+		//this.horariosEspeciales
+		this.precioEstimadoDesdeCtvos = asig.getPrecioEstimadoDesdeCtvos();
+		this.precioEstimadoHastaCtvos = asig.getPrecioEstimadoHastaCtvos();
+		this.seniaCtvos = asig.getSeniaCtvos();
+		return this;
 	}
 
 }
