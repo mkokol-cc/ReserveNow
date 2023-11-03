@@ -2,6 +2,7 @@
 package com.sistema.examenes.anterior.modelo;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -19,7 +20,6 @@ import javax.validation.Valid;
 import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.NotNull;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -361,6 +361,19 @@ public class Reserva {
 		this.horaFin = r.getHoraFin();
 		this.nota = r.getNota();
 		return this;
+	}
+	
+	public CambioEstado obtenerUltimoCambioEstado() {
+		CambioEstado ultimo = new CambioEstado();
+		LocalDateTime fechaHoraAux = LocalDateTime.MIN;
+		for(CambioEstado c : this.cambioEstado) {
+			LocalDateTime delCambioEstado = c.getFecha().atTime(c.getHora());
+			if(fechaHoraAux.isBefore(delCambioEstado)) {
+				fechaHoraAux = delCambioEstado;
+				ultimo = c;
+			}
+		}
+		return ultimo;
 	}
 	
 }//end Reserva

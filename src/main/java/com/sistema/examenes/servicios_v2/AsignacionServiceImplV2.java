@@ -91,7 +91,7 @@ public class AsignacionServiceImplV2 implements AsignacionServiceV2{
         }
 	}
 	
-	private void eliminarReservas(Set<Reserva> reservas, Usuario u) {
+	private void eliminarReservas(Set<Reserva> reservas, Usuario u) throws Exception {
 		for(Reserva r : reservas) {
 			if(!r.getEstado().isEsEstadoFinal()) {
 				reservaService.eliminarReserva(r, u);

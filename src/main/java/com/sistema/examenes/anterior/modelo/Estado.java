@@ -28,26 +28,26 @@ public class Estado {
 	private long id;
 	
 	@Column(name = "nombre",nullable=false)
-	public String nombre;
+	private String nombre;
 	
 	
 	@Column(name = "descripcion",nullable=true)
-	public String descripcion;
+	private String descripcion;
 	
 	@OneToMany(mappedBy="estado")
 	@Column(name = "reservas",nullable=true)
 	@JsonBackReference
 	@JsonIgnore
-	public List<Reserva> reservas;
+	private List<Reserva> reservas;
 	
 	@OneToMany(mappedBy="estado")
 	@Column(name = "cambiosDeEstado",nullable=true)
 	@JsonBackReference
 	@JsonIgnore
-	public List<Reserva> cambiosDeEstado;
+	private List<Reserva> cambiosDeEstado;
 	
 	@Column(name = "esEstadoFinal")
-	public boolean esEstadoFinal;
+	private boolean esEstadoFinal;
 	
 	public long getId() {
 		return id;

@@ -91,7 +91,7 @@ public class RecursoServiceImplV2 implements RecursoServiceV2{
 	}
 	
 	
-	private void eliminarReservas(List<Reserva> reservas, Usuario u) {
+	private void eliminarReservas(List<Reserva> reservas, Usuario u) throws Exception {
 		for(Reserva r : reservas) {
 			if(!r.getEstado().isEsEstadoFinal()) {
 				reservaService.eliminarReserva(r, u);

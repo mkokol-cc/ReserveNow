@@ -7,9 +7,9 @@ import com.sistema.examenes.modelo.usuario.Usuario;
 
 public interface ReservaServiceV2 {
 	Reserva obtenerReservaPorId(Long id) throws Exception;
-	Reserva eliminarReserva(Reserva r,  Usuario u);
+	Reserva eliminarReserva(Reserva r,  Usuario u) throws Exception;
 	void borrarReserva(Long idReserva) throws Exception;
 	Reserva editarReserva(Reserva r, Usuario u) throws Exception;
-	Reserva nuevaReserva(Reserva r);
+	Reserva nuevaReserva(Reserva r) throws Exception;
 	List<Reserva> listarReservas(Usuario u);
 }

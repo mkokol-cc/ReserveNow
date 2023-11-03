@@ -27,17 +27,19 @@ public class EstadoServiceImpl implements EstadoService{
 	
 	@Override
 	public Reserva nuevoCambioEstadoReserva(Reserva r, Estado anterior) {
-		CambioEstado c = new CambioEstado();
-		c.setEstadoAnterior(anterior);
-		c.setEstadoNuevo(r.getEstado());
-		c.setFecha(LocalDate.now());
-		c.setHora(LocalTime.now());
-		c.setReserva(r);
-		CambioEstado guardado = cambioEstadoRepo.save(c);
-		List<CambioEstado> cambios = r.getCambioEstado();
-		cambios.add(guardado);
-		r.setCambioEstado(cambios);
-		//NOTIFICAR AL DUEÑO DE LA RESERVA
+		if(!anterior.isEsEstadoFinal() && !anterior.equals(r.getEstado())) {
+			CambioEstado c = new CambioEstado();
+			c.setEstadoAnterior(anterior);
+			c.setEstadoNuevo(r.getEstado());
+			c.setFecha(LocalDate.now());
+			c.setHora(LocalTime.now());
+			c.setReserva(r);
+			CambioEstado guardado = cambioEstadoRepo.save(c);
+			List<CambioEstado> cambios = r.getCambioEstado();
+			cambios.add(guardado);
+			r.setCambioEstado(cambios);
+			//NOTIFICAR AL DUEÑO DE LA RESERVA	
+		}
 		return r;
 	}
 	
