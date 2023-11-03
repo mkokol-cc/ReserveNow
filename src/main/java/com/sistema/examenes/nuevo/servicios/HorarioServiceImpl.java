@@ -1,6 +1,5 @@
 package com.sistema.examenes.nuevo.servicios;
 
-import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.HashSet;
 import java.util.List;
@@ -12,7 +11,6 @@ import org.springframework.stereotype.Service;
 import com.sistema.examenes.anterior.modelo.AsignacionRecursoTipoTurno;
 import com.sistema.examenes.anterior.modelo.Dias;
 import com.sistema.examenes.anterior.modelo.Horario;
-import com.sistema.examenes.anterior.modelo.HorarioEspecial;
 import com.sistema.examenes.anterior.modelo.Recurso;
 import com.sistema.examenes.anterior.repositorios.HorarioRepository;
 import com.sistema.examenes.nuevo.servicios_interfaces.HorarioService;

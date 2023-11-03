@@ -25,6 +25,12 @@ public class RecursoServiceImplV2 implements RecursoServiceV2{
 	@Autowired
 	private AsignacionServiceV2 asignacionService;
 	
+	@Autowired
+	private HorarioServiceV2 horarioService;
+	
+	@Autowired
+	private HorarioEspecialServiceV2 horarioEspService;
+
 	private final Validator validator;
 	
     public RecursoServiceImplV2(Validator validator) {
@@ -69,7 +75,8 @@ public class RecursoServiceImplV2 implements RecursoServiceV2{
 		Recurso guardado = obtenerRecursoPorId(r.getId());
 		if(r.getUsuario().equals(u)) {
 			validar(r);
-			return recursoRepo.save(guardado.editarRecurso(r));
+			Recurso recursoEditado = recursoRepo.save(guardado.editarRecurso(r));
+			return guardarHorariosRecurso(recursoEditado);
 		}else {
 			throw new Exception("Usuario no autorizado");
 		}
@@ -103,6 +110,12 @@ public class RecursoServiceImplV2 implements RecursoServiceV2{
 		for(AsignacionRecursoTipoTurno asig : asignaciones) {
 			asignacionService.eliminarAsignacion(asig.getId(), u);
 		}
+	}
+	
+	private Recurso guardarHorariosRecurso(Recurso r) throws Exception {
+		r = horarioService.guardarHorarioRecurso(r);
+		r = horarioEspService.guardarHorarioEspecialRecurso(r);
+		return r;
 	}
 
 }
