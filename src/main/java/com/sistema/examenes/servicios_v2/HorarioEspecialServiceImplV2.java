@@ -25,10 +25,10 @@ public class HorarioEspecialServiceImplV2 implements HorarioEspecialServiceV2{
     }
 	
 	@Override
-	public Recurso guardarHorarioEspecialRecurso(Recurso r) throws Exception {
+	public Recurso guardarHorariosEspecialesRecurso(Recurso r) throws Exception {
 		Set<HorarioEspecial> horariosGuardados = new HashSet<>();
+		validarLista(r.getHorariosEspeciales());
 		for(HorarioEspecial h : r.getHorariosEspeciales()) {
-			validar(h);
 			horariosGuardados.add(horarioEspRepo.save(h));
 		}
 		r.setHorariosEspeciales(horariosGuardados);
@@ -41,6 +41,16 @@ public class HorarioEspecialServiceImplV2 implements HorarioEspecialServiceV2{
         if (errors.hasErrors()) {
         	throw new Exception(errors.getFieldError().getDefaultMessage().toString());
         }
+	}
+	
+	@Override
+	public void validarLista(Set<HorarioEspecial> horarios) throws Exception {
+		for(HorarioEspecial h : horarios) {
+			validar(h);
+			if(h.sePisaConAlgunoDeEstos(horarios)) {
+				throw new Exception("Los horarios especiales se pisan");
+			}
+		}
 	}
 
 }

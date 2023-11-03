@@ -113,9 +113,23 @@ public class RecursoServiceImplV2 implements RecursoServiceV2{
 	}
 	
 	private Recurso guardarHorariosRecurso(Recurso r) throws Exception {
-		r = horarioService.guardarHorarioRecurso(r);
-		r = horarioEspService.guardarHorarioEspecialRecurso(r);
+		horarioService.validarLista(r.getHorarios());
+		horarioEspService.validarLista(r.getHorariosEspeciales());
+		r = horarioService.guardarHorariosRecurso(r);
+		r = horarioEspService.guardarHorariosEspecialesRecurso(r);
+		actualizarReservas(r);
 		return r;
+	}
+	
+	private void actualizarReservas(Recurso r) throws Exception {
+		for(Reserva reserva : r.obtenerReservas()) {
+			if(!reserva.estaEnHorario()) {
+				//solamente verificamos si esta en horario, ya que las verificaciones de concurrencia no deberian
+				//tener nada que ver en el cambio de horario, solo se eliminan las reservas cuyo horario quedo fuera
+				//del nuevo rango
+				reservaService.eliminarReserva(reserva, r.getUsuario());
+			}
+		}
 	}
 
 }

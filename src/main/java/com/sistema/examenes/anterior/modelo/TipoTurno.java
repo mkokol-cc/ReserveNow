@@ -42,8 +42,8 @@ public class TipoTurno {
 	@Column(name = "id")
 	private Long id;
 	
-	@Column(name = "eliminado",nullable=true)
-	private boolean eliminado;
+	@Column(name = "eliminado")
+	private boolean eliminado = false;
 	
 	@NotNull(message = "Debes ingresar el nombre.")
     @NotBlank(message = "El nombre no puede estar en blanco.")

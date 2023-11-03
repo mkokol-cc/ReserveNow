@@ -1,6 +1,9 @@
 package com.sistema.examenes.servicios_v2;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,6 +84,12 @@ public class AsignacionServiceImplV2 implements AsignacionServiceV2{
 		}else {
 			throw new Exception("Usuario no autorizado");
 		}
+	}
+	
+	@Override
+	public Map<LocalTime,Boolean> obtenerHorariosDisponibles(Long idAsignacion, LocalDate fecha) throws Exception{
+		AsignacionRecursoTipoTurno asig = obtenerAsignacionPorId(idAsignacion);
+		return asig.getHorariosDisponibles(fecha);
 	}
 	
 	private void validar(AsignacionRecursoTipoTurno asig) throws Exception{

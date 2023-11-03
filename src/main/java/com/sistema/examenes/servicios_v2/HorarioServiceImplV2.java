@@ -25,10 +25,10 @@ public class HorarioServiceImplV2 implements HorarioServiceV2{
     }
 	
 	@Override
-	public Recurso guardarHorarioRecurso(Recurso r) throws Exception {
+	public Recurso guardarHorariosRecurso(Recurso r) throws Exception {
 		Set<Horario> horariosGuardados = new HashSet<>();
+		validarLista(r.getHorarios());
 		for(Horario h : r.getHorarios()) {
-			validar(h);
 			horariosGuardados.add(horarioRepo.save(h));
 		}
 		r.setHorarios(horariosGuardados);
@@ -41,5 +41,15 @@ public class HorarioServiceImplV2 implements HorarioServiceV2{
         if (errors.hasErrors()) {
         	throw new Exception(errors.getFieldError().getDefaultMessage().toString());
         }
+	}
+	
+	@Override
+	public void validarLista(Set<Horario> horarios) throws Exception {
+		for(Horario h : horarios) {
+			validar(h);
+			if(h.sePisaConAlgunoDeEstos(horarios)) {
+				throw new Exception("Los horarios se pisan");
+			}
+		}
 	}
 }
