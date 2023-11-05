@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.validation.ValidationUtils;
@@ -16,6 +17,7 @@ import com.sistema.examenes.anterior.repositorios.ReservaRepository;
 import com.sistema.examenes.modelo.usuario.Usuario;
 import com.sistema.examenes.nuevo.servicios_interfaces.EstadoService;
 
+@Service
 public class ReservaServiceImplV2 implements ReservaServiceV2{
 	
 	@Autowired

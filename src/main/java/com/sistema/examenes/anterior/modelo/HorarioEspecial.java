@@ -163,8 +163,17 @@ public class HorarioEspecial {
 	}
 	
 	//VALIDACIONES
+	
+	@AssertTrue(message = "El horario debe tener al menos 60 minutos.")
+	private boolean isCantidadMinimaDeMinutos() {
+		if(this.cerrado) {
+			return true;
+		}
+		return !this.desde.plusMinutes(60L).isAfter(this.hasta);
+	}
+	
 	@AssertTrue(message = "La hora desde debe ser mayor que la hora hasta.")
-	private boolean horaDesdeMenorQueHoraHasta() {
+	private boolean isHoraDesdeMenorQueHoraHasta() {
 		if(!this.cerrado) {
 			return this.desde.isBefore(this.hasta);	
 		}
@@ -172,7 +181,7 @@ public class HorarioEspecial {
 	}
 	
 	@AssertTrue(message = "La fecha debe ser mayor a la actual.")
-	private boolean validarFecha() {
+	private boolean isValidaFecha() {
 		return (this.fecha.isAfter(LocalDate.now()));
 	}
 	
@@ -204,7 +213,7 @@ public class HorarioEspecial {
 	}
 	
 	public boolean sonValidosLosDatos() {
-		return validarHorarios() && validarFecha();
+		return validarHorarios() && isValidaFecha();
 	}
 	
 	public boolean sePisaConAlgunoDeEstos(Set<HorarioEspecial> horarios) {

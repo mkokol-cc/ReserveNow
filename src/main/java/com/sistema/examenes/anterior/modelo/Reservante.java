@@ -2,8 +2,6 @@ package com.sistema.examenes.anterior.modelo;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.regex.Matcher;
-//import java.util.regex.Pattern;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -15,13 +13,14 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.Null;
 import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.sistema.examenes.modelo.usuario.Usuario;
 
 @Entity
@@ -44,8 +43,8 @@ public class Reservante {
     @Column(name = "apellido")
 	private String apellido;
 	
-	@NotNull(message = "Debes ingresar el DNI.")
-    @NotBlank(message = "El DNI no puede estar en blanco.")
+	//@NotNull(message = "Debes ingresar el DNI.")
+	@Size(min = 7, max = 8, message = "El nombre debe tener entre 7 y 8 caracteres.")
 	@Column(name="dni")
 	private String dni;
 	
@@ -175,4 +174,19 @@ public class Reservante {
 	}
 	
 
+	@AssertTrue(message = "El usuario requiere datos de DNI")
+	private boolean isDni() {
+		if(this.usuario.isRequiereReservanteConDni()) {
+			return this.dni!=null;
+		}
+		return true;
+	}
+	
+	@AssertTrue(message = "El usuario requiere nombre y apellido")
+	private boolean isNombreYApellido() {
+		if(this.usuario.isRequiereReservanteConNombreYApellido()) {
+			return this.nombre!=null && this.apellido!=null;
+		}
+		return true;
+	}
 }

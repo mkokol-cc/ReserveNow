@@ -124,8 +124,13 @@ public class Horario {
 	//VALIDACIONES
 	
 	@AssertTrue(message = "La hora desde debe ser mayor que la hora hasta.")
-	private boolean horaDesdeMenorQueHoraHasta() {
+	private boolean isDesdeMenorQueHoraHasta() {
 		return this.desde.isBefore(this.hasta);
+	}
+	
+	@AssertTrue(message = "El horario debe tener al menos 60 minutos.")
+	private boolean is60Minutos() {
+		return !this.desde.plusMinutes(60L).isAfter(this.hasta);
 	}
 	
 	@AssertTrue(message = "El horario debe estar asociado a un recurso o a una asignacion.")
@@ -179,13 +184,7 @@ public class Horario {
 		return this.desde.isBefore(this.hasta);
 	}
 	
-	
-	
-	
-	
-	
-	
-	
+
 	
 	public List<LocalTime> obtenerHorarioCadaXMinutos(int minutos){
 		List<LocalTime> listaHorarios = new ArrayList<>();
@@ -197,4 +196,5 @@ public class Horario {
 		}
 		return listaHorarios;
 	}
+	
 }//end Horario

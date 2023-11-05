@@ -1,6 +1,7 @@
 package com.sistema.examenes.servicios_v2;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.validation.ValidationUtils;
@@ -8,6 +9,7 @@ import org.springframework.validation.Validator;
 import com.sistema.examenes.anterior.modelo.Reservante;
 import com.sistema.examenes.anterior.repositorios.ReservanteRepository;
 
+@Service
 public class ReservanteServiceImplV2 implements ReservanteServiceV2{
 
 	@Autowired

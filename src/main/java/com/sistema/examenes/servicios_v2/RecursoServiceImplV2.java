@@ -3,6 +3,7 @@ package com.sistema.examenes.servicios_v2;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.validation.ValidationUtils;
@@ -14,6 +15,7 @@ import com.sistema.examenes.anterior.modelo.Reserva;
 import com.sistema.examenes.anterior.repositorios.RecursoRepository;
 import com.sistema.examenes.modelo.usuario.Usuario;
 
+@Service
 public class RecursoServiceImplV2 implements RecursoServiceV2{
 
 	@Autowired

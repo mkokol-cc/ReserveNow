@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.validation.ValidationUtils;
@@ -19,6 +20,7 @@ import com.sistema.examenes.anterior.modelo.TipoTurno;
 import com.sistema.examenes.anterior.repositorios.AsignacionRecursoTipoTurnoRepository;
 import com.sistema.examenes.modelo.usuario.Usuario;
 
+@Service
 public class AsignacionServiceImplV2 implements AsignacionServiceV2{
 	
 	@Autowired

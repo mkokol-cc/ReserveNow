@@ -4,15 +4,18 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
 
+import com.sistema.examenes.anterior.modelo.Horario;
 import com.sistema.examenes.anterior.modelo.HorarioEspecial;
 import com.sistema.examenes.anterior.modelo.Recurso;
 import com.sistema.examenes.anterior.repositorios.HorarioEspecialRepository;
 
+@Service
 public class HorarioEspecialServiceImplV2 implements HorarioEspecialServiceV2{
 
 	@Autowired
@@ -47,10 +50,35 @@ public class HorarioEspecialServiceImplV2 implements HorarioEspecialServiceV2{
 	public void validarLista(Set<HorarioEspecial> horarios) throws Exception {
 		for(HorarioEspecial h : horarios) {
 			validar(h);
+			/*
 			if(h.sePisaConAlgunoDeEstos(horarios)) {
 				throw new Exception("Los horarios especiales se pisan");
 			}
+			*/
 		}
+		noSeSuperponen(horarios);
 	}
+	
+    private boolean noSeSuperponen(Set<HorarioEspecial> horarios) throws Exception {
+        for (HorarioEspecial horario1 : horarios) {
+            for (HorarioEspecial horario2 : horarios) {
+                if (horario1 != horario2) {
+                    // Comprueba si los horarios se superponen
+                    if (horariosSeSuperponen(horario1, horario2) && horario1.getFecha().equals(horario2.getFecha())) {
+                        throw new Exception("Hay horarios que se superponen"); // Si se superponen, devuelve false
+                    }
+                }
+            }
+        }
+        return true; // Si no se superponen, devuelve true
+    }
+
+    private static boolean horariosSeSuperponen(HorarioEspecial horario1, HorarioEspecial horario2) {
+        if((horario1.isCerrado() || horario2.isCerrado())) {
+        	return true;
+        }
+    	return horario1.getDesde().isBefore(horario2.getHasta()) &&
+               horario1.getHasta().isAfter(horario2.getDesde());
+    }
 
 }

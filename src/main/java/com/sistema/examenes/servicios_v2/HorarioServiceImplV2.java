@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.validation.ValidationUtils;
@@ -13,6 +14,7 @@ import com.sistema.examenes.anterior.modelo.Horario;
 import com.sistema.examenes.anterior.modelo.Recurso;
 import com.sistema.examenes.anterior.repositorios.HorarioRepository;
 
+@Service
 public class HorarioServiceImplV2 implements HorarioServiceV2{
 
 	@Autowired
@@ -47,9 +49,31 @@ public class HorarioServiceImplV2 implements HorarioServiceV2{
 	public void validarLista(Set<Horario> horarios) throws Exception {
 		for(Horario h : horarios) {
 			validar(h);
+			/*
 			if(h.sePisaConAlgunoDeEstos(horarios)) {
 				throw new Exception("Los horarios se pisan");
 			}
+			*/
 		}
+		noSeSuperponen(horarios);
 	}
+	
+    private boolean noSeSuperponen(Set<Horario> horarios) throws Exception {
+        for (Horario horario1 : horarios) {
+            for (Horario horario2 : horarios) {
+                if (horario1 != horario2) {
+                    // Comprueba si los horarios se superponen
+                    if (horariosSeSuperponen(horario1, horario2) && horario1.getDia().equals(horario2.getDia()) ) {
+                        throw new Exception("Hay horarios que se superponen"); // Si se superponen, devuelve false
+                    }
+                }
+            }
+        }
+        return true; // Si no se superponen, devuelve true
+    }
+
+    private static boolean horariosSeSuperponen(Horario horario1, Horario horario2) {
+        return horario1.getDesde().isBefore(horario2.getHasta()) &&
+               horario1.getHasta().isAfter(horario2.getDesde());
+    }
 }
