@@ -87,7 +87,7 @@ public class AsignacionRecursoTipoTurno {
 	//@JsonBackReference
 	public Set<Reserva> reservas;
 	
-	@Min(value = 1, message = "La duración debe ser al menos 1 minuto.")
+	@Min(value = 10, message = "La duración debe ser al menos 10 minutos.")
 	@Max(value = 1440, message = "La duración no puede ser mayor de 1440 minutos (24 horas).")
 	@Column(name = "duracionEnMinutos",nullable=false)
 	private Integer duracionEnMinutos;
@@ -225,6 +225,15 @@ public class AsignacionRecursoTipoTurno {
 		this.precioEstimadoHastaCtvos = precioEstimadoHastaCtvos;
 	}
 	
+	
+	@AssertTrue(message="Recurso inhabilitado.")
+	private boolean isHabilitadoRecurso() {
+		return !this.recurso.isEliminado();
+	}
+	@AssertTrue(message="Tipo de Turno inhabilitado.")
+	private boolean isHabilitadoTipoTurno() {
+		return !this.tipoTurno.isEliminado();
+	}
 	
 	//validar cantidadConcurrencia
 	
@@ -391,9 +400,13 @@ public class AsignacionRecursoTipoTurno {
 	}
 	
 	private Boolean comprobarDisponibilidadTurno(List<Reserva> reservas, LocalTime horaInicio, LocalTime horaFin) {
-		Boolean estaLibre = reservas.stream().filter(r -> (!r.getHora().isBefore(horaInicio) && r.getHora().isBefore(horaFin)) 
-				|| (!r.getHoraFin().isAfter(horaFin) && r.getHora().isAfter(horaInicio))).collect(Collectors.toList()).isEmpty();
-		return estaLibre;
+		List<Reserva> reservasDelRango = reservas.stream().filter(r -> 
+		(!r.getHora().isBefore(horaInicio) && r.getHora().isBefore(horaFin)) || 
+		(!r.getHoraFin().isAfter(horaFin) && r.getHora().isAfter(horaInicio))).collect(Collectors.toList());
+		
+		boolean sonDeEstaAsignacion = reservasDelRango.stream().allMatch(r -> r.getAsignacionTipoTurno().equals(this));
+		
+		return (sonDeEstaAsignacion && reservasDelRango.size()<this.cantidadConcurrencia) || reservasDelRango.isEmpty();
 	}
 	
 	

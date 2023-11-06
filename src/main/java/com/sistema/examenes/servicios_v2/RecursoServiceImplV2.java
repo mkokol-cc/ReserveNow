@@ -12,6 +12,7 @@ import org.springframework.validation.Validator;
 import com.sistema.examenes.anterior.modelo.AsignacionRecursoTipoTurno;
 import com.sistema.examenes.anterior.modelo.Recurso;
 import com.sistema.examenes.anterior.modelo.Reserva;
+import com.sistema.examenes.anterior.modelo.TipoTurno;
 import com.sistema.examenes.anterior.repositorios.RecursoRepository;
 import com.sistema.examenes.modelo.usuario.Usuario;
 
@@ -97,6 +98,7 @@ public class RecursoServiceImplV2 implements RecursoServiceV2{
         if (errors.hasErrors()) {
         	throw new Exception(errors.getFieldError().getDefaultMessage().toString());
         }
+        existeRecursoConEseNombre(r);
 	}
 	
 	
@@ -134,4 +136,11 @@ public class RecursoServiceImplV2 implements RecursoServiceV2{
 		}
 	}
 
+	private void existeRecursoConEseNombre(Recurso r) throws Exception {
+		//Boolean b = !listarTipoTurno(t.getUsuario()).stream().filter( tipoTurno -> tipoTurno.getNombre().equals(t.getNombre())).toList().isEmpty();
+		if(!listarRecursos(r.getUsuario()).stream().filter( recurso -> 
+		recurso.getNombre().equals(r.getNombre())).toList().isEmpty() ){
+			throw new Exception("Ya existe un Recurso con ese nombre");
+		}
+	}
 }

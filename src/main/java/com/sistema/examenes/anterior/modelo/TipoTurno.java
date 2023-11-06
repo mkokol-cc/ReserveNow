@@ -70,7 +70,7 @@ public class TipoTurno {
 	@JsonIgnore
     private Usuario usuario;
 	
-	@Min(value = 1, message = "La duración debe ser al menos 1 minuto.")
+	@Min(value = 10, message = "La duración debe ser al menos 10 minutos.")
 	@Max(value = 1440, message = "La duración no puede ser mayor de 1440 minutos (24 horas).")
 	@Column(name = "duracionEnMinutos",nullable=true)
 	private Integer duracionEnMinutos = 1;

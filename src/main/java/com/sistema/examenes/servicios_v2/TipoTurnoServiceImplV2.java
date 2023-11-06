@@ -87,6 +87,7 @@ public class TipoTurnoServiceImplV2 implements TipoTurnoServiceV2{
         if (errors.hasErrors()) {
         	throw new Exception(errors.getFieldError().getDefaultMessage().toString());
         }
+        existeTipoDeTurnoConEseNombre(t);
 	}
 	
 	private void eliminarReservas(List<Reserva> reservas, Usuario u) throws Exception {
@@ -102,5 +103,13 @@ public class TipoTurnoServiceImplV2 implements TipoTurnoServiceV2{
 			asignacionService.eliminarAsignacion(asig.getId(), u);
 		}
 	}	
+	
+	private void existeTipoDeTurnoConEseNombre(TipoTurno t) throws Exception {
+		//Boolean b = !listarTipoTurno(t.getUsuario()).stream().filter( tipoTurno -> tipoTurno.getNombre().equals(t.getNombre())).toList().isEmpty();
+		if(!listarTipoTurno(t.getUsuario()).stream().filter( tipoTurno -> 
+		tipoTurno.getNombre().equals(t.getNombre())).toList().isEmpty() ){
+			throw new Exception("Ya existe un Tipo de Turno con ese nombre");
+		}
+	}
 
 }

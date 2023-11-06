@@ -1,10 +1,13 @@
 
 package com.sistema.examenes.anterior.modelo;
 
+
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -245,12 +248,9 @@ public class Reserva {
 	 * -LA CONCURRENCIA ES CORRECTA
 	 * */
 	@AssertTrue(message="Se intento reservar para un dia y hora que ya pasaron.")
-	private boolean validarFechaYHoraFuturas() {
-		LocalDate hoy = LocalDate.now();
-		if(hoy.isBefore(this.fecha)) {
-			return true;
-		}
-		return (this.fecha.equals(LocalDate.now()) ? this.hora.isAfter(LocalTime.now()) : false);
+	private boolean isValidaFechaYHora() {
+		LocalDateTime fechaHoraReserva = LocalDateTime.of(this.fecha, this.hora);
+		return fechaHoraReserva.isAfter(LocalDateTime.now());
 	}
 	
 	@AssertTrue(message="No tiene permitido reservas a su nombre.")
@@ -274,14 +274,15 @@ public class Reserva {
 	
 	@AssertTrue(message="Recurso ocupado.")
 	public boolean isOcupadoElRecurso() {
-		System.out.println("ENTRE 1");
-		//List<Reserva> reservasDelRecursoParaElDia = this.asignacionTipoTurno.getRecurso().obtenerReservasPorFecha(this.fecha);
-		//for(Reserva r : reservasDelRecursoParaElDia) {
-		//	if(sePisaLosHorariosConEstaReserva(r) && !r.getAsignacionTipoTurno().equals(this.asignacionTipoTurno)) {
-		//		return false;//ocupado con otro tipo de turno
-		//	}
-		//}
-		return true;//libre
+		for (Map.Entry<LocalTime, Boolean> entry : this.asignacionTipoTurno.getHorariosDisponibles(this.fecha).entrySet()) {
+            LocalTime hora = entry.getKey();
+            Boolean disponible = entry.getValue();
+            System.out.println(hora+" - "+disponible);
+            if(hora.equals(this.hora)) {
+            	return disponible;
+            }
+        }
+		return false;//true - libre | false - ocupado
 	}
 
 	@AssertTrue(message="Concurrencia llena para el horario.")
@@ -303,7 +304,7 @@ public class Reserva {
 	
 	@AssertTrue(message="La hora fin esta mal.")
 	private boolean isValidaHoraFin() {
-		System.out.println("ENTRE 3");
+		//System.out.println("ENTRE 3");
 		return this.hora.plusMinutes((long)this.asignacionTipoTurno.getDuracionEnMinutos()).equals(this.horaFin);
 	}
 	

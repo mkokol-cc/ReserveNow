@@ -100,6 +100,7 @@ public class AsignacionServiceImplV2 implements AsignacionServiceV2{
         if (errors.hasErrors()) {
         	throw new Exception(errors.getFieldError().getDefaultMessage().toString());
         }
+        existeAsignacion(asig);
 	}
 	
 	private void eliminarReservas(Set<Reserva> reservas, Usuario u) throws Exception {
@@ -107,6 +108,13 @@ public class AsignacionServiceImplV2 implements AsignacionServiceV2{
 			if(!r.getEstado().isEsEstadoFinal()) {
 				reservaService.eliminarReserva(r, u);
 			}
+		}
+	}
+	
+	private void existeAsignacion(AsignacionRecursoTipoTurno asig) throws Exception {
+		if(listarAsignaciones(asig.getTipoTurno().getUsuario()).stream().anyMatch(a->
+		a.getTipoTurno().equals(asig.getTipoTurno()) && a.getRecurso().equals(asig.getRecurso()))) {
+			throw new Exception("Ya existe la asignacion "+asig.getRecurso().getNombre()+" con "+asig.getTipoTurno().getNombre()+".");
 		}
 	}
 
