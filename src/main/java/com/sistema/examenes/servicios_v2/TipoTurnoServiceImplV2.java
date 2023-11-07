@@ -60,6 +60,7 @@ public class TipoTurnoServiceImplV2 implements TipoTurnoServiceV2{
 
 	@Override
 	public TipoTurno nuevoTipoTurno(TipoTurno t) throws Exception {
+		existeTipoDeTurnoConEseNombre(t);
 		validar(t);
 		return tipoTurnoRepo.save(t);
 	}
@@ -68,6 +69,7 @@ public class TipoTurnoServiceImplV2 implements TipoTurnoServiceV2{
 	public TipoTurno editarTipoTurno(TipoTurno t, Usuario u) throws Exception{
 		TipoTurno guardado = obtenerTipoTurnoPorId(t.getId());
 		if(t.getUsuario().equals(u)) {
+			existeTipoDeTurnoConEseNombre(t);
 			validar(t);
 			return tipoTurnoRepo.save(guardado.editarTipoTurno(t));
 		}else {
@@ -77,8 +79,11 @@ public class TipoTurnoServiceImplV2 implements TipoTurnoServiceV2{
 	
 	@Override
 	public void borrarTipoTurno(Long idTipoTurno) throws Exception {
-		// TODO Auto-generated method stub
-		
+		try {
+			tipoTurnoRepo.deleteById(idTipoTurno);	
+		}catch(Exception e) {
+			throw new Exception("Error al eliminar el Tipo de Turno");
+		}
 	}
 	
 	private void validar(TipoTurno t) throws Exception{
@@ -87,7 +92,6 @@ public class TipoTurnoServiceImplV2 implements TipoTurnoServiceV2{
         if (errors.hasErrors()) {
         	throw new Exception(errors.getFieldError().getDefaultMessage().toString());
         }
-        existeTipoDeTurnoConEseNombre(t);
 	}
 	
 	private void eliminarReservas(List<Reserva> reservas, Usuario u) throws Exception {

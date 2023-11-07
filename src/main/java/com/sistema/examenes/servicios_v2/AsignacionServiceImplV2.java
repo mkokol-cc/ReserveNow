@@ -53,6 +53,7 @@ public class AsignacionServiceImplV2 implements AsignacionServiceV2{
 		TipoTurno t = tipoTurnoService.obtenerTipoTurnoPorId(idTipoTurno);
 		if(r.getUsuario().equals(t.getUsuario()) && r.getUsuario().equals(u)) {
 			AsignacionRecursoTipoTurno a = new AsignacionRecursoTipoTurno(r, t);
+			existeAsignacion(a);
 			validar(a);//validar tambien si el usuario esta habilitado y si el recurso y tipoturno estan habilitados
 			return asignacionRepo.save(a);
 		}
@@ -100,7 +101,6 @@ public class AsignacionServiceImplV2 implements AsignacionServiceV2{
         if (errors.hasErrors()) {
         	throw new Exception(errors.getFieldError().getDefaultMessage().toString());
         }
-        existeAsignacion(asig);
 	}
 	
 	private void eliminarReservas(Set<Reserva> reservas, Usuario u) throws Exception {

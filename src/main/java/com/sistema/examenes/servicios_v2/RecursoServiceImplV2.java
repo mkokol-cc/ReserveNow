@@ -69,6 +69,7 @@ public class RecursoServiceImplV2 implements RecursoServiceV2{
 
 	@Override
 	public Recurso nuevoRecurso(Recurso r) throws Exception {
+		existeRecursoConEseNombre(r);
 		validar(r);
 		return recursoRepo.save(r);
 	}
@@ -77,6 +78,7 @@ public class RecursoServiceImplV2 implements RecursoServiceV2{
 	public Recurso editarRecurso(Recurso r, Usuario u) throws Exception {
 		Recurso guardado = obtenerRecursoPorId(r.getId());
 		if(r.getUsuario().equals(u)) {
+			existeRecursoConEseNombre(r);
 			validar(r);
 			Recurso recursoEditado = recursoRepo.save(guardado.editarRecurso(r));
 			return guardarHorariosRecurso(recursoEditado);
@@ -88,8 +90,11 @@ public class RecursoServiceImplV2 implements RecursoServiceV2{
 
 	@Override
 	public void borrarRecurso(Long idRecurso) throws Exception {
-		// TODO Auto-generated method stub
-		
+		try {
+			recursoRepo.deleteById(idRecurso);	
+		}catch(Exception e) {
+			throw new Exception("Error al eliminar el Recurso");
+		}
 	}
 	
 	private void validar(Recurso r) throws Exception{
@@ -98,7 +103,6 @@ public class RecursoServiceImplV2 implements RecursoServiceV2{
         if (errors.hasErrors()) {
         	throw new Exception(errors.getFieldError().getDefaultMessage().toString());
         }
-        existeRecursoConEseNombre(r);
 	}
 	
 	
