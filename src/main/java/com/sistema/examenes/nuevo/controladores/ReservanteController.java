@@ -16,8 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sistema.examenes.anterior.modelo.Reservante;
-import com.sistema.examenes.nuevo.servicios_interfaces.ReservanteService;
 import com.sistema.examenes.servicios.UsuarioService;
+import com.sistema.examenes.servicios_v2.ReservanteServiceV2;
 
 @RestController
 @RequestMapping("/v1.1")
@@ -25,16 +25,16 @@ import com.sistema.examenes.servicios.UsuarioService;
 public class ReservanteController {
 
 	@Autowired
-	private ReservanteService reservanteService;
+	private ReservanteServiceV2 reservanteService;
 	
 	@Autowired
 	private UsuarioService usuarioService;
 	
 	
-	@GetMapping("/clientes")
+	@GetMapping("/cliente")
 	public ResponseEntity<?> listarClientes() throws JsonProcessingException {
 		try {
-			List<Reservante> reservantes = reservanteService.listarReservanteDeUsuario(usuarioService.obtenerUsuarioActual());
+			List<Reservante> reservantes = reservanteService.listarReservantes(usuarioService.obtenerUsuarioActual());
 			return ResponseEntity.ok(reservantes);
 		}catch(Exception e) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
@@ -42,10 +42,10 @@ public class ReservanteController {
 	}
 	
 	
-	@PutMapping("/clientes")
+	@PutMapping("/cliente")
 	public ResponseEntity<?> editarCliente(@Valid @RequestBody Reservante reservanteStr) throws JsonProcessingException {
 		try {
-			Reservante reservanteEditado = reservanteService.editarReservante(reservanteStr, usuarioService.getIdUsuarioActual());
+			Reservante reservanteEditado = reservanteService.editarReservante(reservanteStr, usuarioService.obtenerUsuarioActual());
 			return ResponseEntity.ok(reservanteEditado);
 		}catch(Exception e) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());

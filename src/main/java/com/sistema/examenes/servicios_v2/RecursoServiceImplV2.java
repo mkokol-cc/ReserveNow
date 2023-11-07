@@ -77,7 +77,7 @@ public class RecursoServiceImplV2 implements RecursoServiceV2{
 	@Override
 	public Recurso editarRecurso(Recurso r, Usuario u) throws Exception {
 		Recurso guardado = obtenerRecursoPorId(r.getId());
-		if(r.getUsuario().equals(u)) {
+		if(guardado.getUsuario().equals(u)) {
 			existeRecursoConEseNombre(r);
 			validar(r);
 			Recurso recursoEditado = recursoRepo.save(guardado.editarRecurso(r));

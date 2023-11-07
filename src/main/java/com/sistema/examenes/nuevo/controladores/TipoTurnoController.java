@@ -20,8 +20,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sistema.examenes.anterior.modelo.TipoTurno;
-import com.sistema.examenes.nuevo.servicios_interfaces.TipoTurnoService;
 import com.sistema.examenes.servicios.UsuarioService;
+import com.sistema.examenes.servicios_v2.TipoTurnoServiceV2;
 
 
 @RestController
@@ -30,16 +30,17 @@ import com.sistema.examenes.servicios.UsuarioService;
 public class TipoTurnoController {
 
 	@Autowired
-	private TipoTurnoService tipoTurnoService;
+	private TipoTurnoServiceV2 tipoTurnoService;
 	
 	@Autowired
 	private UsuarioService usuarioService;
 	
 	//CRUD TIPO TURNO
 	@PostMapping("/tipo-turno")
-	public ResponseEntity</*TipoTurno*/?> guardarTipoTurno(@Valid @RequestBody TipoTurno tipoTurnoStr) throws JsonProcessingException {
+	public ResponseEntity<?> guardarTipoTurno(@RequestBody TipoTurno tipoTurnoStr) throws JsonProcessingException {
 		try {
-			TipoTurno tipoTurnoGuardado = tipoTurnoService.guardarTipoTurno(tipoTurnoStr);
+			tipoTurnoStr.setUsuario(usuarioService.obtenerUsuarioActual());
+			TipoTurno tipoTurnoGuardado = tipoTurnoService.nuevoTipoTurno(tipoTurnoStr);
 			return ResponseEntity.ok(tipoTurnoGuardado);
 		}catch(Exception e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
@@ -49,7 +50,7 @@ public class TipoTurnoController {
 	@PutMapping("/tipo-turno")
 	public ResponseEntity<?> editarTipoTurno(@Valid @RequestBody TipoTurno tipoTurnoStr) throws JsonProcessingException {
 		try {
-			TipoTurno tipoTurnoEditado = tipoTurnoService.editarTipoTurno(tipoTurnoStr);
+			TipoTurno tipoTurnoEditado = tipoTurnoService.editarTipoTurno(tipoTurnoStr,usuarioService.obtenerUsuarioActual());
 			return ResponseEntity.ok(tipoTurnoEditado);	
 		}catch(Exception e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
@@ -59,7 +60,7 @@ public class TipoTurnoController {
 	@GetMapping("/tipo-turno")
 	public ResponseEntity<?> listarTipoTurno(){
 		try {
-			List<TipoTurno> listaTiposTurnos = tipoTurnoService.listarTipoTurnoDeUsuario(usuarioService.obtenerUsuarioActual());
+			List<TipoTurno> listaTiposTurnos = tipoTurnoService.listarTipoTurno(usuarioService.obtenerUsuarioActual());
 			return ResponseEntity.ok(listaTiposTurnos);	
 		}catch(Exception e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
@@ -71,6 +72,17 @@ public class TipoTurnoController {
 		try {
 			TipoTurno t = tipoTurnoService.obtenerTipoTurnoPorId(id);
 			tipoTurnoService.eliminarTipoTurno(id, usuarioService.obtenerUsuarioActual());
+			return ResponseEntity.ok("Se elimino correctamente el tipo de turno "+t.getNombre()+" y se cancelaron sus reservas.");
+		}catch(Exception e) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+		}
+	}
+	
+	@DeleteMapping("/tipo-turno/borrar/{id}")
+	public ResponseEntity<?> borrarTipoTurno(@PathVariable Long id){
+		try {
+			TipoTurno t = tipoTurnoService.obtenerTipoTurnoPorId(id);
+			tipoTurnoService.borrarTipoTurno(id);
 			return ResponseEntity.ok("Se elimino correctamente el tipo de turno "+t.getNombre()+" y sus reservas.");
 		}catch(Exception e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());

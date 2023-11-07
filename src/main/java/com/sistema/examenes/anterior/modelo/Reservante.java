@@ -189,4 +189,12 @@ public class Reservante {
 		}
 		return true;
 	}
+
+	public Reservante editarReservante(Reservante r) {
+		this.habilitado = r.isHabilitado();
+		this.nombre = r.getNombre();
+		this.apellido = r.getApellido();
+		this.dni = r.getDni();
+		return this;
+	}
 }
