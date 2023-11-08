@@ -165,7 +165,7 @@ public class HorarioEspecial {
 	//VALIDACIONES
 	
 	@AssertTrue(message = "El horario debe tener al menos 60 minutos.")
-	private boolean isCantidadMinimaDeMinutos() {
+	private boolean isValidoMinutos() {
 		if(this.cerrado) {
 			return true;
 		}
@@ -173,7 +173,7 @@ public class HorarioEspecial {
 	}
 	
 	@AssertTrue(message = "La hora desde debe ser mayor que la hora hasta.")
-	private boolean isHoraDesdeMenorQueHoraHasta() {
+	private boolean isValidoHorarios() {
 		if(!this.cerrado) {
 			return this.desde.isBefore(this.hasta);	
 		}

@@ -11,6 +11,7 @@ import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
 
 import com.sistema.examenes.anterior.modelo.Horario;
+import com.sistema.examenes.anterior.modelo.HorarioEspecial;
 import com.sistema.examenes.anterior.modelo.Recurso;
 import com.sistema.examenes.anterior.repositorios.HorarioRepository;
 
@@ -29,6 +30,7 @@ public class HorarioServiceImplV2 implements HorarioServiceV2{
 	@Override
 	public Recurso guardarHorariosRecurso(Recurso r) throws Exception {
 		Set<Horario> horariosGuardados = new HashSet<>();
+		r.setHorarios(setRecurso(r,r.getHorarios()));
 		validarLista(r.getHorarios());
 		for(Horario h : r.getHorarios()) {
 			horariosGuardados.add(horarioRepo.save(h));
@@ -49,11 +51,6 @@ public class HorarioServiceImplV2 implements HorarioServiceV2{
 	public void validarLista(Set<Horario> horarios) throws Exception {
 		for(Horario h : horarios) {
 			validar(h);
-			/*
-			if(h.sePisaConAlgunoDeEstos(horarios)) {
-				throw new Exception("Los horarios se pisan");
-			}
-			*/
 		}
 		noSeSuperponen(horarios);
 	}
@@ -75,5 +72,12 @@ public class HorarioServiceImplV2 implements HorarioServiceV2{
     private static boolean horariosSeSuperponen(Horario horario1, Horario horario2) {
         return horario1.getDesde().isBefore(horario2.getHasta()) &&
                horario1.getHasta().isAfter(horario2.getDesde());
+    }
+    
+    private Set<Horario> setRecurso(Recurso r, Set<Horario> horarios) {
+    	for(Horario h : horarios) {
+    		h.setRecurso(r);
+    	}
+    	return horarios;
     }
 }

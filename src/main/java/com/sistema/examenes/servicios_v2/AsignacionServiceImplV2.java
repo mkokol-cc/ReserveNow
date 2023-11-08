@@ -113,7 +113,8 @@ public class AsignacionServiceImplV2 implements AsignacionServiceV2{
 	
 	private void existeAsignacion(AsignacionRecursoTipoTurno asig) throws Exception {
 		if(listarAsignaciones(asig.getTipoTurno().getUsuario()).stream().anyMatch(a->
-		a.getTipoTurno().equals(asig.getTipoTurno()) && a.getRecurso().equals(asig.getRecurso()))) {
+		a.getTipoTurno().equals(asig.getTipoTurno()) && a.getRecurso().equals(asig.getRecurso())
+		&& !a.getId().equals(asig.getId()) )) {
 			throw new Exception("Ya existe la asignacion "+asig.getRecurso().getNombre()+" con "+asig.getTipoTurno().getNombre()+".");
 		}
 	}

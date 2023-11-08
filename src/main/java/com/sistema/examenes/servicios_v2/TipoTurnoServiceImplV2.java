@@ -111,7 +111,7 @@ public class TipoTurnoServiceImplV2 implements TipoTurnoServiceV2{
 	private void existeTipoDeTurnoConEseNombre(TipoTurno t) throws Exception {
 		//Boolean b = !listarTipoTurno(t.getUsuario()).stream().filter( tipoTurno -> tipoTurno.getNombre().equals(t.getNombre())).toList().isEmpty();
 		if(!listarTipoTurno(t.getUsuario()).stream().filter( tipoTurno -> 
-		tipoTurno.getNombre().equals(t.getNombre())).toList().isEmpty() ){
+		tipoTurno.getNombre().equals(t.getNombre()) && !tipoTurno.getId().equals(t.getId()) ).toList().isEmpty()){
 			throw new Exception("Ya existe un Tipo de Turno con ese nombre");
 		}
 	}

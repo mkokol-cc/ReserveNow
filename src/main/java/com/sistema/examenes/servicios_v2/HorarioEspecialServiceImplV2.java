@@ -30,6 +30,7 @@ public class HorarioEspecialServiceImplV2 implements HorarioEspecialServiceV2{
 	@Override
 	public Recurso guardarHorariosEspecialesRecurso(Recurso r) throws Exception {
 		Set<HorarioEspecial> horariosGuardados = new HashSet<>();
+		r.setHorariosEspeciales(setRecurso(r,r.getHorariosEspeciales()));
 		validarLista(r.getHorariosEspeciales());
 		for(HorarioEspecial h : r.getHorariosEspeciales()) {
 			horariosGuardados.add(horarioEspRepo.save(h));
@@ -50,16 +51,11 @@ public class HorarioEspecialServiceImplV2 implements HorarioEspecialServiceV2{
 	public void validarLista(Set<HorarioEspecial> horarios) throws Exception {
 		for(HorarioEspecial h : horarios) {
 			validar(h);
-			/*
-			if(h.sePisaConAlgunoDeEstos(horarios)) {
-				throw new Exception("Los horarios especiales se pisan");
-			}
-			*/
 		}
 		noSeSuperponen(horarios);
 	}
 	
-    private boolean noSeSuperponen(Set<HorarioEspecial> horarios) throws Exception {
+    private void noSeSuperponen(Set<HorarioEspecial> horarios) throws Exception {
         for (HorarioEspecial horario1 : horarios) {
             for (HorarioEspecial horario2 : horarios) {
                 if (horario1 != horario2) {
@@ -70,7 +66,6 @@ public class HorarioEspecialServiceImplV2 implements HorarioEspecialServiceV2{
                 }
             }
         }
-        return true; // Si no se superponen, devuelve true
     }
 
     private static boolean horariosSeSuperponen(HorarioEspecial horario1, HorarioEspecial horario2) {
@@ -79,6 +74,13 @@ public class HorarioEspecialServiceImplV2 implements HorarioEspecialServiceV2{
         }
     	return horario1.getDesde().isBefore(horario2.getHasta()) &&
                horario1.getHasta().isAfter(horario2.getDesde());
+    }
+    
+    private Set<HorarioEspecial> setRecurso(Recurso r, Set<HorarioEspecial> horarios) {
+    	for(HorarioEspecial he : horarios) {
+    		he.setRecurso(r);
+    	}
+    	return horarios;
     }
 
 }

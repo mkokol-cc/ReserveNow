@@ -1,6 +1,10 @@
 package com.sistema.examenes.servicios_v2;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -10,9 +14,9 @@ import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
 
 import com.sistema.examenes.anterior.modelo.AsignacionRecursoTipoTurno;
+import com.sistema.examenes.anterior.modelo.HorarioEspecial;
 import com.sistema.examenes.anterior.modelo.Recurso;
 import com.sistema.examenes.anterior.modelo.Reserva;
-import com.sistema.examenes.anterior.modelo.TipoTurno;
 import com.sistema.examenes.anterior.repositorios.RecursoRepository;
 import com.sistema.examenes.modelo.usuario.Usuario;
 
@@ -80,8 +84,9 @@ public class RecursoServiceImplV2 implements RecursoServiceV2{
 		if(guardado.getUsuario().equals(u)) {
 			existeRecursoConEseNombre(r);
 			validar(r);
-			Recurso recursoEditado = recursoRepo.save(guardado.editarRecurso(r));
-			return guardarHorariosRecurso(recursoEditado);
+			Recurso editado = guardado.editarRecurso(r);
+			Recurso conHorariosGuadados = guardarHorariosRecurso(editado);
+			return recursoRepo.save(conHorariosGuadados);
 		}else {
 			throw new Exception("Usuario no autorizado");
 		}
@@ -143,7 +148,7 @@ public class RecursoServiceImplV2 implements RecursoServiceV2{
 	private void existeRecursoConEseNombre(Recurso r) throws Exception {
 		//Boolean b = !listarTipoTurno(t.getUsuario()).stream().filter( tipoTurno -> tipoTurno.getNombre().equals(t.getNombre())).toList().isEmpty();
 		if(!listarRecursos(r.getUsuario()).stream().filter( recurso -> 
-		recurso.getNombre().equals(r.getNombre())).toList().isEmpty() ){
+		recurso.getNombre().equals(r.getNombre()) && !recurso.getId().equals(r.getId()) ).toList().isEmpty() ){
 			throw new Exception("Ya existe un Recurso con ese nombre");
 		}
 	}
