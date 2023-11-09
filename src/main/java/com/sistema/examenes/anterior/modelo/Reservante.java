@@ -16,11 +16,10 @@ import javax.persistence.Table;
 import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Null;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sistema.examenes.modelo.usuario.Usuario;
 
 @Entity
@@ -31,25 +30,22 @@ public class Reservante {
 	@Column(name = "id")
 	private Long id;
 	
-	@NotNull(message = "Debes ingresar el nombre.")
-    @NotBlank(message = "El nombre no puede estar en blanco.")
+	//@NotNull(message = "Debes ingresar el nombre.")
     @Size(min = 2, max = 50, message = "El nombre debe tener entre 2 y 50 caracteres.")
 	@Column(name="nombre")
 	private String nombre;
 	
-	@NotNull(message = "Debes ingresar el apellido.")
-    @NotBlank(message = "El apellido no puede estar en blanco.")
+	//@NotNull(message = "Debes ingresar el apellido.")
     @Size(min = 2, max = 50, message = "El apellido debe tener entre 2 y 50 caracteres.")
     @Column(name = "apellido")
 	private String apellido;
 	
 	//@NotNull(message = "Debes ingresar el DNI.")
-	@Size(min = 7, max = 8, message = "El nombre debe tener entre 7 y 8 caracteres.")
+	@Size(min = 7, max = 8, message = "El DNI debe tener entre 7 y 8 caracteres.")
 	@Column(name="dni")
 	private String dni;
 	
 	@NotNull(message = "Debes ingresar el telefono.")
-    @NotBlank(message = "El telefono no puede estar en blanco.")
     @Pattern(regexp = "^(\\+\\d{1,3}[- ]?)?\\d{3,14}$", message = "El número de teléfono esta en formato incorrecto.")
 	@Column(name="telefono",unique=false)
 	private String telefono;
@@ -58,17 +54,13 @@ public class Reservante {
 	private boolean habilitado;
 	
 	@OneToMany(mappedBy = "reservante", fetch = FetchType.EAGER/*, cascade = CascadeType.ALL, orphanRemoval = true*/)
-    //@JsonIgnore
-	//@JsonManagedReference
-	@JsonBackReference
+    @JsonIgnore
     private Set<Reserva> reservas = new HashSet<>();
 	
 	//RELACIONADO CON EL DUEÑO
 	@NotNull(message = "El usuario no puede ser nulo.")
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "usuario", referencedColumnName = "id", nullable = false, unique = false)
-	//@JsonBackReference
-	//@JsonManagedReference
     private Usuario usuario;
 
 	public Long getId() {
@@ -175,7 +167,10 @@ public class Reservante {
 	
 
 	@AssertTrue(message = "El usuario requiere datos de DNI")
-	private boolean isDni() {
+	public boolean isDni() {
+		if(this.usuario==null) {
+			return false;
+		}
 		if(this.usuario.isRequiereReservanteConDni()) {
 			return this.dni!=null;
 		}
@@ -183,7 +178,10 @@ public class Reservante {
 	}
 	
 	@AssertTrue(message = "El usuario requiere nombre y apellido")
-	private boolean isNombreYApellido() {
+	public boolean isNombreYApellido() {
+		if(this.usuario==null) {
+			return false;
+		}
 		if(this.usuario.isRequiereReservanteConNombreYApellido()) {
 			return this.nombre!=null && this.apellido!=null;
 		}

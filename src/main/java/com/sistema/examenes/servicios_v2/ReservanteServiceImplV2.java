@@ -45,9 +45,10 @@ public class ReservanteServiceImplV2 implements ReservanteServiceV2{
 	@Override
 	public Reservante editarReservante(Reservante r, Usuario u) throws Exception {
 		Reservante guardado = reservanteRepo.getById(r.getId());
-		if(guardado.getUsuario().equals(u)) {
+		if(guardado.getUsuario() == u) {
+			r.setUsuario(u);
+			validar(r);
 			Reservante editado = guardado.editarReservante(r);
-			validar(editado);
 			return reservanteRepo.save(editado);
 		}else {
 			throw new Exception("Usuario no autorizado");
@@ -58,6 +59,7 @@ public class ReservanteServiceImplV2 implements ReservanteServiceV2{
 		Errors errors = new BeanPropertyBindingResult(r, "reservante");
         ValidationUtils.invokeValidator(validator, r, errors);
         if (errors.hasErrors()) {
+        	//System.out.println(errors.toString());
         	throw new Exception(errors.getFieldError().getDefaultMessage().toString());
         }
 	}

@@ -36,7 +36,6 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 @Entity
 @Table(name = "reserva")
 @JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
-//@JsonIdentityInfo(generator = ObjectIdGenerators.UUIDGenerator.class, property = "id")
 public class Reserva {
 
 	@Id
@@ -82,7 +81,7 @@ public class Reserva {
 	@NotNull(message = "Debes ingresar los datos de la persona que va a reservar.")	
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "reservante", referencedColumnName = "id", nullable = false, unique = false)
-	@JsonManagedReference
+	//@JsonManagedReference
 	//@JsonBackReference
 	private Reservante reservante;
 	

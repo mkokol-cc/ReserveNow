@@ -43,7 +43,7 @@ public class ReservanteController {
 	
 	
 	@PutMapping("/cliente")
-	public ResponseEntity<?> editarCliente(@Valid @RequestBody Reservante reservanteStr) throws JsonProcessingException {
+	public ResponseEntity<?> editarCliente(@RequestBody Reservante reservanteStr) throws JsonProcessingException {
 		try {
 			Reservante reservanteEditado = reservanteService.editarReservante(reservanteStr, usuarioService.obtenerUsuarioActual());
 			return ResponseEntity.ok(reservanteEditado);
