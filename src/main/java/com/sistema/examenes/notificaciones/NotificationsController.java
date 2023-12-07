@@ -1,4 +1,4 @@
-package com.sistema.examenes.email;
+package com.sistema.examenes.notificaciones;
 
 import java.sql.Date;
 import java.time.LocalDate;
@@ -40,7 +40,7 @@ import io.jsonwebtoken.JwtException;
 @RestController
 @RequestMapping("/email")
 @CrossOrigin("*")
-public class EmailSender{
+public class NotificationsController{
 
     @Autowired
     private JavaMailSender emailSender;
@@ -65,12 +65,27 @@ public class EmailSender{
 
     @Autowired
     private JwtUtils jwtUtils;
+    
+    /*
+     * VAMOS A AVISAR:
+     * pagos de licencias
+     * vencimiento de licencias
+     * (si lo tiene activado) notificaciones de reservas al Administrador
+     * notificaciones de reservas al reservante
+     * notificacion de cambio de estado de reserva a reservante
+     * 
+     * VAMOS A ENVIAR MENSAJE POR:
+     * validacion de email
+     * validacion de numero telefonico?
+     * 
+     * */
+    
+    private String domain = "http://localhost:4200";
 
     @PostMapping("/bienvenida/{email}")
     public ResponseEntity<JwtResponse> mailBienvenida(@PathVariable("email") String to) throws Exception {        
-    	//PARAMETROS
     	String token = generarTokenBienvenida(to);
-        String link = "http://localhost:4200/verify-email/";
+        String link = domain+"/verify-email/";
         //----------
         String htmlMsg = "<h3>Hola Usuario</h3><p>Bienvenido a Calendario, haga click "
         		+ "<a href=\""+link+token+"\">AQUI</a>"
@@ -86,7 +101,7 @@ public class EmailSender{
     	//System.out.println("HE ENTRADO");
     	if(u!=null && u.isEnabled()) {
     		//PARAMETROS
-            String link = "http://localhost:4200/change-password/";
+            String link = domain+"/change-password/";
             String token = generarTokenBienvenida(to);
             //----------
             String htmlMsg = "<h3>Hola Usuario</h3><p>Para poder recuperar tu contraseña haga click</p>"
@@ -113,8 +128,7 @@ public class EmailSender{
             if(u.getPagos().size()==0) {
             	Pago p = new Pago();
             	Licencia l = licenciaRepo.getById((long)1);//obtenemos la licencia mensual
-            	Date fechaActual = Date.valueOf(LocalDate.now());
-            	p.setFecha(fechaActual);
+            	p.setFecha(LocalDate.now());
             	p.setLicencia(l);
             	p.setMonto(0);//monto gratuito
             	p.setUsuario(u);
@@ -157,7 +171,7 @@ public class EmailSender{
         helper.setText(htmlMsg, true); // Use this or above line.
         helper.setTo(to);
         helper.setSubject(subject);
-        helper.setFrom("noreply@calendario.com");
+        helper.setFrom("noreply@reservenow.com");
         emailSender.send(mimeMessage);
     }
     

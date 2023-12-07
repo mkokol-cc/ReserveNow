@@ -1,6 +1,7 @@
 package com.sistema.examenes.modelo.usuario.pagos;
 
 import java.sql.Date;
+import java.time.LocalDate;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -23,10 +24,10 @@ public class Pago {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
     
-	private Date fecha;
-	private Date fechaVto;
+	private LocalDate fecha;
+	private LocalDate fechaVto;
 	private int monto;
-	private int estado;
+	private int estado;//0 ptePago 1 pagado 2 rechazado
 	
 	@Column(nullable=true)
 	private String mpPreferenceId;
@@ -48,7 +49,7 @@ public class Pago {
 
 	
 	public Pago() {}
-	public Pago(Long id, Date fecha, int monto, Licencia licencia, Usuario usuario) {
+	public Pago(Long id, LocalDate fecha, int monto, Licencia licencia, Usuario usuario) {
 		this.id = id;
 		this.fecha = fecha;
 		this.monto = monto;
@@ -66,11 +67,11 @@ public class Pago {
 		this.id = id;
 	}
 
-	public Date getFecha() {
+	public LocalDate getFecha() {
 		return fecha;
 	}
 
-	public void setFecha(Date fecha) {
+	public void setFecha(LocalDate fecha) {
 		this.fecha = fecha;
 	}
 
@@ -106,11 +107,11 @@ public class Pago {
 		this.estado = estado;
 	}
 
-	public Date getFechaVto() {
+	public LocalDate getFechaVto() {
 		return fechaVto;
 	}
 	
-	public void setFechaVto(Date fechaVto) {
+	public void setFechaVto(LocalDate fechaVto) {
 		this.fechaVto = fechaVto;
 	}
 	public String getMpPreferenceId() {

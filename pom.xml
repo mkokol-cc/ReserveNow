@@ -79,11 +79,21 @@
 		</dependency>
 		
 		<!--DEPENDENCIAS PARA COBROS CON MP-->
+		<!--
 		<dependency>
             <groupId>com.mercadopago</groupId>
             <artifactId>dx-java</artifactId>
             <version>1.5.2</version>
         </dependency>
+		-->        
+		        
+		<dependency>
+		  <groupId>com.mercadopago</groupId>
+		  <artifactId>sdk-java</artifactId>
+		  <version>2.1.17</version>
+		</dependency>
+        
+        
         <dependency>
 		    <groupId>org.projectlombok</groupId>
 		    <artifactId>lombok</artifactId>

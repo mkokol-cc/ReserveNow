@@ -8,7 +8,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import com.mercadopago.MercadoPago;
+//import com.mercadopago.MercadoPago;
 
 @SpringBootApplication
 @ComponentScan(basePackages = {"com.sistema.examenes"})
@@ -31,7 +31,7 @@ public class SistemaExamenesBackendApplication implements CommandLineRunner {
 	@Override
 	public void run(String... args) throws Exception {
 		// TODO Auto-generated method stub
-		MercadoPago.SDK.setAccessToken("TEST-7405079288753970-041215-b9acfd241ad71407ba522bda572489f1-554532024");
+		//MercadoPago.SDK.setAccessToken("TEST-7405079288753970-041215-b9acfd241ad71407ba522bda572489f1-554532024");
 	}
 
 

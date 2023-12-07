@@ -2,12 +2,12 @@ package com.sistema.examenes.modelo.usuario.pagos;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.mercadopago.MercadoPago;
-import com.mercadopago.exceptions.MPConfException;
+//import com.mercadopago.MercadoPago;
+//import com.mercadopago.exceptions.MPConfException;
 import com.mercadopago.exceptions.MPException;
-import com.mercadopago.resources.Preference;
-import com.mercadopago.resources.datastructures.preference.BackUrls;
-import com.mercadopago.resources.datastructures.preference.Item;
+//import com.mercadopago.resources.Preference;
+//import com.mercadopago.resources.datastructures.preference.BackUrls;
+//import com.mercadopago.resources.datastructures.preference.Item;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.util.StringUtils;
@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 @Service
 public class PreferenceService {
     private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
-
+    /*
 
     public ResponseEntity create(NewPreferenceDTO preferenceDTO) throws MPException {
         if (StringUtils.isEmpty(preferenceDTO.getAccessToken())) {
@@ -59,4 +59,5 @@ public class PreferenceService {
         }
         return ResponseEntity.ok(gson.toJson(p));
     }
+    */
 }

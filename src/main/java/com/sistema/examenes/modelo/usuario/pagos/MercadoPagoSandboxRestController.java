@@ -28,10 +28,10 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.gson.GsonBuilder;
 import com.mercadopago.exceptions.MPException;
-import com.mercadopago.resources.Payment;
-import com.mercadopago.resources.Preference;
-import com.mercadopago.resources.datastructures.preference.BackUrls;
-import com.mercadopago.resources.datastructures.preference.Item;
+//import com.mercadopago.resources.Payment;
+//import com.mercadopago.resources.Preference;
+//import com.mercadopago.resources.datastructures.preference.BackUrls;
+//import com.mercadopago.resources.datastructures.preference.Item;
 import com.sistema.examenes.configuraciones.JwtUtils;
 import com.sistema.examenes.modelo.usuario.Usuario;
 import com.sistema.examenes.repositorios.LicenciaRepository;
@@ -46,7 +46,7 @@ import io.jsonwebtoken.JwtException;
 @RestController
 @CrossOrigin("*")
 public class MercadoPagoSandboxRestController {
-	
+	/*
 	
 	@Autowired
 	private UsuarioRepository usuarioRepo;
@@ -126,11 +126,12 @@ public class MercadoPagoSandboxRestController {
         			//3-segun el estado (ya actualizado) del objeto que devuelve en el front mostramos el mensaje de
         			//que el pago id... esta en Estado ...
         		
-        			/*
+        			*//*
             	new BackUrls().setFailure("http://localhost:4200/payment-failure")
             	.setPending("http://localhost:4200/payment-pending")
            		.setSuccess("http://localhost:4200/payment-success")
            		*/
+	/*
            		new BackUrls().setFailure(link).setPending(link).setSuccess(link)
         	)
         	//.setNotificationUrl("http://localhost:8080/mp/refresh-payment-state/"+p.getId()) - ESTO ES PARA CUANDO ESTE CONFIGURADO EL WEBHOOK Y SE REALIZEN ACTUALIZACIONES AUTOMATICAS
@@ -168,12 +169,12 @@ public class MercadoPagoSandboxRestController {
         }
     }
     
-    /*
+    *//*
     @PostMapping(value="/mp/refresh-payment-state/{idPago}")
     private ResponseEntity actualizarEstadoPago() {
     	MercadoPago.SDK.getAccessToken();
     }
-    */
+    *//*
     
     
     
@@ -218,6 +219,6 @@ public class MercadoPagoSandboxRestController {
     	return "no ok";
     }
     
-    
+    */
     
 }
