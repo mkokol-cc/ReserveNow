@@ -9,10 +9,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.sistema.examenes.anterior.modelo.Reservante;
-import com.sistema.examenes.modelo.usuario.Usuario;
-import com.sistema.examenes.servicios_v2.ReservanteServiceImplV2;
-import com.sistema.examenes.servicios_v2.ReservanteServiceV2;
+import com.sistema.anterior.modelo.Reservante;
+import com.sistema.modelo.usuario.Usuario;
+import com.sistema.servicios_v2.ReservanteServiceImplV2;
+import com.sistema.servicios_v2.ReservanteServiceV2;
 
 @SpringBootTest
 public class ReservanteServiceTest {

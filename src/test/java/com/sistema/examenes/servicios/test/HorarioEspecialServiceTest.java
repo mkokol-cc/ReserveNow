@@ -12,9 +12,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.sistema.examenes.anterior.modelo.HorarioEspecial;
-import com.sistema.examenes.servicios_v2.HorarioEspecialServiceImplV2;
-import com.sistema.examenes.servicios_v2.HorarioEspecialServiceV2;
+import com.sistema.anterior.modelo.HorarioEspecial;
+import com.sistema.servicios_v2.HorarioEspecialServiceImplV2;
+import com.sistema.servicios_v2.HorarioEspecialServiceV2;
 
 @SpringBootTest
 public class HorarioEspecialServiceTest {

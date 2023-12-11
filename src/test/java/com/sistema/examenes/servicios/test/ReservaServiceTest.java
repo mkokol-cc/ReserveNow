@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.lang.reflect.Method;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -14,17 +15,17 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.sistema.examenes.anterior.modelo.AsignacionRecursoTipoTurno;
-import com.sistema.examenes.anterior.modelo.Dias;
-import com.sistema.examenes.anterior.modelo.Horario;
-import com.sistema.examenes.anterior.modelo.HorarioEspecial;
-import com.sistema.examenes.anterior.modelo.Recurso;
-import com.sistema.examenes.anterior.modelo.Reserva;
-import com.sistema.examenes.anterior.modelo.Reservante;
-import com.sistema.examenes.anterior.modelo.TipoTurno;
-import com.sistema.examenes.modelo.usuario.Usuario;
-import com.sistema.examenes.servicios_v2.ReservaServiceImplV2;
-import com.sistema.examenes.servicios_v2.ReservaServiceV2;
+import com.sistema.anterior.modelo.AsignacionRecursoTipoTurno;
+import com.sistema.anterior.modelo.Dias;
+import com.sistema.anterior.modelo.Horario;
+import com.sistema.anterior.modelo.HorarioEspecial;
+import com.sistema.anterior.modelo.Recurso;
+import com.sistema.anterior.modelo.Reserva;
+import com.sistema.anterior.modelo.Reservante;
+import com.sistema.anterior.modelo.TipoTurno;
+import com.sistema.modelo.usuario.Usuario;
+import com.sistema.servicios_v2.ReservaServiceImplV2;
+import com.sistema.servicios_v2.ReservaServiceV2;
 
 @SpringBootTest
 public class ReservaServiceTest {
@@ -123,9 +124,8 @@ public class ReservaServiceTest {
 		
 		Set<Reserva> reservasDeOtraAsignacion = new HashSet<>();
 		Reserva r1 = new Reserva();
-		r1.setHora(LocalTime.of(10,0));
-		r1.setHoraFin(LocalTime.of(20, 0));
-		r1.setFecha(LocalDate.of(2024, 3, 4));
+		r1.setFechaHoraInicio(LocalDateTime.of(LocalDate.of(2024, 3, 4),LocalTime.of(10,0)));
+		r1.setFechaHoraFin(LocalDateTime.of(LocalDate.of(2024, 3, 4),LocalTime.of(20, 0)));
 		reservasDeOtraAsignacion.add(r1);
 		
 		AsignacionRecursoTipoTurno otraAsignacionDelRecurso = asignacion();
@@ -137,10 +137,9 @@ public class ReservaServiceTest {
 		//fecha y hora NO mayor a la actual
 		Reserva reservaConFechaHoraInvalida = new Reserva();
 		reservaConFechaHoraInvalida.setAsignacionTipoTurno(asignacion);
-		reservaConFechaHoraInvalida.setReservante(reservante(true));;
-		reservaConFechaHoraInvalida.setFecha(LocalDate.of(2023, 1, 2));;
-		reservaConFechaHoraInvalida.setHora(LocalTime.of(10, 0));
-		reservaConFechaHoraInvalida.setHoraFin(reservaConFechaHoraInvalida.getHora().plusMinutes(reservaConFechaHoraInvalida.getAsignacionTipoTurno().getDuracionEnMinutos()));
+		reservaConFechaHoraInvalida.setReservante(reservante(true));
+		reservaConFechaHoraInvalida.setFechaHoraInicio(LocalDateTime.of(LocalDate.of(2023, 1, 2),LocalTime.of(10,0)));
+		reservaConFechaHoraInvalida.setFechaHoraFin(reservaConFechaHoraInvalida.getFechaHoraInicio().plusMinutes(reservaConFechaHoraInvalida.getAsignacionTipoTurno().getDuracionEnMinutos()));
 		
         // Usa reflexión para acceder al método privado
         Method method = ReservaServiceImplV2.class.getDeclaredMethod("validar", Reserva.class);
@@ -154,9 +153,8 @@ public class ReservaServiceTest {
         	System.out.println("Prueba 1 : Se lanzo correctamente una excepcion con el mensaje: "+e.getMessage());
         	
         	//la reserva debe tener un horario de acuerdo a los horarios del recurso de la asignacion a reservar
-    		reservaConFechaHoraInvalida.setFecha(LocalDate.of(2025, 5, 5));
-    		reservaConFechaHoraInvalida.setHora(LocalTime.of(10, 5));
-    		reservaConFechaHoraInvalida.setHoraFin(reservaConFechaHoraInvalida.getHora().plusMinutes(reservaConFechaHoraInvalida.getAsignacionTipoTurno().getDuracionEnMinutos()));
+        	reservaConFechaHoraInvalida.setFechaHoraInicio(LocalDateTime.of(LocalDate.of(2025, 5, 5), LocalTime.of(10, 5)));
+    		reservaConFechaHoraInvalida.setFechaHoraFin(reservaConFechaHoraInvalida.getFechaHoraInicio().plusMinutes(reservaConFechaHoraInvalida.getAsignacionTipoTurno().getDuracionEnMinutos()));
     		
         	try {
         		method.invoke(reservaService, reservaConFechaHoraInvalida);
@@ -166,8 +164,7 @@ public class ReservaServiceTest {
         		System.out.println("Prueba 2 : Se lanzo correctamente una excepcion con el mensaje: "+e2.getMessage());
         		
         		//el recurso ademas debe estar LIBRE para el horario seleccionado
-        		reservaConFechaHoraInvalida.setFecha(LocalDate.of(2024, 3, 4));
-        		reservaConFechaHoraInvalida.setHora(LocalTime.of(10, 0));
+        		reservaConFechaHoraInvalida.setFechaHoraInicio(LocalDateTime.of(LocalDate.of(2024, 3, 4), LocalTime.of(10, 0)));
         		
             	try {
             		method.invoke(reservaService, reservaConFechaHoraInvalida);
@@ -176,7 +173,7 @@ public class ReservaServiceTest {
             		// La excepción fue lanzada, lo que es correcto
             		System.out.println("Prueba 3 : Se lanzo correctamente una excepcion con el mensaje: "+e3.getMessage());
             		//tanto la asignacion como el tipo de turno y recurso asociado a ella deben estar habilitados
-            		reservaConFechaHoraInvalida.setFecha(LocalDate.of(2024, 3, 11));
+            		reservaConFechaHoraInvalida.setFechaHoraInicio(LocalDateTime.of(LocalDate.of(2024, 3, 11), LocalTime.of(10, 0)));
             		reservaConFechaHoraInvalida.getAsignacionTipoTurno().getTipoTurno().setEliminado(true);
             		try {
             			method.invoke(reservaService, reservaConFechaHoraInvalida);
@@ -224,9 +221,8 @@ public class ReservaServiceTest {
 
 	    Set<Reserva> reservasDeAsignacion = new HashSet<>();
 	    Reserva r1 = new Reserva();
-	    r1.setHora(LocalTime.of(10, 0));
-	    r1.setHoraFin(LocalTime.of(10, 30));
-	    r1.setFecha(LocalDate.of(2024, 3, 4));
+	    r1.setFechaHoraInicio(LocalDateTime.of(LocalDate.of(2024, 3, 4), LocalTime.of(10, 0)));
+	    r1.setFechaHoraFin(LocalDateTime.of(LocalDate.of(2024, 3, 4), LocalTime.of(10, 30)));
 	    r1.setAsignacionTipoTurno(asignacion);
 	    reservasDeAsignacion.add(r1);
 	    asignacion.setReservas(reservasDeAsignacion);
@@ -235,9 +231,8 @@ public class ReservaServiceTest {
 	    Reserva reservaValida = new Reserva();
 	    reservaValida.setAsignacionTipoTurno(asignacion); // Utiliza la asignación configurada previamente
 	    reservaValida.setReservante(reservante(true));
-	    reservaValida.setFecha(LocalDate.of(2024, 3, 4));
-	    reservaValida.setHora(LocalTime.of(10, 0));
-	    reservaValida.setHoraFin(reservaValida.getHora().plusMinutes(asignacion.getDuracionEnMinutos())); // Utiliza la duración de la asignación
+	    reservaValida.setFechaHoraInicio(LocalDateTime.of(LocalDate.of(2024, 3, 4), LocalTime.of(10, 0)));
+	    reservaValida.setFechaHoraFin(reservaValida.getFechaHoraInicio().plusMinutes(asignacion.getDuracionEnMinutos())); // Utiliza la duración de la asignación
 
 	    // Usa reflexión para acceder al método privado
 	    Method method = ReservaServiceImplV2.class.getDeclaredMethod("validar", Reserva.class);

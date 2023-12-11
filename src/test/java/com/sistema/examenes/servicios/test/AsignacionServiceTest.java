@@ -8,12 +8,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.sistema.examenes.anterior.modelo.AsignacionRecursoTipoTurno;
-import com.sistema.examenes.anterior.modelo.Recurso;
-import com.sistema.examenes.anterior.modelo.TipoTurno;
-import com.sistema.examenes.modelo.usuario.Usuario;
-import com.sistema.examenes.servicios_v2.AsignacionServiceImplV2;
-import com.sistema.examenes.servicios_v2.AsignacionServiceV2;
+import com.sistema.anterior.modelo.AsignacionRecursoTipoTurno;
+import com.sistema.anterior.modelo.Recurso;
+import com.sistema.anterior.modelo.TipoTurno;
+import com.sistema.modelo.usuario.Usuario;
+import com.sistema.servicios_v2.AsignacionServiceImplV2;
+import com.sistema.servicios_v2.AsignacionServiceV2;
 
 @SpringBootTest
 public class AsignacionServiceTest {

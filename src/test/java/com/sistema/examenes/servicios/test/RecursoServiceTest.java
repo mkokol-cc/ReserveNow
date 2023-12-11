@@ -8,10 +8,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.sistema.examenes.anterior.modelo.Recurso;
-import com.sistema.examenes.modelo.usuario.Usuario;
-import com.sistema.examenes.servicios_v2.RecursoServiceImplV2;
-import com.sistema.examenes.servicios_v2.RecursoServiceV2;
+import com.sistema.anterior.modelo.Recurso;
+import com.sistema.modelo.usuario.Usuario;
+import com.sistema.servicios_v2.RecursoServiceImplV2;
+import com.sistema.servicios_v2.RecursoServiceV2;
 
 @SpringBootTest
 public class RecursoServiceTest {

@@ -8,10 +8,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.sistema.examenes.anterior.modelo.TipoTurno;
-import com.sistema.examenes.modelo.usuario.Usuario;
-import com.sistema.examenes.servicios_v2.TipoTurnoServiceImplV2;
-import com.sistema.examenes.servicios_v2.TipoTurnoServiceV2;
+import com.sistema.anterior.modelo.TipoTurno;
+import com.sistema.modelo.usuario.Usuario;
+import com.sistema.servicios_v2.TipoTurnoServiceImplV2;
+import com.sistema.servicios_v2.TipoTurnoServiceV2;
 
 @SpringBootTest
 public class TipoTurnoServiceTest {

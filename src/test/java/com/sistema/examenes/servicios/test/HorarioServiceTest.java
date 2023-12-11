@@ -11,10 +11,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.sistema.examenes.anterior.modelo.Dias;
-import com.sistema.examenes.anterior.modelo.Horario;
-import com.sistema.examenes.servicios_v2.HorarioServiceImplV2;
-import com.sistema.examenes.servicios_v2.HorarioServiceV2;
+import com.sistema.anterior.modelo.Dias;
+import com.sistema.anterior.modelo.Horario;
+import com.sistema.servicios_v2.HorarioServiceImplV2;
+import com.sistema.servicios_v2.HorarioServiceV2;
 
 @SpringBootTest
 public class HorarioServiceTest {
