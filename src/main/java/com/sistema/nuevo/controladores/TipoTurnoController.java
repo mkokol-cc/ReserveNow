@@ -48,8 +48,9 @@ public class TipoTurnoController {
 	}
 
 	@PutMapping("/tipo-turno")
-	public ResponseEntity<?> editarTipoTurno(@Valid @RequestBody TipoTurno tipoTurnoStr) throws JsonProcessingException {
+	public ResponseEntity<?> editarTipoTurno(@RequestBody TipoTurno tipoTurnoStr) throws JsonProcessingException {
 		try {
+			tipoTurnoStr.setUsuario(usuarioService.obtenerUsuarioActual());
 			TipoTurno tipoTurnoEditado = tipoTurnoService.editarTipoTurno(tipoTurnoStr,usuarioService.obtenerUsuarioActual());
 			return ResponseEntity.ok(tipoTurnoEditado);	
 		}catch(Exception e) {

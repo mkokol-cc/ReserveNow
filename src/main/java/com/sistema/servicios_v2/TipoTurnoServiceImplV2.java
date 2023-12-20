@@ -10,6 +10,7 @@ import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
 
 import com.sistema.anterior.modelo.AsignacionRecursoTipoTurno;
+import com.sistema.anterior.modelo.Recurso;
 import com.sistema.anterior.modelo.Reserva;
 import com.sistema.anterior.modelo.TipoTurno;
 import com.sistema.anterior.repositorios.TipoTurnoRepository;
@@ -68,10 +69,11 @@ public class TipoTurnoServiceImplV2 implements TipoTurnoServiceV2{
 	@Override
 	public TipoTurno editarTipoTurno(TipoTurno t, Usuario u) throws Exception{
 		TipoTurno guardado = obtenerTipoTurnoPorId(t.getId());
-		if(t.getUsuario().equals(u)) {
+		if(guardado.getUsuario().equals(u)) {
 			existeTipoDeTurnoConEseNombre(t);
 			validar(t);
-			return tipoTurnoRepo.save(guardado.editarTipoTurno(t));
+			TipoTurno editado = guardado.editarTipoTurno(t);
+			return tipoTurnoRepo.save(editado);
 		}else {
 			throw new Exception("Usuario no autorizado");
 		}
