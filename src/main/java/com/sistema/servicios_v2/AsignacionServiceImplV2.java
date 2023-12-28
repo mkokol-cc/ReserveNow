@@ -62,7 +62,7 @@ public class AsignacionServiceImplV2 implements AsignacionServiceV2{
 	@Override
 	public AsignacionRecursoTipoTurno editarAsignacion(AsignacionRecursoTipoTurno asig, Usuario u) throws Exception {
 		AsignacionRecursoTipoTurno guardado = obtenerAsignacionPorId(asig.getId());
-		if(asig.getRecurso().getUsuario().equals(u) &&  asig.getTipoTurno().getUsuario().equals(u)) {
+		if(guardado.getRecurso().getUsuario().equals(u) && guardado.getTipoTurno().getUsuario().equals(u)) {
 			validar(asig);
 			return asignacionRepo.save(guardado.editarAsignacionRecursoTipoTurno(asig));
 		}else {

@@ -431,7 +431,8 @@ public class AsignacionRecursoTipoTurno {
 		List<LocalTime> horarios = new ArrayList<>();
 		for(HorarioEspecial h : horariosEspeciales) {
 			if(h.isCerrado()) {
-				return null;
+				List<LocalTime> horariosNulos = new ArrayList<>();
+				return horariosNulos;
 			}
 			horarios.addAll(getHorariosTurnos(h.getDesde(),h.getHasta()));
 		}
@@ -441,7 +442,9 @@ public class AsignacionRecursoTipoTurno {
 		List<LocalTime> horarios = new ArrayList<>();
 		while(desde.isBefore(hasta)) {
 			LocalTime finTurno = desde.plusMinutes(this.getDuracionEnMinutos());
-			horarios.add(finTurno);
+			if(!finTurno.isAfter(hasta) && !finTurno.isBefore(desde)) {
+				horarios.add(desde);	
+			}
 			desde = finTurno;
 		}
 		return horarios;
@@ -470,7 +473,7 @@ public class AsignacionRecursoTipoTurno {
 			for(LocalTime t : getHorariosTurnos(inicio.toLocalDate())) {
 				grillaHorarios.put(LocalDateTime.of(inicio.toLocalDate(),t), getCantidadConcurrencia());
 			}
-			inicio.plusDays(1);
+			inicio = inicio.plusDays(1);
 		}
 		return modificarDisponibilidadGrilla(grillaHorarios);
 	}

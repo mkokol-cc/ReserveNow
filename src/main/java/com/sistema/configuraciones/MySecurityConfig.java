@@ -58,7 +58,7 @@ public class MySecurityConfig extends WebSecurityConfigurerAdapter {
                 .disable()
                 .authorizeRequests()
                 .antMatchers("/ws-endpoint/**").permitAll()
-                .antMatchers("/generate-token","/usuario/new","/email/reestablecer-clave/*","/email/bienvenida/*","/email/contacto/*","/email/validar-email/*","/v1/prueba","/v1.11/public/**","/v1.0/**","/ws-endpoint/**","/mp/**").permitAll()
+                .antMatchers("/generate-token","/usuario/new","/email/reestablecer-clave/*","/email/bienvenida/*","/email/contacto/*","/email/validar-email/*","/v1/prueba","/v1.1/public/**","/v1.0/**","/ws-endpoint/**","/mp/**").permitAll()
                 .antMatchers(HttpMethod.OPTIONS).permitAll()
                 //.regexMatchers("*").permitAll()
                 //.regexMatchers("/v1.*").permitAll() // Permite acceso sin autorización a la URL /api/v1/comentarios

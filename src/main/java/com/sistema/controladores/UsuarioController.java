@@ -64,5 +64,10 @@ public class UsuarioController {
     public void eliminarUsuario(){
         usuarioService.eliminarUsuario(usuarioService.obtenerUsuarioActual().getId());
     }
+    
+    @GetMapping("/v1.1/public/{nombreEspacio}")
+    public Usuario getUsuarioPorNombreEspacio(@PathVariable String nombreEspacio) {
+    	return usuarioService.obtenerUsuarioPorPageId(nombreEspacio);
+    }
 
 }

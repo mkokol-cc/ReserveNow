@@ -96,7 +96,7 @@ public class Usuario implements UserDetails {
     private boolean requiereReservanteConNombreYApellido=false;
     
     //cantidad de dias con antelacion que se puede reservar (es para que no se reserve de aca a 1 año)
-    private Integer CantSemanasDeAntelacionParaReservar = null;
+    private Integer CantSemanasDeAntelacionParaReservar = 5;
     
     @Column(unique = true, nullable = true)
     private String nombreEspacioPersonal;

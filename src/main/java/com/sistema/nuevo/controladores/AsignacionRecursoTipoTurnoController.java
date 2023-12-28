@@ -77,7 +77,7 @@ public class AsignacionRecursoTipoTurnoController {
 	
 	
 	@PutMapping("/asignacion")
-	public ResponseEntity<?> editarAsignacion(@Valid @RequestBody AsignacionRecursoTipoTurno asigStr) throws JsonProcessingException {
+	public ResponseEntity<?> editarAsignacion(@RequestBody AsignacionRecursoTipoTurno asigStr) throws JsonProcessingException {
 		try {
 			AsignacionRecursoTipoTurno asignacion = asignacionService.editarAsignacion(asigStr, usuarioService.obtenerUsuarioActual());
 			return ResponseEntity.ok(asignacion);			
@@ -100,7 +100,7 @@ public class AsignacionRecursoTipoTurnoController {
 	
 	
     @GetMapping("public/horarios/{idAsignacion}")
-    public ResponseEntity<?> getTurnosDeAsignacionParaFecha(@PathVariable Long idAsignacion,@PathVariable String fecha) {
+    public ResponseEntity<?> getTurnosDeAsignacionParaFecha(@PathVariable Long idAsignacion/*,@PathVariable String fecha*/) {
     	try {
     		//DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
     		//LocalDate fechaLocalDate = LocalDate.parse(fecha, formatter);
