@@ -51,7 +51,7 @@ public class Reservante {
 	private String telefono;
 	
 	@Column(name="habilitado")
-	private boolean habilitado;
+	private boolean habilitado = true;
 	
 	@OneToMany(mappedBy = "reservante", fetch = FetchType.EAGER/*, cascade = CascadeType.ALL, orphanRemoval = true*/)
     @JsonIgnore

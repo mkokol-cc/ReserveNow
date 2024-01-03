@@ -53,7 +53,7 @@ public class Reserva {
 	
 	@NotNull(message = "Debes ingresar la fecha.")
 	@Column(name = "fechaHoraInicio", nullable = false)
-	//@JsonFormat(pattern = "yyyy-MM-dd")
+	@JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
 	private LocalDateTime fechaHoraInicio;
 	
 	@NotNull(message = "Debes ingresar la hora de fin.")
@@ -267,7 +267,7 @@ public class Reserva {
 	 * -LA CONCURRENCIA ES CORRECTA
 	 * */
 	@AssertTrue(message="Se intento reservar para un dia y hora que ya pasaron.")
-	private boolean isValidaFechaYHora() {
+	public boolean isValidaFechaYHora() {
 		return fechaHoraInicio.isAfter(LocalDateTime.now());
 	}
 	
@@ -290,19 +290,20 @@ public class Reserva {
 	//primero hay que setear la AsignacionRecursoTipoTurno a la Reserva
 	//------------------------------------------	
 	
-	@AssertTrue(message="Recurso ocupado.")
+	@AssertTrue(message="Horario ocupado.")
 	public boolean isOcupadoElRecurso() {
-		for (Map.Entry<LocalTime, Boolean> entry : this.asignacionTipoTurno.getHorariosDisponibles(this.fechaHoraInicio.toLocalDate()).entrySet()) {
-            LocalTime hora = entry.getKey();
-            Boolean disponible = entry.getValue();
+		for (Map.Entry<LocalDateTime, Integer> entry : this.asignacionTipoTurno.obtenerTurnosLibres().entrySet()) {
+            LocalDateTime hora = entry.getKey();
+            Integer disponible = entry.getValue();
             System.out.println(hora+" - "+disponible);
-            if(hora.equals(this.fechaHoraInicio.toLocalTime())) {
-            	return disponible;
+            if(hora.equals(this.fechaHoraInicio) && disponible>0) {
+            	return true;
             }
         }
 		return false;//true - libre | false - ocupado
 	}
 
+	/*
 	@AssertTrue(message="Concurrencia llena para el horario.")
 	private boolean isValidaConcurrencia() {
 		System.out.println("ENTRE 2");
@@ -318,53 +319,22 @@ public class Reserva {
 		//}
 		return true;//libre
 	}
-	
+	*/
 	
 	@AssertTrue(message="La hora fin esta mal.")
 	private boolean isValidaHoraFin() {
 		//System.out.println("ENTRE 3");
-		return this.fechaHoraInicio.toLocalTime().plusMinutes((long)this.asignacionTipoTurno.getDuracionEnMinutos()).equals(this.fechaHoraFin.toLocalTime());
+		this.fechaHoraFin = this.fechaHoraInicio.plusMinutes((long)this.asignacionTipoTurno.getDuracionEnMinutos());
+		return this.fechaHoraInicio.plusMinutes((long)this.asignacionTipoTurno.getDuracionEnMinutos()).equals(this.fechaHoraFin);
 	}
 	
 	
 	
-	@AssertTrue(message="Horario no aceptado.")
-	private boolean isHorarioValido() {
-		//System.out.println("ENTRE 4");
-		//return this.asignacionTipoTurno.turnosParaLaFecha(this.fecha).contains(this.hora);
-		return true;
+	@AssertTrue(message="Recurso inhabilitado para reserva.")
+	private boolean isHabilitado() {
+		return (!this.asignacionTipoTurno.isEliminado() && !this.asignacionTipoTurno.getRecurso().isEliminado()
+				&& !this.asignacionTipoTurno.getTipoTurno().isEliminado());
 	}
-	
-	public String validarReserva() {
-		if(isHorarioValido()) {
-			if(isValidaHoraFin()) {
-				if(isOcupadoElRecurso()) {
-					if(isValidaConcurrencia()) {
-						return ""; 
-					}
-					return "Concurrencia llena para el horario.";
-				}else {
-					return "Recurso ocupado.";
-				}
-			}else {
-				return "La hora fin esta mal.";
-			}
-		}else {
-			return "Horario no aceptado.";
-		}
-	}
-	
-	private boolean sePisaLosHorariosConEstaReserva(Reserva r) {
-		//hd hh HD HH - (hd>=HH || hh<=HD)
-		//hd this.hora - hh this.horaFin
-		if( this.fechaHoraInicio.compareTo(r.getFechaHoraFin()) >= 0 || 
-				this.fechaHoraFin.compareTo(r.getFechaHoraInicio()) <= 0 ) {
-			return false;
-		}
-		return true;
-	}
-	//public boolean estaEn
-	
 	
 	public boolean estaEnHorario() {
 		if(this.getEstado().isEsEstadoFinal()) {

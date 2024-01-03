@@ -3,6 +3,7 @@ package com.sistema.servicios_v2;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -66,11 +67,13 @@ public class ReservaServiceImplV2 implements ReservaServiceV2{
 
 	@Override
 	public Reserva nuevaReserva(Reserva r) throws Exception {
-		validar(estadoService.estadoReservaNueva(r));
+		AsignacionRecursoTipoTurno a = asignacionService.obtenerAsignacionPorId(r.getAsignacionTipoTurno().getId());
+		r.setAsignacionTipoTurno(a);
 		Reservante reservante = reservanteService.nuevoReservante(r.getReservante());
 		r.setReservante(reservante);
+		r = estadoService.estadoReservaNueva(r);
 		validar(r);
-		if(r.getAsignacionTipoTurno().getSeniaCtvos()>0) {
+		if(r.getAsignacionTipoTurno().getSeniaCtvos()>0 && r.getReservante().getUsuario().getTokenMP()!=null) {
 			r.setLinkPago(mpService.crearPagoSeña(r).getInitPoint());//metodo que crea el link de pago de la seña	
 		}
 		return reservaRepo.save(r);
@@ -136,8 +139,5 @@ public class ReservaServiceImplV2 implements ReservaServiceV2{
 		}
 	}
 	
-	
-	
-
 
 }

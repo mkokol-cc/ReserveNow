@@ -56,7 +56,7 @@ public class ReservaController {
     public ResponseEntity<?> guardarNuevaReservaPorGuest(@PathVariable String idUserPage,@RequestBody Reserva reservaStr) {
     	try {
 			Reservante r = reservaStr.getReservante();
-			Usuario u = usuarioService.obtenerUsuarioActual();
+			Usuario u = usuarioService.obtenerUsuarioPorPageId(idUserPage);
 			r.setUsuario(u);
 			Reserva reservaGuardada = reservaService.nuevaReserva(reservaStr);
 			return ResponseEntity.ok(reservaGuardada);
